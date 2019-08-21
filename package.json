@@ -1,0 +1,30 @@
+{
+  "name": "app",
+  "version": "1.0.0",
+  "description": "",
+  "main": "server.js",
+  "scripts": {
+    "dev": "nodemon --watch src --ext *  server.js ",
+    "test": "mocha",
+    "start": "node server.js",
+    "prod": "node server.js",
+    "build": "node build.js"
+  },
+  "author": "John Chynoweth",
+  "license": "ISC",
+  "devDependencies": {
+    "chai": "^4.2.0",
+    "mocha": "^6.2.0",
+    "nodemon": "^1.19.1"
+  },
+  "dependencies": {
+    "@audius/hedgehog": "^1.0.3",
+    "connect": "^3.7.0",
+    "esm": "^3.2.25",
+    "ethereumjs-wallet": "^0.6.3",
+    "node-elm-compiler": "^5.0.4",
+    "serve-static": "^1.14.1",
+    "web3": "^1.0.0-beta.55",
+    "web3-provider-engine": "^15.0.0"
+  }
+}
