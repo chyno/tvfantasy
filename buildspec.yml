@@ -12,7 +12,7 @@ phases:
      -  npm install
  build:
    commands:
-     - npm run build
+    #  - npm run build
      - aws s3 sync --delete . "s3://fantasytv.net"
  post_build:
    commands:
