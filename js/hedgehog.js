@@ -1,13 +1,16 @@
-import { Firebase } from './firebase.js';
 
-const AUTH_TABLE = "Authentications";
-const USER_TABLE = "Users";
-const firebaseService = new Firebase();
+import { Fauna } from './fauna.js';
+
+const AUTH_COL = "authentications";
+const USER_COL = "users";
+
+const faunaService = new Fauna();
+console.log('fauna service: ' +faunaService);
 const setAuthFn = async obj =>
-firebaseService.createIfNotExists(AUTH_TABLE, obj.lookupKey, obj);
+faunaService.createIfNotExists(AUTH_COL, obj.lookupKey, obj);
 const setUserFn = async obj =>
-firebaseService.createIfNotExists(USER_TABLE, obj.username, obj);
-const getFn = async obj => firebaseService.readRecordFromFirebase(AUTH_TABLE, obj);
+faunaService.createIfNotExists(USER_COL, obj.username, obj);
+const getFn = async obj => faunaService.readAuthRecordFromDb(obj); 
 
 
 export const hedgehog = new Hedgehog(getFn, setAuthFn, setUserFn);
