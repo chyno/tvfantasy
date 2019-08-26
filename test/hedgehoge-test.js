@@ -14,7 +14,7 @@ const setAuthFn = async obj => dbObj.createIfNotExists(obj.lookupKey, obj);
 const setUserFn = async obj => dbObj.createIfNotExists(obj.username, obj);
 const getFn = async obj => dbObj.readRecord(obj);
 
-describe("Can create fake data", function() {
+xdescribe("Can create fake data", function() {
   xit("get function test ", async function() {
     let fdata = {
       foo: {
@@ -55,7 +55,7 @@ describe("Can create fake data", function() {
   });
 });
 
-describe("web3 and hedgehog", function() {
+xdescribe("web3 and hedgehog", function() {
   let hedgehog = "not set";
   beforeEach(async function() {
     hedgehog = new Hedgehog(getFn, setAuthFn, setUserFn);

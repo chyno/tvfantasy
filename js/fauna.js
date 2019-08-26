@@ -1,10 +1,11 @@
 
 
 console.log('faunadb is ' +faunadb);
-const secretKey = "fnADWcLT_fACDXoJvPFkhmgDxMFcEJsM8Xh2gAx-";
+const secretAdminKey = "fnADWgJgt8ACDfD3rbUmyhnhTuPY425nDHQ9GZ9Y";
+const secretClientKey = 'fnADWgKmE-ACCNt8DvTuqmsjsRC71C3AcoGbPJ7x';
 //var client = new faunadb.Client({ secret: secretKey });
 var q = faunadb.query, client = new faunadb.Client({
-    secret: secretKey
+    secret: secretAdminKey
    });
 
 export class Fauna {
@@ -12,10 +13,17 @@ export class Fauna {
 
   async createIfNotExists(collection, obj) {
     // Todo: Check is exists
+    
+    try {
     let response = await client.query(
       q.Create(q.Collection(collection), { data: obj })
     );
     return response.ref;
+    } catch (e) {
+        console.log('**** Error :' +e);
+        throw e;
+    }
+    
   }
 
   async readAuthRecordFromDb(obj) {

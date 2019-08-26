@@ -7,9 +7,9 @@ const USER_COL = "users";
 const faunaService = new Fauna();
 console.log('fauna service: ' +faunaService);
 const setAuthFn = async obj =>
-faunaService.createIfNotExists(AUTH_COL, obj.lookupKey, obj);
+faunaService.createIfNotExists(AUTH_COL, obj);
 const setUserFn = async obj =>
-faunaService.createIfNotExists(USER_COL, obj.username, obj);
+faunaService.createIfNotExists(USER_COL, obj);
 const getFn = async obj => faunaService.readAuthRecordFromDb(obj); 
 
 

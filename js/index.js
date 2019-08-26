@@ -44,19 +44,21 @@ app.ports.logoutUser.subscribe(function() {
     address: "",
     isLoggedIn: false,
     message: "User Logged out",
-    showInfos : ''
+    showInfos : []
   });
 });
 
 app.ports.registerUser.subscribe(function(data) {
   hedgehog.logout();
-  hedgehog.signUp(data.userName, data.password).then(
+
+  hedgehog.signUp(data.userName, data.password)
+  .then(
     () => {
       app.ports.loginResult.send({
         address: "",
         isLoggedIn: false,
         message: "User Created",
-        showInfos : ''
+        showInfos : []
       });
     },
     e => {
@@ -64,10 +66,16 @@ app.ports.registerUser.subscribe(function(data) {
         address: "",
         isLoggedIn: false,
         message: e.message,
-        showInfos : ''
+        showInfos : []
       });
     }
-  );
+  )
+  .catch(err => app.ports.loginResult.send({
+    address: "",
+    isLoggedIn: false,
+    message: err.message,
+    showInfos : []
+  }));
 });
 
 function getShows() {
