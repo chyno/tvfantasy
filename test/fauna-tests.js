@@ -25,7 +25,7 @@ xdescribe("Raw testing of Fauna Javascript API", function() {
     let item = q.CreateIndex({
       name: authenticationsIndex,
       source: q.Collection("authentications"),
-      terms: [{ field: ["data", "authentication"] }]
+      terms: [{ field: ["data", "lookupKey"] }]
     });
     try {
       let ret = await client.query(item);
