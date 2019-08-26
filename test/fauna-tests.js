@@ -5,8 +5,9 @@ var faunadb = require('faunadb'),
   const secretAdminKey = "fnADWu_uwLACCI7LXiCJ7Szqvqjvk8BFndUFRMvy";
  // const secretClientKey = 'fnADWgKmE-ACCNt8DvTuqmsjsRC71C3AcoGbPJ7x';
 //var client = new faunadb.Client({ secret: 'YOUR_FAUNADB_SECRET' });
+var utils = require("../js/utils");
 
-describe("Raw testing of Fauna Javascript API", function() {
+xdescribe("Raw testing of Fauna Javascript API", function() {
     let client = null;
 
     beforeEach(async function() {
@@ -107,4 +108,16 @@ describe("Raw testing of Fauna Javascript API", function() {
          assert.fail(e,resp);
      }
    });
+});
+
+describe("Test Fauna Service", function() {
+  let client = null;
+
+  beforeEach(async function() {
+    client = new faunadb.Client({ secret: secretAdminKey });
+  });
+
+  it("Can create client", function() {
+    assert.ok(client, "fauna client created");
+  });
 });
