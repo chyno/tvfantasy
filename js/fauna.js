@@ -16,6 +16,23 @@ readAuthRecordFromDb = async (tvlistingsClient, tvlistingsQuery, obj) => {
    } catch (e) {
      throw(e);
    }
-adAuthRecordFromDb,
-  createIfNotExists
+};
+
+createIfNotExists = async (tvlistingsClient, tvlistingsQuery,collection, obj) => {
+  // Todo: Check is exists
+
+  try {
+    let response = await tvlistingsClient.query(
+    tvlistingsQuery.Create(tvlistingsQuery.Collection(collection), { data: obj }));
+    return response.ref;
+  } catch (e) {
+      console.log('**** Error :' +e);
+      throw e;
+  } 
+};
+
+
+module.exports = {
+readAuthRecordFromDb,
+createIfNotExists
 };
