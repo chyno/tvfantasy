@@ -5,7 +5,8 @@ var faunadb = require('faunadb'),
   const secretAdminKey = "fnADWu_uwLACCI7LXiCJ7Szqvqjvk8BFndUFRMvy";
  // const secretClientKey = 'fnADWgKmE-ACCNt8DvTuqmsjsRC71C3AcoGbPJ7x';
 //var client = new faunadb.Client({ secret: 'YOUR_FAUNADB_SECRET' });
-var utils = require("../js/utils");
+
+var fauna  =  require('../JS/fauna.js');
 
 xdescribe("Raw testing of Fauna Javascript API", function() {
     let client = null;
@@ -112,12 +113,31 @@ xdescribe("Raw testing of Fauna Javascript API", function() {
 
 describe("Test Fauna Service", function() {
   let client = null;
-
+  
   beforeEach(async function() {
-    client = new faunadb.Client({ secret: secretAdminKey });
+    this.client = new faunadb.Client({ secret: secretAdminKey });
+    
   });
 
-  it("Can create client", function() {
-    assert.ok(client, "fauna client created");
+  xit("fauna class exports functions", function() {
+   
+    let fn = fauna.readAuthRecordFromDb;
+    assert.ok(fn, "fauna function created");
+
+    let fn2 = fauna.createIfNotExists;
+    assert.ok(fn2, "fauna function created");
+
   });
+
+  it("fauna function can read  existing record", async function() {
+   
+    let fn = fauna.readAuthRecordFromDb;
+    assert.ok(fn, "fauna function created");
+
+    let result = await fn(this.client,q,{lookupKey : 'myusername'});
+    assert.ok(result, "fauna function created");
+
+  });
+
+  
 });

@@ -1,45 +1,41 @@
+const secretAdminKey = "fnADWu_uwLACCI7LXiCJ7Szqvqjvk8BFndUFRMvy";
 
-
-console.log('faunadb is ' +faunadb);
-const secretAdminKey = "fnADWgJgt8ACDfD3rbUmyhnhTuPY425nDHQ9GZ9Y";
-const secretClientKey = 'fnADWgKmE-ACCNt8DvTuqmsjsRC71C3AcoGbPJ7x';
-//var client = new faunadb.Client({ secret: secretKey });
-// Instanciated from global fauna in the cdn reference
-var q = faunadb.query, client = new faunadb.Client({
-    secret: secretAdminKey
-   });
-
-export class Fauna {
-  
-  constructor() {
-    this.faunaClient = new faunadb.Client({
-      secret: secretAdminKey
-     });
-    this.faunaQuery = faunadb.query;
+readAuthRecordFromDb = async (tvlistingsClient, tvlistingsQuery, obj) => {
+  const userIndex = 'users_by_username';
+  if(!obj || !obj.lookupKey) {
+    throw('Valid data not passed in');
   }
+  let lookupKey = obj.lookupKey;
 
-  async createIfNotExists(collection, obj) {
+  try {
+    let ret = await tvlistingsClient.query(
+      tvlistingsQuery.Get(
+        tvlistingsQuery.Match(tvlistingsQuery.Index(userIndex), lookupKey)));
+     console.log(ret);
+     if (ret && ret.data)  {
+       return ret.data;
+     } else {throw('can not get data');}
+
+   } catch (e) {
+     throw(e);
+ }
+};
+
+createIfNotExists = async (tvlistingsClient, tvlistingsQuery,collection, obj) => {
     // Todo: Check is exists
-    
+  
     try {
-    let response = await client.query(
-      q.Create(q.Collection(collection), { data: obj })
-    );
-    return response.ref;
+      let response = await tvlistingsClient.query(
+      tvlistingsQuery.Create(tvlistingsQuery.Collection(collection), { data: obj }));
+      return response.ref;
     } catch (e) {
         console.log('**** Error :' +e);
         throw e;
-    }
-    
-  }
+    } 
+  };
 
-  async readAuthRecordFromDb(obj) {
-    let lookupKey = obj.lookupKey;
-    var response = await client.query(
-      q.Create(q.Collection("authentications"), {
-        data: { testField: lookupKey }
-      })
-    );
-    return response.data;
-  }
-}
+
+module.exports = {
+  readAuthRecordFromDb,
+  createIfNotExists
+};
