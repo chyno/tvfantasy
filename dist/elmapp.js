@@ -5082,15 +5082,19 @@ var author$project$Main$update = F2(
 								{userName: usrname})
 						}),
 					elm$core$Platform$Cmd$none);
-			case 'StartLogin':
-				return _Utils_Tuple2(
+			case 'StartLoginOrCancel':
+				return _Utils_eq(model.loadState, perzanko$elm_loading$Loading$Off) ? _Utils_Tuple2(
 					_Utils_update(
 						model,
 						{
 							loadState: perzanko$elm_loading$Loading$On,
 							loginResult: {address: '-', isLoggedIn: false, message: '', showInfos: _List_Nil}
 						}),
-					author$project$Main$loginUser(model.userInfo));
+					author$project$Main$loginUser(model.userInfo)) : _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{loadState: perzanko$elm_loading$Loading$Off}),
+					elm$core$Platform$Cmd$none);
 			case 'Logout':
 				return _Utils_Tuple2(
 					author$project$Main$initdata,
@@ -5360,11 +5364,12 @@ var author$project$Main$createAccountView = function (model) {
 					]))
 			]));
 };
-var author$project$Model$StartLogin = {$: 'StartLogin'};
+var author$project$Model$StartLoginOrCancel = {$: 'StartLoginOrCancel'};
 var author$project$Model$UpdatePassword = function (a) {
 	return {$: 'UpdatePassword', a: a};
 };
 var author$project$Main$loginView = function (model) {
+	var buttonText = _Utils_eq(model.loadState, perzanko$elm_loading$Loading$Off) ? 'Login' : 'Cancel';
 	return A2(
 		elm$html$Html$div,
 		_List_fromArray(
@@ -5435,11 +5440,11 @@ var author$project$Main$loginView = function (model) {
 								_List_fromArray(
 									[
 										elm$html$Html$Attributes$class('button fullWidth'),
-										elm$html$Html$Events$onClick(author$project$Model$StartLogin)
+										elm$html$Html$Events$onClick(author$project$Model$StartLoginOrCancel)
 									]),
 								_List_fromArray(
 									[
-										elm$html$Html$text('Log In')
+										elm$html$Html$text(buttonText)
 									])),
 								A2(
 								elm$html$Html$div,

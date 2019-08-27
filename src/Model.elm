@@ -57,6 +57,7 @@ type Msg
     | UpdatePassword String
     | UpdateNewPassword String
     | UpdateNewConfirmPassword String
-    | StartLogin
+    | StartLoginOrCancel
     | Logout
     | RegisterUser
+   

@@ -8,8 +8,8 @@ export const getLatestTvsShow = async(page) => {
   
   const apiUrl = `https://api.themoviedb.org/3/discover/tv?api_key=6aec6123c85be51886e8f69cd9a3a226&first_air_date.gte=2019-01-01&page=${curPage}`;
   //`https://api.themoviedb.org/4/discover/movie?api_key=6aec6123c85be51886e8f69cd9a3a226&primary_release_year=2019&page=${curPage}&primary_release_year=2019`;
-  const data =  await axios.get(apiUrl);
-  return data.results.map(x => {
+  const result =  await axios.get(apiUrl);
+  return result.data.results.map(x => {
    return {
       name: x.name,
       country: x.origin_country,

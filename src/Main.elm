@@ -1,23 +1,7 @@
 port module Main exposing (main)
 
 import Browser
-import Html
-    exposing
-        ( Attribute
-        , Html
-        , br
-        , button
-        , div
-        , h1
-        , h3
-        , hr
-        , img
-        , input
-        , p
-        , span
-        , strong
-        , text
-        )
+import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (onClick, onInput)
 import Json.Encode as E
@@ -148,8 +132,12 @@ createAccountView model =
 
 loginView : Model -> Html Msg
 loginView model =
-    div [ class "content" ]
-        [ div [ class "form" ]
+    let
+        buttonText = if model.loadState == Loading.Off then "Login" else "Cancel"
+    in
+    
+        div [ class "content" ]
+            [ div [ class "form" ]
             [ div [ class "fields" ]
                 [ input [ placeholder "Username", onInput UpdateUserName, value model.userInfo.userName ]
                     []
@@ -161,8 +149,8 @@ loginView model =
                     ]
                 ]
             , div [ class "buttons" ]
-                [ div [ class "button fullWidth", onClick StartLogin ]
-                    [ text "Log In" ]
+                [ div [ class "button fullWidth", onClick StartLoginOrCancel ]
+                    [ text buttonText ]
                 , div [ class "link", onClick (TabNavigate CreateAccountTab) ]
                     [ span []
                         [ text "Create Account" ]
@@ -229,7 +217,8 @@ update msg model =
             in
             ( { model | userInfo = { li | userName = usrname } }, Cmd.none )
 
-        StartLogin ->
+        StartLoginOrCancel ->
+          if model.loadState == Loading.Off then 
             ( { model
                 | loginResult =
                     { isLoggedIn = False
@@ -240,7 +229,9 @@ update msg model =
                 , loadState = Loading.On
               }
             , loginUser model.userInfo
-            )
+            ) 
+            else
+              ({ model | loadState = Loading.Off } , Cmd.none )  
 
         Logout ->
             ( initdata, logoutUser model.userInfo )
