@@ -1,5 +1,5 @@
 import { hedgehog } from './hedgehog.js';
-import {apiUrl} from './tvapi.js';
+import {getLatestTvsShow} from './tvapi.js';
 let app = Elm.Main.init({
   flags: "Hello",
   node: document.getElementById("elm")
@@ -20,7 +20,7 @@ app.ports.loginUser.subscribe(function(data) {
 
   hedgehog.login(data.userName, data.password).then(
     () => {
-      apiUrl().then(showData => {
+      getLatestTvsShow().then(showData => {
         app.ports.loginResult.send({
           address: hedgehog.getWallet().getAddressString(),
           isLoggedIn: isLoggedIn(),

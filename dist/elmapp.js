@@ -9494,6 +9494,7 @@ var author$project$Main$tabView = function (model) {
 var author$project$Model$Logout = {$: 'Logout'};
 var elm$html$Html$table = _VirtualDom_node('table');
 var elm$html$Html$td = _VirtualDom_node('td');
+var elm$html$Html$th = _VirtualDom_node('th');
 var elm$html$Html$tr = _VirtualDom_node('tr');
 var author$project$Show$showsView = function (model) {
 	var showDetails = function (x) {
@@ -9557,7 +9558,50 @@ var author$project$Show$showsView = function (model) {
 				A2(
 				elm$html$Html$table,
 				_List_Nil,
-				A2(elm$core$List$map, showDetails, model.loginResult.showInfos)),
+				A2(
+					elm$core$List$cons,
+					A2(
+						elm$html$Html$tr,
+						_List_Nil,
+						_List_fromArray(
+							[
+								A2(
+								elm$html$Html$th,
+								_List_Nil,
+								_List_fromArray(
+									[
+										elm$html$Html$text('Name')
+									])),
+								A2(
+								elm$html$Html$th,
+								_List_Nil,
+								_List_fromArray(
+									[
+										elm$html$Html$text('Country')
+									])),
+								A2(
+								elm$html$Html$th,
+								_List_Nil,
+								_List_fromArray(
+									[
+										elm$html$Html$text('Description')
+									])),
+								A2(
+								elm$html$Html$th,
+								_List_Nil,
+								_List_fromArray(
+									[
+										elm$html$Html$text('First Aired')
+									])),
+								A2(
+								elm$html$Html$th,
+								_List_Nil,
+								_List_fromArray(
+									[
+										elm$html$Html$text('Vote Average')
+									]))
+							])),
+					A2(elm$core$List$map, showDetails, model.loginResult.showInfos))),
 				A2(
 				elm$html$Html$div,
 				_List_fromArray(

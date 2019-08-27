@@ -22,6 +22,12 @@ showsView model =
   in
     div [ class "message" ]
     [ h1 [] [ text "These are your shows:" ]
-      ,table[] (List.map showDetails model.loginResult.showInfos)
+      ,table[] (tr[] [
+            th[][text "Name"]
+            ,th[][text "Country"]
+            , th[][text "Description"]
+            , th[][text "First Aired"]
+            , th[][text "Vote Average"]
+          ]:: (List.map showDetails model.loginResult.showInfos))
       , div [ class "button", onClick Logout ] [ text "Log Out" ]
     ]
