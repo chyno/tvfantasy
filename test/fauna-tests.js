@@ -13,6 +13,7 @@ var fauna = require("../js/faunadb.js/index.js");
 xdescribe("Raw testing of Fauna Javascript API", function() {
   let client = null;
 
+  
   beforeEach(async function() {
     client = new faunadb.Client({ secret: secretAdminKey });
   });
