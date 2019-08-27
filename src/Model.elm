@@ -1,11 +1,14 @@
 module  Model exposing(..)
 
+import Loading exposing (LoadingState)
+
 type alias Model =
   {
     userInfo : UserInfo,
     loginResult: LoginResultInfo,
     activeTab: ActiveLoginTab,
-    activePage: ActivePage
+    activePage: ActivePage,
+    loadState: LoadingState
   }
 
 type alias ShowInfo =
@@ -38,7 +41,7 @@ type ActivePage =  LoginPage
 
 type Msg = PageNavigate ActivePage
             | TabNavigate ActiveLoginTab
-            |   SuccessLogin LoginResultInfo
+            |   DoneLogin LoginResultInfo
             |   UpdateUserName String
             |   UpdatePassword String
             |   UpdateNewPassword String

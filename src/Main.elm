@@ -11,6 +11,13 @@ import Html.Attributes exposing (..)
 import Json.Encode as E
 import Model exposing (..)
 import Show exposing (..)
+import Loading
+  exposing
+      ( LoaderType(..)
+      , defaultConfig
+      , render
+      )
+
 init : String ->  ( Model, Cmd Msg )
 init  flag =  (initdata, Cmd.none)  
 
@@ -31,15 +38,16 @@ initdata =
       address = "-",
       message = "",
       showInfos = []
-    },
-      userInfo = {
+    }
+    , userInfo = {
           userName = "",
           password = "", 
           passwordConfimation = ""
-      },
+      }
      
-    activeTab = LoggingInTab,
-    activePage = LoginPage  
+    , activeTab = LoggingInTab
+    , activePage = LoginPage  
+    , loadState = Loading.Off
     }
 
 -- adaptionView : Model -> Html Msg
@@ -153,14 +161,17 @@ update msg model =
       updateTab tab model
     PageNavigate page  ->
        updatePage page  model
-    SuccessLogin data ->
+    DoneLogin data ->
         case data.isLoggedIn of
             True ->
                 ({ model | loginResult = data, 
-                activeTab = LoggedInTab, 
-                activePage = ShowsPage   }, Cmd.none)
+                activeTab = LoggedInTab 
+                , activePage = ShowsPage 
+                , loadState = Loading.Off  }, Cmd.none)
             False ->
-                ({ model | loginResult = data   }, Cmd.none)
+                ({ model | 
+                loginResult = data
+                ,  loadState = Loading.Off   }, Cmd.none)
     
     UpdateNewConfirmPassword pswd ->
         let
@@ -191,6 +202,7 @@ update msg model =
                     , message = ""
                     , showInfos = []
                  }
+                 , loadState = Loading.On
         }, loginUser  model.userInfo)
     Logout ->
        ( initdata, logoutUser  model.userInfo)
@@ -229,7 +241,7 @@ updateTab msg model =
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
-    loginResult SuccessLogin
+    loginResult DoneLogin
 
  
 signedInView : Model -> Html Msg
@@ -257,6 +269,11 @@ tabView model =
     in
   div []
       [vw
+        ,div[][ Loading.render
+            Spinner -- LoaderType
+            { defaultConfig | color = "#333" } -- Config
+            model.loadState -- LoadingState
+        ]    
         ,div [][text model.loginResult.message] 
       ]
 
@@ -271,7 +288,7 @@ view model =
     in
   div [ id "root" ]
       [ div [ class "app" ]
-            [vw]       
+            [vw]    
       ]
       
 main = 
