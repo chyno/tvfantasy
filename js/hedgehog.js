@@ -4,10 +4,10 @@ import { faunaService } from "./faunadb.js";
 
 const AUTH_COL = "authentications";
 const USER_COL = "users";
-const client = new faunadb.Client({ secret: faunaService.secretAdminKey });
+const client = new faunadb.Client({ secret: faunaService.faunaKey });
 const q = faunadb.query;
 
-console.log('fauna service: ' +faunaService);
+console.log('fauna service: ' + faunaService);
 // const setAuthFn = async obj =>
 // faunaService.createIfNotExists(AUTH_COL, obj);
 // const setUserFn = async obj =>

@@ -13,8 +13,13 @@ type alias Model =
 
 
 type alias ShowInfo =
-    { name : String
-    , description : String
+    { 
+      name: String,
+      country: String,
+      overview: String,
+      firstAirDate: String,
+      voteAverage: String
+      
     }
 
 

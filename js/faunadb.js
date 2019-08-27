@@ -1,4 +1,4 @@
-const secretAdminKey = "fnADWu_uwLACCI7LXiCJ7Szqvqjvk8BFndUFRMvy";
+const faunaKey = "fnADWu_uwLACCI7LXiCJ7Szqvqjvk8BFndUFRMvy";
 
 const readAuthRecordFromDb = async (tvlistingsClient, tvlistingsQuery, obj) => {
                                 
@@ -36,6 +36,6 @@ const createIfNotExists = async (tvlistingsClient, tvlistingsQuery,collection, o
 export const faunaService = {
 readAuthRecordFromDb,
 createIfNotExists,
-secretAdminKey
+faunaKey: faunaKey
 };
 

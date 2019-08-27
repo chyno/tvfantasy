@@ -4872,16 +4872,31 @@ var author$project$Main$loginResult = _Platform_incomingPort(
 			elm$json$Json$Decode$list(
 				A2(
 					elm$json$Json$Decode$andThen,
-					function (name) {
+					function (voteAverage) {
 						return A2(
 							elm$json$Json$Decode$andThen,
-							function (description) {
-								return elm$json$Json$Decode$succeed(
-									{description: description, name: name});
+							function (overview) {
+								return A2(
+									elm$json$Json$Decode$andThen,
+									function (name) {
+										return A2(
+											elm$json$Json$Decode$andThen,
+											function (firstAirDate) {
+												return A2(
+													elm$json$Json$Decode$andThen,
+													function (country) {
+														return elm$json$Json$Decode$succeed(
+															{country: country, firstAirDate: firstAirDate, name: name, overview: overview, voteAverage: voteAverage});
+													},
+													A2(elm$json$Json$Decode$field, 'country', elm$json$Json$Decode$string));
+											},
+											A2(elm$json$Json$Decode$field, 'firstAirDate', elm$json$Json$Decode$string));
+									},
+									A2(elm$json$Json$Decode$field, 'name', elm$json$Json$Decode$string));
 							},
-							A2(elm$json$Json$Decode$field, 'description', elm$json$Json$Decode$string));
+							A2(elm$json$Json$Decode$field, 'overview', elm$json$Json$Decode$string));
 					},
-					A2(elm$json$Json$Decode$field, 'name', elm$json$Json$Decode$string))))));
+					A2(elm$json$Json$Decode$field, 'voteAverage', elm$json$Json$Decode$string))))));
 var author$project$Model$DoneLogin = function (a) {
 	return {$: 'DoneLogin', a: a};
 };
@@ -9477,16 +9492,51 @@ var author$project$Main$tabView = function (model) {
 			]));
 };
 var author$project$Model$Logout = {$: 'Logout'};
-var elm$html$Html$li = _VirtualDom_node('li');
-var elm$html$Html$ul = _VirtualDom_node('ul');
+var elm$html$Html$table = _VirtualDom_node('table');
+var elm$html$Html$td = _VirtualDom_node('td');
+var elm$html$Html$tr = _VirtualDom_node('tr');
 var author$project$Show$showsView = function (model) {
 	var showDetails = function (x) {
 		return A2(
-			elm$html$Html$ul,
+			elm$html$Html$tr,
 			_List_Nil,
 			_List_fromArray(
 				[
-					elm$html$Html$text(x.name)
+					A2(
+					elm$html$Html$td,
+					_List_Nil,
+					_List_fromArray(
+						[
+							elm$html$Html$text(x.name)
+						])),
+					A2(
+					elm$html$Html$td,
+					_List_Nil,
+					_List_fromArray(
+						[
+							elm$html$Html$text(x.country)
+						])),
+					A2(
+					elm$html$Html$td,
+					_List_Nil,
+					_List_fromArray(
+						[
+							elm$html$Html$text(x.overview)
+						])),
+					A2(
+					elm$html$Html$td,
+					_List_Nil,
+					_List_fromArray(
+						[
+							elm$html$Html$text(x.firstAirDate)
+						])),
+					A2(
+					elm$html$Html$td,
+					_List_Nil,
+					_List_fromArray(
+						[
+							elm$html$Html$text(x.voteAverage)
+						]))
 				]));
 	};
 	return A2(
@@ -9505,20 +9555,9 @@ var author$project$Show$showsView = function (model) {
 						elm$html$Html$text('These are your shows:')
 					])),
 				A2(
-				elm$html$Html$ul,
+				elm$html$Html$table,
 				_List_Nil,
-				A2(
-					elm$core$List$map,
-					function (x) {
-						return A2(
-							elm$html$Html$li,
-							_List_Nil,
-							_List_fromArray(
-								[
-									elm$html$Html$text(x.name)
-								]));
-					},
-					model.loginResult.showInfos)),
+				A2(elm$core$List$map, showDetails, model.loginResult.showInfos)),
 				A2(
 				elm$html$Html$div,
 				_List_fromArray(
