@@ -8,33 +8,34 @@ let app = Elm.Main.init({
 app.ports.loginUser.subscribe(function(data) {
   // For testing
   console.log('... User logging in');
-  app.ports.loginResult.send({
-          address: '1234',
-          isLoggedIn: true,
-          message: "Success 2",
-          showInfos : [
-            {name: 'friends', description: 'lame show'},
-            {name: 'Silicon valley', description: 'about computer geeks'}
-          ]
-        });
+  // app.ports.loginResult.send({
+  //         address: '1234',
+  //         isLoggedIn: true,
+  //         message: "Success 2",
+  //         showInfos : [
+  //           {name: 'friends', description: 'lame show'},
+  //           {name: 'Silicon valley', description: 'about computer geeks'}
+  //         ]
+  //       });
 
-  // hedgehog.login(data.userName, data.password).then(
-  //   () => {
-  //     app.ports.loginResult.send({
-  //       address: hedgehog.getWallet().getAddressString(),
-  //       isLoggedIn: isLoggedIn(),
-  //       message: "Success",
-  //       shows: getShows
-  //     });
-  //   },
-  //   e => {
-  //     app.ports.loginResult.send({
-  //       address: "",
-  //       isLoggedIn: false,
-  //       message: e.message
-  //     });
-  //   }
- // );
+  hedgehog.login(data.userName, data.password).then(
+    () => {
+      app.ports.loginResult.send({
+        address: hedgehog.getWallet().getAddressString(),
+        isLoggedIn: isLoggedIn(),
+        message: "Success",
+        showInfos: []
+      });
+    },
+    e => {
+      app.ports.loginResult.send({
+        address: "",
+        isLoggedIn: false,
+        message: 'Invalid Username or password',
+        showInfos: []
+      });
+    }
+ );
 });
 
 app.ports.logoutUser.subscribe(function() {

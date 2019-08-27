@@ -1,6 +1,6 @@
 const secretAdminKey = "fnADWu_uwLACCI7LXiCJ7Szqvqjvk8BFndUFRMvy";
 
-readAuthRecordFromDb = async (tvlistingsClient, tvlistingsQuery, obj) => {
+const readAuthRecordFromDb = async (tvlistingsClient, tvlistingsQuery, obj) => {
                                 
   const authenticationsIndex = 'authentications_by_lookupkey';
   
@@ -12,13 +12,14 @@ readAuthRecordFromDb = async (tvlistingsClient, tvlistingsQuery, obj) => {
      if (ret && ret.data)  {
        return ret.data;
      }
+     return null;
 
    } catch (e) {
      throw(e);
    }
 };
 
-createIfNotExists = async (tvlistingsClient, tvlistingsQuery,collection, obj) => {
+const createIfNotExists = async (tvlistingsClient, tvlistingsQuery,collection, obj) => {
   // Todo: Check is exists
 
   try {
@@ -32,7 +33,9 @@ createIfNotExists = async (tvlistingsClient, tvlistingsQuery,collection, obj) =>
 };
 
 
-module.exports = {
+export const faunaService = {
 readAuthRecordFromDb,
-createIfNotExists
+createIfNotExists,
+secretAdminKey
 };
+

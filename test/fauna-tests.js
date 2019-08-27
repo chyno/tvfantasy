@@ -8,7 +8,7 @@ const secretAdminKey = "fnADWu_uwLACCI7LXiCJ7Szqvqjvk8BFndUFRMvy";
 // const secretClientKey = 'fnADWgKmE-ACCNt8DvTuqmsjsRC71C3AcoGbPJ7x';
 //var client = new faunadb.Client({ secret: 'YOUR_FAUNADB_SECRET' });
 
-var fauna = require("../JS/fauna.js");
+var fauna = require("../js/faunadb.js/index.js");
 
 xdescribe("Raw testing of Fauna Javascript API", function() {
   let client = null;
