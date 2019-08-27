@@ -9476,6 +9476,7 @@ var author$project$Main$tabView = function (model) {
 					]))
 			]));
 };
+var author$project$Model$Logout = {$: 'Logout'};
 var elm$html$Html$li = _VirtualDom_node('li');
 var elm$html$Html$ul = _VirtualDom_node('ul');
 var author$project$Show$showsView = function (model) {
@@ -9527,7 +9528,18 @@ var author$project$Show$showsView = function (model) {
 									elm$html$Html$text(x.name)
 								]));
 					},
-					model.loginResult.showInfos))
+					model.loginResult.showInfos)),
+				A2(
+				elm$html$Html$div,
+				_List_fromArray(
+					[
+						elm$html$Html$Attributes$class('button'),
+						elm$html$Html$Events$onClick(author$project$Model$Logout)
+					]),
+				_List_fromArray(
+					[
+						elm$html$Html$text('Log Out')
+					]))
 			]));
 };
 var author$project$Main$view = function (model) {

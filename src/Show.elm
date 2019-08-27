@@ -21,6 +21,7 @@ showsView model =
                 [ text "authenticated" ]
             , h1 [] [ text "These are your shows:" ]
             , ul [] (List.map (\x -> li [][text x.name]) model.loginResult.showInfos)
+            , div [ class "button", onClick Logout ] [ text "Log Out"  ]
 
             ]  
             
