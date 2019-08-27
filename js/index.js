@@ -24,7 +24,7 @@ app.ports.loginUser.subscribe(function(data) {
         address: hedgehog.getWallet().getAddressString(),
         isLoggedIn: isLoggedIn(),
         message: "Success",
-        showInfos: []
+        showInfos: getShows()
       });
     },
     e => {
@@ -81,20 +81,9 @@ app.ports.registerUser.subscribe(function(data) {
 
 function getShows() {
   return [
-    {
-      name: 'Friends',
-      Description: 'Lame show of young people doing nothing'
-    },
-    {
-      name: 'Silicon Valley',
-      Description: 'Show about silicon valley'
-    },
-    {
-      name: 'Breaking Bad',
-      Description: 'takes place in NM'
-    },
-
-  ];
+              {name: 'friends', description: 'lame show'},
+              {name: 'Silicon valley', description: 'about computer geeks'}
+            ];
 }
 
 function isLoggedIn() {

@@ -1,27 +1,39 @@
-module  Show exposing(..)
+module Show exposing (..)
 
-import Model exposing (..)
 import Browser
-import Html.Events exposing (onInput, onClick)
-import Html exposing (p,
- Html, Attribute,
- div, input, text, 
- h1, hr,br, img, h3, 
- strong, span, button, ul, li)
+import Html
+    exposing
+        ( Attribute
+        , Html
+        , br
+        , button
+        , div
+        , h1
+        , h3
+        , hr
+        , img
+        , input
+        , li
+        , p
+        , span
+        , strong
+        , text
+        , ul
+        )
 import Html.Attributes exposing (..)
+import Html.Events exposing (onClick, onInput)
 import Json.Encode as E
+import Model exposing (..)
+
 
 showsView : Model -> Html Msg
-showsView model = 
-  let
-        showDetails = \x -> ul [][text x.name] 
-  in
+showsView model =
+    let
+        showDetails =
+            \x -> ul [] [ text x.name ]
+    in
     div [ class "message" ]
-            [ div [ class "pill green" ]
-                [ text "authenticated" ]
-            , h1 [] [ text "These are your shows:" ]
-            , ul [] (List.map (\x -> li [][text x.name]) model.loginResult.showInfos)
-            , div [ class "button", onClick Logout ] [ text "Log Out"  ]
-
-            ]  
-            
+        [ h1 [] [ text "These are your shows:" ]
+        , ul [] (List.map (\x -> li [] [ text x.name ]) model.loginResult.showInfos)
+        , div [ class "button", onClick Logout ] [ text "Log Out" ]
+        ]
