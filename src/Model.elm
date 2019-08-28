@@ -9,6 +9,7 @@ type alias Model =
     , activeTab : ActiveLoginTab
     , activePage : ActivePage
     , loadState : LoadingState
+    , showInfos : List ShowInfo
     }
 
 
@@ -18,7 +19,7 @@ type alias ShowInfo =
       country: String,
       overview: String,
       firstAirDate: String,
-      voteAverage: String
+      voteAverage: Float
       
     }
 
@@ -27,7 +28,6 @@ type alias LoginResultInfo =
     { isLoggedIn : Bool
     , address : String
     , message : String
-    , showInfos : List ShowInfo
     }
 
 

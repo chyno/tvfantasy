@@ -4435,7 +4435,8 @@ var author$project$Main$initdata = {
 	activePage: author$project$Model$LoginPage,
 	activeTab: author$project$Model$LoggingInTab,
 	loadState: perzanko$elm_loading$Loading$Off,
-	loginResult: {address: '-', isLoggedIn: false, message: '', showInfos: _List_Nil},
+	loginResult: {address: '-', isLoggedIn: false, message: ''},
+	showInfos: _List_Nil,
 	userInfo: {password: '', passwordConfimation: '', userName: ''}
 };
 var elm$core$Basics$True = {$: 'True'};
@@ -4837,72 +4838,45 @@ var elm$core$Platform$Cmd$none = elm$core$Platform$Cmd$batch(_List_Nil);
 var author$project$Main$init = function (flag) {
 	return _Utils_Tuple2(author$project$Main$initdata, elm$core$Platform$Cmd$none);
 };
-var elm$json$Json$Decode$andThen = _Json_andThen;
-var elm$json$Json$Decode$bool = _Json_decodeBool;
-var elm$json$Json$Decode$field = _Json_decodeField;
-var elm$json$Json$Decode$list = _Json_decodeList;
-var elm$json$Json$Decode$string = _Json_decodeString;
-var elm$json$Json$Decode$succeed = _Json_succeed;
-var author$project$Main$loginResult = _Platform_incomingPort(
-	'loginResult',
-	A2(
-		elm$json$Json$Decode$andThen,
-		function (showInfos) {
-			return A2(
-				elm$json$Json$Decode$andThen,
-				function (message) {
-					return A2(
-						elm$json$Json$Decode$andThen,
-						function (isLoggedIn) {
-							return A2(
-								elm$json$Json$Decode$andThen,
-								function (address) {
-									return elm$json$Json$Decode$succeed(
-										{address: address, isLoggedIn: isLoggedIn, message: message, showInfos: showInfos});
-								},
-								A2(elm$json$Json$Decode$field, 'address', elm$json$Json$Decode$string));
-						},
-						A2(elm$json$Json$Decode$field, 'isLoggedIn', elm$json$Json$Decode$bool));
-				},
-				A2(elm$json$Json$Decode$field, 'message', elm$json$Json$Decode$string));
-		},
-		A2(
-			elm$json$Json$Decode$field,
-			'showInfos',
-			elm$json$Json$Decode$list(
-				A2(
-					elm$json$Json$Decode$andThen,
-					function (voteAverage) {
-						return A2(
-							elm$json$Json$Decode$andThen,
-							function (overview) {
-								return A2(
-									elm$json$Json$Decode$andThen,
-									function (name) {
-										return A2(
-											elm$json$Json$Decode$andThen,
-											function (firstAirDate) {
-												return A2(
-													elm$json$Json$Decode$andThen,
-													function (country) {
-														return elm$json$Json$Decode$succeed(
-															{country: country, firstAirDate: firstAirDate, name: name, overview: overview, voteAverage: voteAverage});
-													},
-													A2(elm$json$Json$Decode$field, 'country', elm$json$Json$Decode$string));
-											},
-											A2(elm$json$Json$Decode$field, 'firstAirDate', elm$json$Json$Decode$string));
-									},
-									A2(elm$json$Json$Decode$field, 'name', elm$json$Json$Decode$string));
-							},
-							A2(elm$json$Json$Decode$field, 'overview', elm$json$Json$Decode$string));
-					},
-					A2(elm$json$Json$Decode$field, 'voteAverage', elm$json$Json$Decode$string))))));
-var author$project$Model$DoneLogin = function (a) {
-	return {$: 'DoneLogin', a: a};
-};
-var author$project$Main$subscriptions = function (model) {
-	return author$project$Main$loginResult(author$project$Model$DoneLogin);
-};
+var author$project$Login$updatePage = F2(
+	function (msg, model) {
+		return _Utils_Tuple2(
+			_Utils_update(
+				model,
+				{activePage: msg}),
+			elm$core$Platform$Cmd$none);
+	});
+var author$project$Model$CreateAccountTab = {$: 'CreateAccountTab'};
+var author$project$Model$LoggedInTab = {$: 'LoggedInTab'};
+var author$project$Login$updateTab = F2(
+	function (msg, model) {
+		switch (msg.$) {
+			case 'LoggingInTab':
+				return _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{
+							activeTab: author$project$Model$LoggingInTab,
+							userInfo: {password: '', passwordConfimation: '', userName: ''}
+						}),
+					elm$core$Platform$Cmd$none);
+			case 'LoggedInTab':
+				return _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{activeTab: author$project$Model$LoggedInTab}),
+					elm$core$Platform$Cmd$none);
+			default:
+				return _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{
+							activeTab: author$project$Model$CreateAccountTab,
+							userInfo: {password: '', passwordConfimation: '', userName: ''}
+						}),
+					elm$core$Platform$Cmd$none);
+		}
+	});
 var elm$json$Json$Encode$object = function (pairs) {
 	return _Json_wrap(
 		A3(
@@ -4968,45 +4942,6 @@ var author$project$Main$registerUser = _Platform_outgoingPort(
 					elm$json$Json$Encode$string($.userName))
 				]));
 	});
-var author$project$Main$updatePage = F2(
-	function (msg, model) {
-		return _Utils_Tuple2(
-			_Utils_update(
-				model,
-				{activePage: msg}),
-			elm$core$Platform$Cmd$none);
-	});
-var author$project$Model$CreateAccountTab = {$: 'CreateAccountTab'};
-var author$project$Model$LoggedInTab = {$: 'LoggedInTab'};
-var author$project$Main$updateTab = F2(
-	function (msg, model) {
-		switch (msg.$) {
-			case 'LoggingInTab':
-				return _Utils_Tuple2(
-					_Utils_update(
-						model,
-						{
-							activeTab: author$project$Model$LoggingInTab,
-							userInfo: {password: '', passwordConfimation: '', userName: ''}
-						}),
-					elm$core$Platform$Cmd$none);
-			case 'LoggedInTab':
-				return _Utils_Tuple2(
-					_Utils_update(
-						model,
-						{activeTab: author$project$Model$LoggedInTab}),
-					elm$core$Platform$Cmd$none);
-			default:
-				return _Utils_Tuple2(
-					_Utils_update(
-						model,
-						{
-							activeTab: author$project$Model$CreateAccountTab,
-							userInfo: {password: '', passwordConfimation: '', userName: ''}
-						}),
-					elm$core$Platform$Cmd$none);
-		}
-	});
 var author$project$Model$ShowsPage = {$: 'ShowsPage'};
 var perzanko$elm_loading$Loading$On = {$: 'On'};
 var author$project$Main$update = F2(
@@ -5014,10 +4949,10 @@ var author$project$Main$update = F2(
 		switch (msg.$) {
 			case 'TabNavigate':
 				var tab = msg.a;
-				return A2(author$project$Main$updateTab, tab, model);
+				return A2(author$project$Login$updateTab, tab, model);
 			case 'PageNavigate':
 				var page = msg.a;
-				return A2(author$project$Main$updatePage, page, model);
+				return A2(author$project$Login$updatePage, page, model);
 			case 'DoneLogin':
 				var data = msg.a;
 				var _n1 = data.isLoggedIn;
@@ -5088,7 +5023,8 @@ var author$project$Main$update = F2(
 						model,
 						{
 							loadState: perzanko$elm_loading$Loading$On,
-							loginResult: {address: '-', isLoggedIn: false, message: '', showInfos: _List_Nil}
+							loginResult: {address: '-', isLoggedIn: false, message: ''},
+							showInfos: _List_Nil
 						}),
 					author$project$Main$loginUser(model.userInfo)) : _Utils_Tuple2(
 					_Utils_update(
@@ -5123,6 +5059,7 @@ var elm$core$Basics$identity = function (x) {
 };
 var elm$json$Json$Decode$map = _Json_map1;
 var elm$json$Json$Decode$map2 = _Json_map2;
+var elm$json$Json$Decode$succeed = _Json_succeed;
 var elm$virtual_dom$VirtualDom$toHandlerInt = function (handler) {
 	switch (handler.$) {
 		case 'Normal':
@@ -5237,10 +5174,12 @@ var elm$core$List$foldr = F3(
 	function (fn, acc, ls) {
 		return A4(elm$core$List$foldrHelper, fn, acc, 0, ls);
 	});
+var elm$json$Json$Decode$field = _Json_decodeField;
 var elm$json$Json$Decode$at = F2(
 	function (fields, decoder) {
 		return A3(elm$core$List$foldr, elm$json$Json$Decode$field, decoder, fields);
 	});
+var elm$json$Json$Decode$string = _Json_decodeString;
 var elm$html$Html$Events$targetValue = A2(
 	elm$json$Json$Decode$at,
 	_List_fromArray(
@@ -5255,7 +5194,7 @@ var elm$html$Html$Events$onInput = function (tagger) {
 			elm$html$Html$Events$alwaysStop,
 			A2(elm$json$Json$Decode$map, tagger, elm$html$Html$Events$targetValue)));
 };
-var author$project$Main$createAccountView = function (model) {
+var author$project$Login$createAccountView = function (model) {
 	return A2(
 		elm$html$Html$div,
 		_List_fromArray(
@@ -5368,7 +5307,7 @@ var author$project$Model$StartLoginOrCancel = {$: 'StartLoginOrCancel'};
 var author$project$Model$UpdatePassword = function (a) {
 	return {$: 'UpdatePassword', a: a};
 };
-var author$project$Main$loginView = function (model) {
+var author$project$Login$loginView = function (model) {
 	var buttonText = _Utils_eq(model.loadState, perzanko$elm_loading$Loading$Off) ? 'Login' : 'Cancel';
 	return A2(
 		elm$html$Html$div,
@@ -5468,13 +5407,13 @@ var author$project$Main$loginView = function (model) {
 					]))
 			]));
 };
-var author$project$Main$tabClassString = F2(
+var author$project$Login$tabClassString = F2(
 	function (model, tab) {
 		return _Utils_eq(model.activeTab, tab) ? 'tab active' : 'tab';
 	});
 var elm$html$Html$h1 = _VirtualDom_node('h1');
 var elm$html$Html$Attributes$id = elm$html$Html$Attributes$stringProperty('id');
-var author$project$Main$headersView = function (model) {
+var author$project$Login$headersView = function (model) {
 	return A2(
 		elm$html$Html$div,
 		_List_fromArray(
@@ -5512,7 +5451,7 @@ var author$project$Main$headersView = function (model) {
 										_List_fromArray(
 											[
 												elm$html$Html$Attributes$class(
-												A2(author$project$Main$tabClassString, model, author$project$Model$CreateAccountTab)),
+												A2(author$project$Login$tabClassString, model, author$project$Model$CreateAccountTab)),
 												elm$html$Html$Events$onClick(
 												author$project$Model$TabNavigate(author$project$Model$CreateAccountTab))
 											]),
@@ -5525,7 +5464,7 @@ var author$project$Main$headersView = function (model) {
 										_List_fromArray(
 											[
 												elm$html$Html$Attributes$class(
-												A2(author$project$Main$tabClassString, model, author$project$Model$LoggingInTab)),
+												A2(author$project$Login$tabClassString, model, author$project$Model$LoggingInTab)),
 												elm$html$Html$Events$onClick(
 												author$project$Model$TabNavigate(author$project$Model$LoggingInTab))
 											]),
@@ -5538,11 +5477,11 @@ var author$project$Main$headersView = function (model) {
 								var _n0 = model.activeTab;
 								switch (_n0.$) {
 									case 'CreateAccountTab':
-										return author$project$Main$createAccountView(model);
+										return author$project$Login$createAccountView(model);
 									case 'LoggingInTab':
-										return author$project$Main$loginView(model);
+										return author$project$Login$loginView(model);
 									default:
-										return author$project$Main$loginView(model);
+										return author$project$Login$loginView(model);
 								}
 							}()
 							])),
@@ -5589,7 +5528,7 @@ var author$project$Main$headersView = function (model) {
 					]))
 			]));
 };
-var author$project$Main$signedInView = function (model) {
+var author$project$Login$signedInView = function (model) {
 	return A2(
 		elm$html$Html$div,
 		_List_fromArray(
@@ -9456,16 +9395,16 @@ var perzanko$elm_loading$Loading$render = F3(
 			return elm$html$Html$text(' ');
 		}
 	});
-var author$project$Main$tabView = function (model) {
+var author$project$Login$tabView = function (model) {
 	var vw = function () {
 		var _n0 = model.activeTab;
 		switch (_n0.$) {
 			case 'CreateAccountTab':
-				return author$project$Main$headersView(model);
+				return author$project$Login$headersView(model);
 			case 'LoggingInTab':
-				return author$project$Main$headersView(model);
+				return author$project$Login$headersView(model);
 			default:
-				return author$project$Main$signedInView(model);
+				return author$project$Login$signedInView(model);
 		}
 	}();
 	return A2(
@@ -9541,7 +9480,8 @@ var author$project$Show$showsView = function (model) {
 					_List_Nil,
 					_List_fromArray(
 						[
-							elm$html$Html$text(x.voteAverage)
+							elm$html$Html$text(
+							elm$core$String$fromFloat(x.voteAverage))
 						]))
 				]));
 	};
@@ -9606,7 +9546,7 @@ var author$project$Show$showsView = function (model) {
 										elm$html$Html$text('Vote Average')
 									]))
 							])),
-					A2(elm$core$List$map, showDetails, model.loginResult.showInfos))),
+					A2(elm$core$List$map, showDetails, model.showInfos))),
 				A2(
 				elm$html$Html$div,
 				_List_fromArray(
@@ -9624,7 +9564,7 @@ var author$project$Main$view = function (model) {
 	var vw = function () {
 		var _n0 = model.activePage;
 		if (_n0.$ === 'LoginPage') {
-			return author$project$Main$tabView(model);
+			return author$project$Login$tabView(model);
 		} else {
 			return author$project$Show$showsView(model);
 		}
@@ -9646,6 +9586,33 @@ var author$project$Main$view = function (model) {
 				_List_fromArray(
 					[vw]))
 			]));
+};
+var author$project$Model$DoneLogin = function (a) {
+	return {$: 'DoneLogin', a: a};
+};
+var elm$json$Json$Decode$andThen = _Json_andThen;
+var elm$json$Json$Decode$bool = _Json_decodeBool;
+var author$project$Subscriptions$loginResult = _Platform_incomingPort(
+	'loginResult',
+	A2(
+		elm$json$Json$Decode$andThen,
+		function (message) {
+			return A2(
+				elm$json$Json$Decode$andThen,
+				function (isLoggedIn) {
+					return A2(
+						elm$json$Json$Decode$andThen,
+						function (address) {
+							return elm$json$Json$Decode$succeed(
+								{address: address, isLoggedIn: isLoggedIn, message: message});
+						},
+						A2(elm$json$Json$Decode$field, 'address', elm$json$Json$Decode$string));
+				},
+				A2(elm$json$Json$Decode$field, 'isLoggedIn', elm$json$Json$Decode$bool));
+		},
+		A2(elm$json$Json$Decode$field, 'message', elm$json$Json$Decode$string)));
+var author$project$Subscriptions$subscriptions = function (model) {
+	return author$project$Subscriptions$loginResult(author$project$Model$DoneLogin);
 };
 var elm$browser$Browser$External = function (a) {
 	return {$: 'External', a: a};
@@ -9861,5 +9828,5 @@ var elm$url$Url$fromString = function (str) {
 };
 var elm$browser$Browser$element = _Browser_element;
 var author$project$Main$main = elm$browser$Browser$element(
-	{init: author$project$Main$init, subscriptions: author$project$Main$subscriptions, update: author$project$Main$update, view: author$project$Main$view});
+	{init: author$project$Main$init, subscriptions: author$project$Subscriptions$subscriptions, update: author$project$Main$update, view: author$project$Main$view});
 _Platform_export({'Main':{'init':author$project$Main$main(elm$json$Json$Decode$string)(0)}});}(this));

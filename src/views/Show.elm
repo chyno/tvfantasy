@@ -6,7 +6,7 @@ import Html.Attributes exposing (..)
 import Html.Events exposing (onClick, onInput)
 import Json.Encode as E
 import Model exposing (..)
-
+import Subscriptions exposing(..)
 
 showsView : Model -> Html Msg
 showsView model =
@@ -17,7 +17,7 @@ showsView model =
         ,td[][text x.country]
         ,td[][text x.overview]
         , td[][text x.firstAirDate]
-        , td[][text x.voteAverage]
+        , td[][text (String.fromFloat x.voteAverage)]
       ]
   in
     div [ class "message" ]
@@ -28,6 +28,6 @@ showsView model =
             , th[][text "Description"]
             , th[][text "First Aired"]
             , th[][text "Vote Average"]
-          ]:: (List.map showDetails model.loginResult.showInfos))
+          ]:: (List.map showDetails model.showInfos))
       , div [ class "button", onClick Logout ] [ text "Log Out" ]
     ]

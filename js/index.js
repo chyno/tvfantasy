@@ -25,7 +25,7 @@ app.ports.loginUser.subscribe(function(data) {
           address: hedgehog.getWallet().getAddressString(),
           isLoggedIn: isLoggedIn(),
           message: "Success",
-          showInfos: showData
+          showInfos: [] //showData
         });
       });
     },
