@@ -3,15 +3,17 @@ module Model exposing (..)
 import Loading exposing (LoadingState)
 
 
-type alias Model =
+type alias AuthModel =
     { userInfo : UserInfo
     , loginResult : LoginResultInfo
     , activeTab : ActiveLoginTab
-    , activePage : ActivePage
     , loadState : LoadingState
-    , showInfos : List ShowInfo
     }
 
+type alias ShowsModel =
+    { 
+     showInfos : List ShowInfo
+    }
 
 type alias ShowInfo =
     { 
@@ -44,14 +46,10 @@ type ActiveLoginTab
     | LoggedInTab
 
 
-type ActivePage
-    = LoginPage
-    | ShowsPage
 
 
 type Msg
-    = PageNavigate ActivePage
-    | TabNavigate ActiveLoginTab
+    = TabNavigate ActiveLoginTab
     | DoneLogin LoginResultInfo
     | UpdateUserName String
     | UpdatePassword String

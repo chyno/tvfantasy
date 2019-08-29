@@ -6,9 +6,9 @@ import Html.Attributes exposing (..)
 import Html.Events exposing (onClick, onInput)
 import Json.Encode as E
 import Model exposing (..)
-import Subscriptions exposing(..)
+ 
 
-showsView : Model -> Html Msg
+showsView : ShowsModel -> Html Msg
 showsView model =
   let
     showDetails =

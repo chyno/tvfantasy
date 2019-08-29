@@ -14,14 +14,20 @@ import Loading
 import Model exposing (..)
 import Show exposing (..)
 import Login exposing(..)
-import Subscriptions exposing (..)
+
 
 init : String -> ( Model, Cmd Msg )
 init flag =
-    ( initdata, Cmd.none )
+    let
+        root = Auth initdata
+    in 
+        ( root, Cmd.none )
 
+type Model
+    = Auth AuthModel
+    | Shows ShowsModel
 
-initdata : Model
+initdata : AuthModel
 initdata =
     { loginResult =
         { isLoggedIn = False
@@ -34,27 +40,48 @@ initdata =
         , passwordConfimation = ""
         }
     , activeTab = LoggingInTab
-    , activePage = LoginPage
     , loadState = Loading.Off
-    , showInfos = []
     }
 
+-- Subscriptions
+
+subscriptions : Model -> Sub Msg
+subscriptions model =
+    loginResult DoneLogin
+
+
+
+
+-- Update
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
+   case model of
+        Shows smdl ->
+            showUpdate msg smdl |> useModel Shows
+        Auth amdl ->
+            loginUpdate msg amdl |> useModel Auth
+
+    
+
+useModel: (subModel -> Model) -> ( subModel, Cmd Msg ) -> ( Model, Cmd Msg )
+useModel toModel (subModel, cmd)  = 
+  ((toModel subModel), cmd)
+
+showUpdate : Msg -> ShowsModel -> ( ShowsModel, Cmd Msg )
+showUpdate msg model =
+   (model, Cmd.none)
+
+loginUpdate : Msg -> AuthModel -> ( AuthModel, Cmd Msg )
+loginUpdate msg model =
     case msg of
         TabNavigate tab ->
             updateTab tab model
-
-        PageNavigate page ->
-            updatePage page model
-
         DoneLogin data ->
             case data.isLoggedIn of
                 True ->
                     ( { model
                         | loginResult = data
                         , activeTab = LoggedInTab
-                        , activePage = ShowsPage
                         , loadState = Loading.Off
                       }
                     , Cmd.none
@@ -105,7 +132,7 @@ update msg model =
                     , message = ""
                     }
                 , loadState = Loading.On
-                , showInfos = []
+                 
               }
             , loginUser model.userInfo
             ) 
@@ -120,16 +147,18 @@ update msg model =
 
 
 
+ 
 
 view : Model -> Html Msg
 view model =
     let
         vw =
-            case model.activePage of
-                LoginPage ->
-                    tabView model
-                ShowsPage ->
-                    showsView model
+            case model of
+                Shows mdl->
+                    showsView mdl         
+                Auth mdl ->
+                    tabView mdl 
+                    
     in
     div [ id "root" ]
         [ div [ class "app" ]
@@ -144,8 +173,11 @@ main =
         , subscriptions = subscriptions
         }
 
-
+port loginResult : (LoginResultInfo -> msg) -> Sub msg
 port registerUser : UserInfo -> Cmd msg
 port loginUser : UserInfo -> Cmd msg
 port logoutUser : UserInfo -> Cmd msg
+
+
 -- port startLoadShows : UserInfo -> Cmd msg
+--  port showResults : (List ShowInfo -> msg) -> Sub msg

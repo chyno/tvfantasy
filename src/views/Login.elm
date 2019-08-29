@@ -6,7 +6,7 @@ import Html.Attributes exposing (..)
 import Html.Events exposing (onClick, onInput)
 import Json.Encode as E
 import Model exposing (..)
-import Subscriptions exposing(..)
+ 
 import Loading
     exposing
         ( LoaderType(..)
@@ -14,7 +14,7 @@ import Loading
         , render
         )
 
-tabClassString : Model -> ActiveLoginTab -> String
+tabClassString : AuthModel -> ActiveLoginTab -> String
 tabClassString model tab =
     if model.activeTab == tab then
         "tab active"
@@ -22,12 +22,8 @@ tabClassString model tab =
     else
         "tab"
 
-updatePage : ActivePage -> Model -> ( Model, Cmd Msg )
-updatePage msg model =
-    ( { model | activePage = msg }, Cmd.none )
 
-
-updateTab : ActiveLoginTab -> Model -> ( Model, Cmd Msg )
+updateTab : ActiveLoginTab -> AuthModel -> ( AuthModel, Cmd Msg )
 updateTab msg model =
     case msg of
         LoggingInTab ->
@@ -58,7 +54,7 @@ updateTab msg model =
             )
 
 
-headersView : Model -> Html Msg
+headersView : AuthModel -> Html Msg
 headersView model =
     div [ id "root" ]
         [ div [ class "app" ]
@@ -100,7 +96,7 @@ headersView model =
         ]
 
 
-createAccountView : Model -> Html Msg
+createAccountView : AuthModel -> Html Msg
 createAccountView model =
     div [ class "content" ]
         [ div [ class "form" ]
@@ -128,7 +124,7 @@ createAccountView model =
         ]
 
 
-loginView : Model -> Html Msg
+loginView : AuthModel -> Html Msg
 loginView model =
     let
         buttonText = if model.loadState == Loading.Off then "Login" else "Cancel"
@@ -157,7 +153,7 @@ loginView model =
             ]
         ]
 
-tabView : Model -> Html Msg
+tabView : AuthModel -> Html Msg
 tabView model =
     let
         vw =
@@ -186,7 +182,7 @@ tabView model =
         , div [] [ text model.loginResult.message ]
         ]
 
-signedInView : Model -> Html Msg
+signedInView : AuthModel -> Html Msg
 signedInView model =
     div [ class "message" ]
         [ div [ class "pill green" ]
