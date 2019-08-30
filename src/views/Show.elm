@@ -32,4 +32,4 @@ showsView model =
       , div [ class "button" ] [ text "Log Out" ]
     ]
 
---, onClick Logout
+-- , onClick StartLogout

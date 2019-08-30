@@ -1,5 +1,5 @@
 port module Main exposing (main)
-
+import Route exposing (Route)
 import Browser
 import Html exposing (..)
 import Browser exposing (Document)
@@ -77,16 +77,13 @@ updateWith toModel toMsg model ( subModel, subCmd ) =
     )
   
 
--- useModel: (subModel -> Model) -> ( subModel, Cmd Msg ) -> ( Model, Cmd Msg )
--- useModel toModel (subModel, cmd)  = 
---   ((toModel subModel), cmd)
-
 showUpdate : ShowMsg -> ShowsModel -> ( ShowsModel, Cmd ShowMsg )
 showUpdate msg model =
     case msg of
         ShowResults  ->
             (model, Cmd.none)
-
+        
+-- (a -> msg) -> Cmd a -> Cmd msg
 loginUpdate : LoginMsg -> AuthModel -> ( AuthModel, Cmd LoginMsg )
 loginUpdate msg model =
     case msg of
@@ -170,12 +167,9 @@ view model =
         toView mdl =
             case mdl of
                 Shows smdl->
-                    Html.map GotShowMsg  (showsView smdl)
-                    -- ((showsView smdl) , GotShowMsg (ShowResults smdl.showInfos))  -- GotShowMsg         
+                    Html.map GotShowMsg  (showsView smdl)                    
                 Auth amdl ->
                     Html.map GotLoginMsg  (tabView amdl)
-                    -- ((tabView amdl), GotLoginMsg (DoneLogin amdl.loginResult) )  -- GotLoginMsg 
-
     in
     div [ id "root" ]
         [ div [ class "app" ]
@@ -190,11 +184,12 @@ main =
         , subscriptions = subscriptions
         }
 
-port loginResult : (LoginResultInfo -> msg) -> Sub msg
+-- Outgoing ports
 port registerUser : UserInfo -> Cmd msg
 port loginUser : UserInfo -> Cmd msg
 port logoutUser : UserInfo -> Cmd msg
-
-
 port startLoadShows : UserInfo -> Cmd msg
+
+-- Incoming Ports
+port loginResult : (LoginResultInfo -> msg) -> Sub msg
 port showResults : (List ShowInfo -> msg) -> Sub msg
