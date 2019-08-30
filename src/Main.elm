@@ -1,6 +1,9 @@
 port module Main exposing (main)
 import Route exposing (Route)
+import Json.Decode as Decode exposing (Value)
 import Browser
+import Browser.Navigation as Nav
+import Url exposing (Url)
 import Html exposing (..)
 import Browser exposing (Document)
 import Html.Attributes exposing (..)
@@ -15,6 +18,7 @@ import Loading
 import Model exposing (..)
 import Show exposing (..)
 import Login exposing(..)
+
 
 
 init : String -> ( Model, Cmd Msg )
@@ -167,15 +171,16 @@ view model =
         toView mdl =
             case mdl of
                 Shows smdl->
-                    Html.map GotShowMsg  (showsView smdl)                    
+                    showsView smdl                   
                 Auth amdl ->
-                    Html.map GotLoginMsg  (tabView amdl)
+                    tabView amdl
     in
     div [ id "root" ]
         [ div [ class "app" ]
             [ model |> toView    ]
         ]
 
+-- main : Program Value Model Msg
 main =
     Browser.element
         { view = view

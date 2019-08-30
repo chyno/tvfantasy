@@ -8,7 +8,7 @@ import Json.Encode as E
 import Model exposing (..)
  
 
-showsView : ShowsModel -> Html ShowMsg
+showsView : ShowsModel -> Html Msg
 showsView model =
   let
     showDetails =
@@ -29,7 +29,7 @@ showsView model =
             , th[][text "First Aired"]
             , th[][text "Vote Average"]
           ]:: (List.map showDetails model.showInfos))
-      , div [ class "button" ] [ text "Log Out" ]
+      , div [ class "button", onClick (GotLoginMsg Logout) ] [ text "Log Out" ]
     ]
 
 -- , onClick StartLogout

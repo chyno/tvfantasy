@@ -54,7 +54,7 @@ updateTab msg model =
             )
 
 
-headersView : AuthModel -> Html LoginMsg
+headersView : AuthModel -> Html Msg
 headersView model =
     div [ id "root" ]
         [ div [ class "app" ]
@@ -63,12 +63,12 @@ headersView model =
                     [ div
                         [ class
                             (tabClassString model CreateAccountTab)
-                        , onClick (TabNavigate CreateAccountTab)
+                        , onClick (GotLoginMsg (TabNavigate CreateAccountTab))
                         ]
                         [ text "Create Account" ]
                     , div
                         [ class (tabClassString model LoggingInTab)
-                        , onClick (TabNavigate LoggingInTab)
+                        , onClick (GotLoginMsg (TabNavigate LoggingInTab))
                         ]
                         [ text "Log In" ]
                     ]
@@ -95,27 +95,31 @@ headersView model =
             ]
         ]
 
+foo: (String -> LoginMsg)  -> String -> Msg
+foo subMsg val  =
+  GotLoginMsg (subMsg val)
 
-createAccountView : AuthModel -> Html LoginMsg
+
+createAccountView : AuthModel -> Html Msg
 createAccountView model =
     div [ class "content" ]
         [ div [ class "form" ]
             [ div [ class "fields" ]
-                [ input [ placeholder "Username", onInput UpdateUserName, value model.userInfo.userName ]
+                [ input [ placeholder "Username", onInput (foo UpdateUserName), value model.userInfo.userName ]
                     []
-                , input [ placeholder "Password", type_ "password", onInput UpdateNewPassword, value model.userInfo.password ]
+                , input [ placeholder "Password", type_ "password", onInput (foo UpdateNewPassword), value model.userInfo.password ]
                     []
                 , div []
-                    [ input [ placeholder "Confirm Password", type_ "password", onInput UpdateNewConfirmPassword, value model.userInfo.passwordConfimation ]
+                    [ input [ placeholder "Confirm Password", type_ "password", onInput (foo UpdateNewConfirmPassword), value model.userInfo.passwordConfimation ]
                         []
                     , p [ class "error" ]
                         []
                     ]
                 ]
-            , div [ class "buttons", onClick RegisterUser ]
+            , div [ class "buttons", onClick (GotLoginMsg RegisterUser) ]
                 [ div [ class "button fullWidth" ]
                     [ text "Create My Account" ]
-                , div [ class "link", onClick (TabNavigate LoggingInTab) ]
+                , div [ class "link", onClick (GotLoginMsg (TabNavigate LoggingInTab)) ]
                     [ span []
                         [ text "I already have an account." ]
                     ]
@@ -124,7 +128,7 @@ createAccountView model =
         ]
 
 
-loginView : AuthModel -> Html LoginMsg
+loginView : AuthModel -> Html Msg
 loginView model =
     let
         buttonText = if model.loadState == Loading.Off then "Login" else "Cancel"
@@ -133,19 +137,19 @@ loginView model =
         div [ class "content" ]
             [ div [ class "form" ]
             [ div [ class "fields" ]
-                [ input [ placeholder "Username", onInput UpdateUserName, value model.userInfo.userName ]
+                [ input [ placeholder "Username", onInput (foo UpdateUserName), value model.userInfo.userName ]
                     []
                 , div []
-                    [ input [ placeholder "Password", type_ "password", onInput UpdatePassword, value model.userInfo.password ]
+                    [ input [ placeholder "Password", type_ "password", onInput (foo UpdatePassword), value model.userInfo.password ]
                         []
                     , p [ class "error" ]
                         []
                     ]
                 ]
             , div [ class "buttons" ]
-                [ div [ class "button fullWidth", onClick StartLoginOrCancel ]
+                [ div [ class "button fullWidth", onClick (GotLoginMsg StartLoginOrCancel) ]
                     [ text buttonText ]
-                , div [ class "link", onClick (TabNavigate CreateAccountTab) ]
+                , div [ class "link", onClick (GotLoginMsg (TabNavigate CreateAccountTab)) ]
                     [ span []
                         [ text "Create Account" ]
                     ]
@@ -153,7 +157,7 @@ loginView model =
             ]
         ]
 
-tabView : AuthModel -> Html LoginMsg
+tabView : AuthModel -> Html Msg
 tabView model =
     let
         vw =
@@ -182,7 +186,7 @@ tabView model =
         , div [] [ text model.loginResult.message ]
         ]
 
-signedInView : AuthModel -> Html LoginMsg
+signedInView : AuthModel -> Html Msg
 signedInView model =
     div [ class "message" ]
         [ div [ class "pill green" ]
