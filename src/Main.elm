@@ -2,6 +2,7 @@ port module Main exposing (main)
 
 import Browser
 import Html exposing (..)
+import Browser exposing (Document)
 import Html.Attributes exposing (..)
 import Html.Events exposing (onClick, onInput)
 import Json.Encode as E
@@ -47,35 +48,51 @@ initdata =
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
-    loginResult DoneLogin
-
+    Sub.none
+    --loginResult DoneLogin
+    --  showResults ShowResults
 
 
 
 -- Update
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
-   case model of
-        Shows smdl ->
-            showUpdate msg smdl |> useModel Shows
-        Auth amdl ->
-            loginUpdate msg amdl |> useModel Auth
+    case  ( msg, model ) of
+    ( GotLoginMsg subMsg, Auth amdl ) ->     
+        loginUpdate subMsg amdl |>
+            updateWith Auth GotLoginMsg model
+    ( GotShowMsg subMsg, Shows smdl ) ->     
+        showUpdate subMsg smdl |>
+            updateWith Shows GotShowMsg model
+    ( GotLoginMsg _, Shows _) ->
+        (model, Cmd.none)
+    ( GotShowMsg _, Auth _ ) ->
+        (model,Cmd.none)
 
-    
+-- For update function
+updateWith : (subModel -> Model) -> (subMsg -> Msg) -> Model -> ( subModel, Cmd subMsg ) -> ( Model, Cmd Msg )
+updateWith toModel toMsg model ( subModel, subCmd ) =
+    ( toModel subModel
+    , Cmd.map toMsg subCmd
+    )
+  
 
-useModel: (subModel -> Model) -> ( subModel, Cmd Msg ) -> ( Model, Cmd Msg )
-useModel toModel (subModel, cmd)  = 
-  ((toModel subModel), cmd)
+-- useModel: (subModel -> Model) -> ( subModel, Cmd Msg ) -> ( Model, Cmd Msg )
+-- useModel toModel (subModel, cmd)  = 
+--   ((toModel subModel), cmd)
 
-showUpdate : Msg -> ShowsModel -> ( ShowsModel, Cmd Msg )
+showUpdate : ShowMsg -> ShowsModel -> ( ShowsModel, Cmd ShowMsg )
 showUpdate msg model =
-   (model, Cmd.none)
+    case msg of
+        ShowResults  ->
+            (model, Cmd.none)
 
-loginUpdate : Msg -> AuthModel -> ( AuthModel, Cmd Msg )
+loginUpdate : LoginMsg -> AuthModel -> ( AuthModel, Cmd LoginMsg )
 loginUpdate msg model =
     case msg of
         TabNavigate tab ->
             updateTab tab model
+          
         DoneLogin data ->
             case data.isLoggedIn of
                 True ->
@@ -147,22 +164,22 @@ loginUpdate msg model =
 
 
 
- 
-
 view : Model -> Html Msg
 view model =
     let
-        vw =
-            case model of
-                Shows mdl->
-                    showsView mdl         
-                Auth mdl ->
-                    tabView mdl 
-                    
+        toView mdl =
+            case mdl of
+                Shows smdl->
+                    Html.map GotShowMsg  (showsView smdl)
+                    -- ((showsView smdl) , GotShowMsg (ShowResults smdl.showInfos))  -- GotShowMsg         
+                Auth amdl ->
+                    Html.map GotLoginMsg  (tabView amdl)
+                    -- ((tabView amdl), GotLoginMsg (DoneLogin amdl.loginResult) )  -- GotLoginMsg 
+
     in
     div [ id "root" ]
         [ div [ class "app" ]
-            [ vw ]
+            [ model |> toView    ]
         ]
 
 main =
@@ -179,5 +196,5 @@ port loginUser : UserInfo -> Cmd msg
 port logoutUser : UserInfo -> Cmd msg
 
 
--- port startLoadShows : UserInfo -> Cmd msg
---  port showResults : (List ShowInfo -> msg) -> Sub msg
+port startLoadShows : UserInfo -> Cmd msg
+port showResults : (List ShowInfo -> msg) -> Sub msg

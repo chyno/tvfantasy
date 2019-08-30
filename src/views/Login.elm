@@ -23,7 +23,7 @@ tabClassString model tab =
         "tab"
 
 
-updateTab : ActiveLoginTab -> AuthModel -> ( AuthModel, Cmd Msg )
+updateTab : ActiveLoginTab -> AuthModel -> ( AuthModel, Cmd LoginMsg )
 updateTab msg model =
     case msg of
         LoggingInTab ->
@@ -54,7 +54,7 @@ updateTab msg model =
             )
 
 
-headersView : AuthModel -> Html Msg
+headersView : AuthModel -> Html LoginMsg
 headersView model =
     div [ id "root" ]
         [ div [ class "app" ]
@@ -96,7 +96,7 @@ headersView model =
         ]
 
 
-createAccountView : AuthModel -> Html Msg
+createAccountView : AuthModel -> Html LoginMsg
 createAccountView model =
     div [ class "content" ]
         [ div [ class "form" ]
@@ -124,7 +124,7 @@ createAccountView model =
         ]
 
 
-loginView : AuthModel -> Html Msg
+loginView : AuthModel -> Html LoginMsg
 loginView model =
     let
         buttonText = if model.loadState == Loading.Off then "Login" else "Cancel"
@@ -153,7 +153,7 @@ loginView model =
             ]
         ]
 
-tabView : AuthModel -> Html Msg
+tabView : AuthModel -> Html LoginMsg
 tabView model =
     let
         vw =
@@ -182,7 +182,7 @@ tabView model =
         , div [] [ text model.loginResult.message ]
         ]
 
-signedInView : AuthModel -> Html Msg
+signedInView : AuthModel -> Html LoginMsg
 signedInView model =
     div [ class "message" ]
         [ div [ class "pill green" ]

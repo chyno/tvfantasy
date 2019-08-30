@@ -4839,35 +4839,10 @@ var author$project$Main$init = function (flag) {
 	var root = author$project$Main$Auth(author$project$Main$initdata);
 	return _Utils_Tuple2(root, elm$core$Platform$Cmd$none);
 };
-var elm$json$Json$Decode$andThen = _Json_andThen;
-var elm$json$Json$Decode$bool = _Json_decodeBool;
-var elm$json$Json$Decode$field = _Json_decodeField;
-var elm$json$Json$Decode$string = _Json_decodeString;
-var elm$json$Json$Decode$succeed = _Json_succeed;
-var author$project$Main$loginResult = _Platform_incomingPort(
-	'loginResult',
-	A2(
-		elm$json$Json$Decode$andThen,
-		function (message) {
-			return A2(
-				elm$json$Json$Decode$andThen,
-				function (isLoggedIn) {
-					return A2(
-						elm$json$Json$Decode$andThen,
-						function (address) {
-							return elm$json$Json$Decode$succeed(
-								{address: address, isLoggedIn: isLoggedIn, message: message});
-						},
-						A2(elm$json$Json$Decode$field, 'address', elm$json$Json$Decode$string));
-				},
-				A2(elm$json$Json$Decode$field, 'isLoggedIn', elm$json$Json$Decode$bool));
-		},
-		A2(elm$json$Json$Decode$field, 'message', elm$json$Json$Decode$string)));
-var author$project$Model$DoneLogin = function (a) {
-	return {$: 'DoneLogin', a: a};
-};
+var elm$core$Platform$Sub$batch = _Platform_batch;
+var elm$core$Platform$Sub$none = elm$core$Platform$Sub$batch(_List_Nil);
 var author$project$Main$subscriptions = function (model) {
-	return author$project$Main$loginResult(author$project$Model$DoneLogin);
+	return elm$core$Platform$Sub$none;
 };
 var author$project$Main$Shows = function (a) {
 	return {$: 'Shows', a: a};
@@ -5066,28 +5041,50 @@ var author$project$Main$showUpdate = F2(
 	function (msg, model) {
 		return _Utils_Tuple2(model, elm$core$Platform$Cmd$none);
 	});
-var author$project$Main$useModel = F2(
-	function (toModel, _n0) {
+var elm$core$Platform$Cmd$map = _Platform_map;
+var author$project$Main$updateWith = F4(
+	function (toModel, toMsg, model, _n0) {
 		var subModel = _n0.a;
-		var cmd = _n0.b;
+		var subCmd = _n0.b;
 		return _Utils_Tuple2(
 			toModel(subModel),
-			cmd);
+			A2(elm$core$Platform$Cmd$map, toMsg, subCmd));
 	});
+var author$project$Model$GotLoginMsg = function (a) {
+	return {$: 'GotLoginMsg', a: a};
+};
+var author$project$Model$GotShowMsg = function (a) {
+	return {$: 'GotShowMsg', a: a};
+};
 var author$project$Main$update = F2(
 	function (msg, model) {
-		if (model.$ === 'Shows') {
-			var smdl = model.a;
-			return A2(
-				author$project$Main$useModel,
-				author$project$Main$Shows,
-				A2(author$project$Main$showUpdate, msg, smdl));
+		var _n0 = _Utils_Tuple2(msg, model);
+		if (_n0.a.$ === 'GotLoginMsg') {
+			if (_n0.b.$ === 'Auth') {
+				var subMsg = _n0.a.a;
+				var amdl = _n0.b.a;
+				return A4(
+					author$project$Main$updateWith,
+					author$project$Main$Auth,
+					author$project$Model$GotLoginMsg,
+					model,
+					A2(author$project$Main$loginUpdate, subMsg, amdl));
+			} else {
+				return _Utils_Tuple2(model, elm$core$Platform$Cmd$none);
+			}
 		} else {
-			var amdl = model.a;
-			return A2(
-				author$project$Main$useModel,
-				author$project$Main$Auth,
-				A2(author$project$Main$loginUpdate, msg, amdl));
+			if (_n0.b.$ === 'Shows') {
+				var subMsg = _n0.a.a;
+				var smdl = _n0.b.a;
+				return A4(
+					author$project$Main$updateWith,
+					author$project$Main$Shows,
+					author$project$Model$GotShowMsg,
+					model,
+					A2(author$project$Main$showUpdate, subMsg, smdl));
+			} else {
+				return _Utils_Tuple2(model, elm$core$Platform$Cmd$none);
+			}
 		}
 	});
 var author$project$Model$RegisterUser = {$: 'RegisterUser'};
@@ -5108,6 +5105,7 @@ var elm$core$Basics$identity = function (x) {
 };
 var elm$json$Json$Decode$map = _Json_map1;
 var elm$json$Json$Decode$map2 = _Json_map2;
+var elm$json$Json$Decode$succeed = _Json_succeed;
 var elm$virtual_dom$VirtualDom$toHandlerInt = function (handler) {
 	switch (handler.$) {
 		case 'Normal':
@@ -5222,10 +5220,12 @@ var elm$core$List$foldr = F3(
 	function (fn, acc, ls) {
 		return A4(elm$core$List$foldrHelper, fn, acc, 0, ls);
 	});
+var elm$json$Json$Decode$field = _Json_decodeField;
 var elm$json$Json$Decode$at = F2(
 	function (fields, decoder) {
 		return A3(elm$core$List$foldr, elm$json$Json$Decode$field, decoder, fields);
 	});
+var elm$json$Json$Decode$string = _Json_decodeString;
 var elm$html$Html$Events$targetValue = A2(
 	elm$json$Json$Decode$at,
 	_List_fromArray(
@@ -9481,7 +9481,6 @@ var author$project$Login$tabView = function (model) {
 					]))
 			]));
 };
-var author$project$Model$Logout = {$: 'Logout'};
 var elm$html$Html$table = _VirtualDom_node('table');
 var elm$html$Html$td = _VirtualDom_node('td');
 var elm$html$Html$th = _VirtualDom_node('th');
@@ -9597,8 +9596,7 @@ var author$project$Show$showsView = function (model) {
 				elm$html$Html$div,
 				_List_fromArray(
 					[
-						elm$html$Html$Attributes$class('button'),
-						elm$html$Html$Events$onClick(author$project$Model$Logout)
+						elm$html$Html$Attributes$class('button')
 					]),
 				_List_fromArray(
 					[
@@ -9606,16 +9604,24 @@ var author$project$Show$showsView = function (model) {
 					]))
 			]));
 };
+var elm$virtual_dom$VirtualDom$map = _VirtualDom_map;
+var elm$html$Html$map = elm$virtual_dom$VirtualDom$map;
 var author$project$Main$view = function (model) {
-	var vw = function () {
-		if (model.$ === 'Shows') {
-			var mdl = model.a;
-			return author$project$Show$showsView(mdl);
+	var toView = function (mdl) {
+		if (mdl.$ === 'Shows') {
+			var smdl = mdl.a;
+			return A2(
+				elm$html$Html$map,
+				author$project$Model$GotShowMsg,
+				author$project$Show$showsView(smdl));
 		} else {
-			var mdl = model.a;
-			return author$project$Login$tabView(mdl);
+			var amdl = mdl.a;
+			return A2(
+				elm$html$Html$map,
+				author$project$Model$GotLoginMsg,
+				author$project$Login$tabView(amdl));
 		}
-	}();
+	};
 	return A2(
 		elm$html$Html$div,
 		_List_fromArray(
@@ -9631,7 +9637,9 @@ var author$project$Main$view = function (model) {
 						elm$html$Html$Attributes$class('app')
 					]),
 				_List_fromArray(
-					[vw]))
+					[
+						toView(model)
+					]))
 			]));
 };
 var elm$browser$Browser$External = function (a) {
