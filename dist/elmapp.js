@@ -5087,11 +5087,14 @@ var author$project$Main$update = F2(
 			}
 		}
 	});
-var author$project$Login$foo = F2(
+var author$project$Login$toInputMsg = F2(
 	function (subMsg, val) {
 		return author$project$Model$GotLoginMsg(
 			subMsg(val));
 	});
+var author$project$Login$toMsg = function (subMsg) {
+	return author$project$Model$GotLoginMsg(subMsg);
+};
 var author$project$Model$RegisterUser = {$: 'RegisterUser'};
 var author$project$Model$TabNavigate = function (a) {
 	return {$: 'TabNavigate', a: a};
@@ -5276,7 +5279,7 @@ var author$project$Login$createAccountView = function (model) {
 									[
 										elm$html$Html$Attributes$placeholder('Username'),
 										elm$html$Html$Events$onInput(
-										author$project$Login$foo(author$project$Model$UpdateUserName)),
+										author$project$Login$toInputMsg(author$project$Model$UpdateUserName)),
 										elm$html$Html$Attributes$value(model.userInfo.userName)
 									]),
 								_List_Nil),
@@ -5287,7 +5290,7 @@ var author$project$Login$createAccountView = function (model) {
 										elm$html$Html$Attributes$placeholder('Password'),
 										elm$html$Html$Attributes$type_('password'),
 										elm$html$Html$Events$onInput(
-										author$project$Login$foo(author$project$Model$UpdateNewPassword)),
+										author$project$Login$toInputMsg(author$project$Model$UpdateNewPassword)),
 										elm$html$Html$Attributes$value(model.userInfo.password)
 									]),
 								_List_Nil),
@@ -5303,7 +5306,7 @@ var author$project$Login$createAccountView = function (model) {
 												elm$html$Html$Attributes$placeholder('Confirm Password'),
 												elm$html$Html$Attributes$type_('password'),
 												elm$html$Html$Events$onInput(
-												author$project$Login$foo(author$project$Model$UpdateNewConfirmPassword)),
+												author$project$Login$toInputMsg(author$project$Model$UpdateNewConfirmPassword)),
 												elm$html$Html$Attributes$value(model.userInfo.passwordConfimation)
 											]),
 										_List_Nil),
@@ -5322,7 +5325,7 @@ var author$project$Login$createAccountView = function (model) {
 							[
 								elm$html$Html$Attributes$class('buttons'),
 								elm$html$Html$Events$onClick(
-								author$project$Model$GotLoginMsg(author$project$Model$RegisterUser))
+								author$project$Login$toMsg(author$project$Model$RegisterUser))
 							]),
 						_List_fromArray(
 							[
@@ -5342,7 +5345,7 @@ var author$project$Login$createAccountView = function (model) {
 									[
 										elm$html$Html$Attributes$class('link'),
 										elm$html$Html$Events$onClick(
-										author$project$Model$GotLoginMsg(
+										author$project$Login$toMsg(
 											author$project$Model$TabNavigate(author$project$Model$LoggingInTab)))
 									]),
 								_List_fromArray(
@@ -5395,7 +5398,7 @@ var author$project$Login$loginView = function (model) {
 									[
 										elm$html$Html$Attributes$placeholder('Username'),
 										elm$html$Html$Events$onInput(
-										author$project$Login$foo(author$project$Model$UpdateUserName)),
+										author$project$Login$toInputMsg(author$project$Model$UpdateUserName)),
 										elm$html$Html$Attributes$value(model.userInfo.userName)
 									]),
 								_List_Nil),
@@ -5411,7 +5414,7 @@ var author$project$Login$loginView = function (model) {
 												elm$html$Html$Attributes$placeholder('Password'),
 												elm$html$Html$Attributes$type_('password'),
 												elm$html$Html$Events$onInput(
-												author$project$Login$foo(author$project$Model$UpdatePassword)),
+												author$project$Login$toInputMsg(author$project$Model$UpdatePassword)),
 												elm$html$Html$Attributes$value(model.userInfo.password)
 											]),
 										_List_Nil),
@@ -5438,7 +5441,7 @@ var author$project$Login$loginView = function (model) {
 									[
 										elm$html$Html$Attributes$class('button fullWidth'),
 										elm$html$Html$Events$onClick(
-										author$project$Model$GotLoginMsg(author$project$Model$StartLoginOrCancel))
+										author$project$Login$toMsg(author$project$Model$StartLoginOrCancel))
 									]),
 								_List_fromArray(
 									[
@@ -5450,7 +5453,7 @@ var author$project$Login$loginView = function (model) {
 									[
 										elm$html$Html$Attributes$class('link'),
 										elm$html$Html$Events$onClick(
-										author$project$Model$GotLoginMsg(
+										author$project$Login$toMsg(
 											author$project$Model$TabNavigate(author$project$Model$CreateAccountTab)))
 									]),
 								_List_fromArray(
@@ -5513,7 +5516,7 @@ var author$project$Login$headersView = function (model) {
 												elm$html$Html$Attributes$class(
 												A2(author$project$Login$tabClassString, model, author$project$Model$CreateAccountTab)),
 												elm$html$Html$Events$onClick(
-												author$project$Model$GotLoginMsg(
+												author$project$Login$toMsg(
 													author$project$Model$TabNavigate(author$project$Model$CreateAccountTab)))
 											]),
 										_List_fromArray(
@@ -5527,7 +5530,7 @@ var author$project$Login$headersView = function (model) {
 												elm$html$Html$Attributes$class(
 												A2(author$project$Login$tabClassString, model, author$project$Model$LoggingInTab)),
 												elm$html$Html$Events$onClick(
-												author$project$Model$GotLoginMsg(
+												author$project$Login$toMsg(
 													author$project$Model$TabNavigate(author$project$Model$LoggingInTab)))
 											]),
 										_List_fromArray(
