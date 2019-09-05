@@ -318,8 +318,8 @@ input::placeholder {
   align-items: center;
   justify-content: center;
   text-align: center;
-
-  max-width: 588px;
+  max-width: 960px;
+  /* max-width: 588px; */
 }
 
 p.address {

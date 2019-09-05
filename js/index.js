@@ -61,8 +61,12 @@ app.ports.registerUser.subscribe(function(data) {
 });
 
 app.ports.startLoadShows.subscribe(function(data) {
-  const tvShows = getFakeTvShows();
-  app.ports.showApiResults.send(tvShows);
+ // const tvShows = getFakeTvShows();
+ // app.ports.showApiResults.send(tvShows);
+ getLatestTvsShow().then(showData => {
+  app.ports.showApiResults.send(showData);
+ });
+  
 });
 
 // Local Functions
@@ -122,3 +126,4 @@ function getFakeTvShows()  {
    ];
 
 }
+
