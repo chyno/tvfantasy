@@ -6,6 +6,8 @@ let app = Elm.Main.init({
 });
 
 
+
+// Subscriptions 
 app.ports.loginUser.subscribe(function(data) {
   // For testing
   console.log("... User logging in");
@@ -58,6 +60,12 @@ app.ports.registerUser.subscribe(function(data) {
     );
 });
 
+app.ports.startLoadShows.subscribe(function(data) {
+  const tvShows = getFakeTvShows();
+  app.ports.showApiResults.send(tvShows);
+});
+
+// Local Functions
 function isLoggedIn() {
   if (hedgehog.isLoggedIn()) {
     return true;
@@ -84,8 +92,8 @@ function appLoginSendResults(data) {
        app.ports.loginResult.send({
          address: hedgehog.getWallet().getAddressString(),
          isLoggedIn: isLoggedIn(),
-         message: "Success",
-         showInfos: [] //showData
+         message: "Success"
+          
        });
      });
    },
@@ -93,10 +101,24 @@ function appLoginSendResults(data) {
      app.ports.loginResult.send({
        address: "",
        isLoggedIn: false,
-       message: "Invalid Username or password",
-       showInfos: []
+       message: "Invalid Username or password" 
      });
    }
  );
+
+}
+// showApiResults
+function getFakeTvShows()  {
+   return [
+     {
+       
+        name: "Friends",
+        country: "US",
+        overview: "Lame show",
+        firstAirDate: "01912002",
+        voteAverage: 2
+        
+     }
+   ];
 
 }

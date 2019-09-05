@@ -57,6 +57,8 @@ type Msg
     | StartLoginOrCancel
     | Logout
     | RegisterUser
-    | ShowResults
+    | StartViewShows 
+    | InitShows 
+    | ShowResults (List ShowInfo)
     
    

@@ -32,6 +32,9 @@ type Model
     = Auth AuthModel
     | Shows ShowsModel
 
+initShowsData : ShowsModel
+initShowsData = { showInfos = []}
+
 initdata : AuthModel
 initdata =
     { loginResult =
@@ -52,8 +55,11 @@ initdata =
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
-    loginResult DoneLogin 
-    --  showResults ShowResults
+    Sub.batch [
+        loginResult DoneLogin,
+        showApiResults ShowResults 
+    ]
+    --  
 
 
 
@@ -61,13 +67,14 @@ subscriptions model =
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case  model  of
-        Auth amdl  ->     
+        Auth amdl  ->
             loginUpdate msg amdl |> 
-                updateWith Auth    
+                    updateWith Auth    
         Shows smdl  -> 
             showUpdate msg smdl |>
-                updateWith Shows  
-
+                updateWith Shows 
+        
+                        
 updateWith : (subModel -> Model)   -> ( subModel, Cmd Msg ) -> ( Model, Cmd Msg )
 updateWith toModel   ( subModel, cmd ) =
     ( toModel subModel
@@ -80,10 +87,12 @@ updateWith toModel   ( subModel, cmd ) =
 showUpdate : Msg -> ShowsModel -> ( ShowsModel, Cmd Msg )
 showUpdate msg model =
     case msg of
-        ShowResults  ->
+        ShowResults shws ->
+           ( { model | showInfos = shws }, Cmd.none)
+        StartViewShows  -> 
+            (initShowsData , startLoadShows "usrInfo")     
+        _ ->  
             (model, Cmd.none)
-        _ ->
-           (model, Cmd.none)
 
         
 -- (a -> msg) -> Cmd a -> Cmd msg
@@ -100,44 +109,44 @@ loginUpdate msg model =
                         , activeTab = LoggedInTab
                         , loadState = Loading.Off
                       }
-                    , Cmd.none
-                    )
+                    , startLoadShows "model.userInfo"
+                    )  
 
                 False ->
                     ( { model
                         | loginResult = data
                         , loadState = Loading.Off
                       }
-                    , Cmd.none
-                    )
+                    , startLoadShows "should be command none"
+                    ) 
 
         UpdateNewConfirmPassword pswd ->
             let
                 li =
                     model.userInfo
             in
-            ( { model | userInfo = { li | passwordConfimation = pswd } }, Cmd.none )
+            ( { model | userInfo = { li | passwordConfimation = pswd } }, Cmd.none ) 
 
         UpdatePassword pswd ->
             let
                 li =
                     model.userInfo
             in
-            ( { model | userInfo = { li | password = pswd } }, Cmd.none )
+            ( { model | userInfo = { li | password = pswd } }, Cmd.none ) 
 
         UpdateNewPassword pswd ->
             let
                 li =
                     model.userInfo
             in
-            ( { model | userInfo = { li | password = pswd } }, Cmd.none )
+            ( { model | userInfo = { li | password = pswd } }, Cmd.none ) 
 
         UpdateUserName usrname ->
             let
                 li =
                     model.userInfo
             in
-            ( { model | userInfo = { li | userName = usrname } }, Cmd.none )
+            ( { model | userInfo = { li | userName = usrname } }, Cmd.none ) 
 
         StartLoginOrCancel ->
           if model.loadState == Loading.Off then 
@@ -156,12 +165,12 @@ loginUpdate msg model =
               ({ model | loadState = Loading.Off } , Cmd.none )  
 
         Logout ->
-            ( initdata, logoutUser model.userInfo )
+            ( initdata, logoutUser model.userInfo ) 
 
         RegisterUser ->
-            ( model, registerUser model.userInfo )
+            ( model, registerUser model.userInfo )         
         _ ->
-           (model, Cmd.none)
+           (model, Cmd.none)  
 
 view : Model -> Html Msg
 view model =
@@ -188,12 +197,11 @@ main =
         }
 
 -- Outgoing ports
-port loginResult : (LoginResultInfo -> msg) -> Sub msg
 port registerUser : UserInfo -> Cmd msg
 port loginUser : UserInfo -> Cmd msg
 port logoutUser : UserInfo -> Cmd msg
--- port startLoadShows : UserInfo -> Cmd msg
+port startLoadShows : String -> Cmd msg
 
 -- Incoming Ports
-
--- port showResults : (List ShowInfo -> msg) -> Sub msg
+port loginResult : (LoginResultInfo -> msg) -> Sub msg
+port showApiResults : ((List ShowInfo) -> msg) -> Sub msg

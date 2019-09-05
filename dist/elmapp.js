@@ -4863,11 +4863,52 @@ var author$project$Main$loginResult = _Platform_incomingPort(
 				A2(elm$json$Json$Decode$field, 'isLoggedIn', elm$json$Json$Decode$bool));
 		},
 		A2(elm$json$Json$Decode$field, 'message', elm$json$Json$Decode$string)));
+var elm$json$Json$Decode$float = _Json_decodeFloat;
+var elm$json$Json$Decode$list = _Json_decodeList;
+var author$project$Main$showApiResults = _Platform_incomingPort(
+	'showApiResults',
+	elm$json$Json$Decode$list(
+		A2(
+			elm$json$Json$Decode$andThen,
+			function (voteAverage) {
+				return A2(
+					elm$json$Json$Decode$andThen,
+					function (overview) {
+						return A2(
+							elm$json$Json$Decode$andThen,
+							function (name) {
+								return A2(
+									elm$json$Json$Decode$andThen,
+									function (firstAirDate) {
+										return A2(
+											elm$json$Json$Decode$andThen,
+											function (country) {
+												return elm$json$Json$Decode$succeed(
+													{country: country, firstAirDate: firstAirDate, name: name, overview: overview, voteAverage: voteAverage});
+											},
+											A2(elm$json$Json$Decode$field, 'country', elm$json$Json$Decode$string));
+									},
+									A2(elm$json$Json$Decode$field, 'firstAirDate', elm$json$Json$Decode$string));
+							},
+							A2(elm$json$Json$Decode$field, 'name', elm$json$Json$Decode$string));
+					},
+					A2(elm$json$Json$Decode$field, 'overview', elm$json$Json$Decode$string));
+			},
+			A2(elm$json$Json$Decode$field, 'voteAverage', elm$json$Json$Decode$float))));
 var author$project$Model$DoneLogin = function (a) {
 	return {$: 'DoneLogin', a: a};
 };
+var author$project$Model$ShowResults = function (a) {
+	return {$: 'ShowResults', a: a};
+};
+var elm$core$Platform$Sub$batch = _Platform_batch;
 var author$project$Main$subscriptions = function (model) {
-	return author$project$Main$loginResult(author$project$Model$DoneLogin);
+	return elm$core$Platform$Sub$batch(
+		_List_fromArray(
+			[
+				author$project$Main$loginResult(author$project$Model$DoneLogin),
+				author$project$Main$showApiResults(author$project$Model$ShowResults)
+			]));
 };
 var author$project$Main$Shows = function (a) {
 	return {$: 'Shows', a: a};
@@ -4968,6 +5009,7 @@ var author$project$Main$registerUser = _Platform_outgoingPort(
 					elm$json$Json$Encode$string($.userName))
 				]));
 	});
+var author$project$Main$startLoadShows = _Platform_outgoingPort('startLoadShows', elm$json$Json$Encode$string);
 var perzanko$elm_loading$Loading$On = {$: 'On'};
 var author$project$Main$loginUpdate = F2(
 	function (msg, model) {
@@ -4983,13 +5025,13 @@ var author$project$Main$loginUpdate = F2(
 						_Utils_update(
 							model,
 							{activeTab: author$project$Model$LoggedInTab, loadState: perzanko$elm_loading$Loading$Off, loginResult: data}),
-						elm$core$Platform$Cmd$none);
+						author$project$Main$startLoadShows('model.userInfo'));
 				} else {
 					return _Utils_Tuple2(
 						_Utils_update(
 							model,
 							{loadState: perzanko$elm_loading$Loading$Off, loginResult: data}),
-						elm$core$Platform$Cmd$none);
+						author$project$Main$startLoadShows('should be command none'));
 				}
 			case 'UpdateNewConfirmPassword':
 				var pswd = msg.a;
@@ -5064,12 +5106,23 @@ var author$project$Main$loginUpdate = F2(
 				return _Utils_Tuple2(model, elm$core$Platform$Cmd$none);
 		}
 	});
+var author$project$Main$initShowsData = {showInfos: _List_Nil};
 var author$project$Main$showUpdate = F2(
 	function (msg, model) {
-		if (msg.$ === 'ShowResults') {
-			return _Utils_Tuple2(model, elm$core$Platform$Cmd$none);
-		} else {
-			return _Utils_Tuple2(model, elm$core$Platform$Cmd$none);
+		switch (msg.$) {
+			case 'ShowResults':
+				var shws = msg.a;
+				return _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{showInfos: shws}),
+					elm$core$Platform$Cmd$none);
+			case 'StartViewShows':
+				return _Utils_Tuple2(
+					author$project$Main$initShowsData,
+					author$project$Main$startLoadShows('usrInfo'));
+			default:
+				return _Utils_Tuple2(model, elm$core$Platform$Cmd$none);
 		}
 	});
 var author$project$Main$updateWith = F2(
