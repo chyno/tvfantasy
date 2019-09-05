@@ -29,7 +29,7 @@ showsView model =
             , th[][text "First Aired"]
             , th[][text "Vote Average"]
           ]:: (List.map showDetails model.showInfos))
-      , div [ class "button", onClick (GotLoginMsg Logout) ] [ text "Log Out" ]
+      , div [ class "button", onClick  Logout ] [ text "Log Out" ]
     ]
 
 -- , onClick StartLogout

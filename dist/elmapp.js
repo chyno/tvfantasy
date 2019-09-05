@@ -4839,10 +4839,35 @@ var author$project$Main$init = function (flag) {
 	var root = author$project$Main$Auth(author$project$Main$initdata);
 	return _Utils_Tuple2(root, elm$core$Platform$Cmd$none);
 };
-var elm$core$Platform$Sub$batch = _Platform_batch;
-var elm$core$Platform$Sub$none = elm$core$Platform$Sub$batch(_List_Nil);
+var elm$json$Json$Decode$andThen = _Json_andThen;
+var elm$json$Json$Decode$bool = _Json_decodeBool;
+var elm$json$Json$Decode$field = _Json_decodeField;
+var elm$json$Json$Decode$string = _Json_decodeString;
+var elm$json$Json$Decode$succeed = _Json_succeed;
+var author$project$Main$loginResult = _Platform_incomingPort(
+	'loginResult',
+	A2(
+		elm$json$Json$Decode$andThen,
+		function (message) {
+			return A2(
+				elm$json$Json$Decode$andThen,
+				function (isLoggedIn) {
+					return A2(
+						elm$json$Json$Decode$andThen,
+						function (address) {
+							return elm$json$Json$Decode$succeed(
+								{address: address, isLoggedIn: isLoggedIn, message: message});
+						},
+						A2(elm$json$Json$Decode$field, 'address', elm$json$Json$Decode$string));
+				},
+				A2(elm$json$Json$Decode$field, 'isLoggedIn', elm$json$Json$Decode$bool));
+		},
+		A2(elm$json$Json$Decode$field, 'message', elm$json$Json$Decode$string)));
+var author$project$Model$DoneLogin = function (a) {
+	return {$: 'DoneLogin', a: a};
+};
 var author$project$Main$subscriptions = function (model) {
-	return elm$core$Platform$Sub$none;
+	return author$project$Main$loginResult(author$project$Model$DoneLogin);
 };
 var author$project$Main$Shows = function (a) {
 	return {$: 'Shows', a: a};
@@ -5031,70 +5056,46 @@ var author$project$Main$loginUpdate = F2(
 				return _Utils_Tuple2(
 					author$project$Main$initdata,
 					author$project$Main$logoutUser(model.userInfo));
-			default:
+			case 'RegisterUser':
 				return _Utils_Tuple2(
 					model,
 					author$project$Main$registerUser(model.userInfo));
+			default:
+				return _Utils_Tuple2(model, elm$core$Platform$Cmd$none);
 		}
 	});
 var author$project$Main$showUpdate = F2(
 	function (msg, model) {
-		return _Utils_Tuple2(model, elm$core$Platform$Cmd$none);
-	});
-var elm$core$Platform$Cmd$map = _Platform_map;
-var author$project$Main$updateWith = F4(
-	function (toModel, toMsg, model, _n0) {
-		var subModel = _n0.a;
-		var subCmd = _n0.b;
-		return _Utils_Tuple2(
-			toModel(subModel),
-			A2(elm$core$Platform$Cmd$map, toMsg, subCmd));
-	});
-var author$project$Model$GotLoginMsg = function (a) {
-	return {$: 'GotLoginMsg', a: a};
-};
-var author$project$Model$GotShowMsg = function (a) {
-	return {$: 'GotShowMsg', a: a};
-};
-var author$project$Main$update = F2(
-	function (msg, model) {
-		var _n0 = _Utils_Tuple2(msg, model);
-		if (_n0.a.$ === 'GotLoginMsg') {
-			if (_n0.b.$ === 'Auth') {
-				var subMsg = _n0.a.a;
-				var amdl = _n0.b.a;
-				return A4(
-					author$project$Main$updateWith,
-					author$project$Main$Auth,
-					author$project$Model$GotLoginMsg,
-					model,
-					A2(author$project$Main$loginUpdate, subMsg, amdl));
-			} else {
-				return _Utils_Tuple2(model, elm$core$Platform$Cmd$none);
-			}
+		if (msg.$ === 'ShowResults') {
+			return _Utils_Tuple2(model, elm$core$Platform$Cmd$none);
 		} else {
-			if (_n0.b.$ === 'Shows') {
-				var subMsg = _n0.a.a;
-				var smdl = _n0.b.a;
-				return A4(
-					author$project$Main$updateWith,
-					author$project$Main$Shows,
-					author$project$Model$GotShowMsg,
-					model,
-					A2(author$project$Main$showUpdate, subMsg, smdl));
-			} else {
-				return _Utils_Tuple2(model, elm$core$Platform$Cmd$none);
-			}
+			return _Utils_Tuple2(model, elm$core$Platform$Cmd$none);
 		}
 	});
-var author$project$Login$toInputMsg = F2(
-	function (subMsg, val) {
-		return author$project$Model$GotLoginMsg(
-			subMsg(val));
+var author$project$Main$updateWith = F2(
+	function (toModel, _n0) {
+		var subModel = _n0.a;
+		var cmd = _n0.b;
+		return _Utils_Tuple2(
+			toModel(subModel),
+			cmd);
 	});
-var author$project$Login$toMsg = function (subMsg) {
-	return author$project$Model$GotLoginMsg(subMsg);
-};
+var author$project$Main$update = F2(
+	function (msg, model) {
+		if (model.$ === 'Auth') {
+			var amdl = model.a;
+			return A2(
+				author$project$Main$updateWith,
+				author$project$Main$Auth,
+				A2(author$project$Main$loginUpdate, msg, amdl));
+		} else {
+			var smdl = model.a;
+			return A2(
+				author$project$Main$updateWith,
+				author$project$Main$Shows,
+				A2(author$project$Main$showUpdate, msg, smdl));
+		}
+	});
 var author$project$Model$RegisterUser = {$: 'RegisterUser'};
 var author$project$Model$TabNavigate = function (a) {
 	return {$: 'TabNavigate', a: a};
@@ -5113,7 +5114,6 @@ var elm$core$Basics$identity = function (x) {
 };
 var elm$json$Json$Decode$map = _Json_map1;
 var elm$json$Json$Decode$map2 = _Json_map2;
-var elm$json$Json$Decode$succeed = _Json_succeed;
 var elm$virtual_dom$VirtualDom$toHandlerInt = function (handler) {
 	switch (handler.$) {
 		case 'Normal':
@@ -5228,12 +5228,10 @@ var elm$core$List$foldr = F3(
 	function (fn, acc, ls) {
 		return A4(elm$core$List$foldrHelper, fn, acc, 0, ls);
 	});
-var elm$json$Json$Decode$field = _Json_decodeField;
 var elm$json$Json$Decode$at = F2(
 	function (fields, decoder) {
 		return A3(elm$core$List$foldr, elm$json$Json$Decode$field, decoder, fields);
 	});
-var elm$json$Json$Decode$string = _Json_decodeString;
 var elm$html$Html$Events$targetValue = A2(
 	elm$json$Json$Decode$at,
 	_List_fromArray(
@@ -5278,8 +5276,7 @@ var author$project$Login$createAccountView = function (model) {
 								_List_fromArray(
 									[
 										elm$html$Html$Attributes$placeholder('Username'),
-										elm$html$Html$Events$onInput(
-										author$project$Login$toInputMsg(author$project$Model$UpdateUserName)),
+										elm$html$Html$Events$onInput(author$project$Model$UpdateUserName),
 										elm$html$Html$Attributes$value(model.userInfo.userName)
 									]),
 								_List_Nil),
@@ -5289,8 +5286,7 @@ var author$project$Login$createAccountView = function (model) {
 									[
 										elm$html$Html$Attributes$placeholder('Password'),
 										elm$html$Html$Attributes$type_('password'),
-										elm$html$Html$Events$onInput(
-										author$project$Login$toInputMsg(author$project$Model$UpdateNewPassword)),
+										elm$html$Html$Events$onInput(author$project$Model$UpdateNewPassword),
 										elm$html$Html$Attributes$value(model.userInfo.password)
 									]),
 								_List_Nil),
@@ -5305,8 +5301,7 @@ var author$project$Login$createAccountView = function (model) {
 											[
 												elm$html$Html$Attributes$placeholder('Confirm Password'),
 												elm$html$Html$Attributes$type_('password'),
-												elm$html$Html$Events$onInput(
-												author$project$Login$toInputMsg(author$project$Model$UpdateNewConfirmPassword)),
+												elm$html$Html$Events$onInput(author$project$Model$UpdateNewConfirmPassword),
 												elm$html$Html$Attributes$value(model.userInfo.passwordConfimation)
 											]),
 										_List_Nil),
@@ -5324,8 +5319,7 @@ var author$project$Login$createAccountView = function (model) {
 						_List_fromArray(
 							[
 								elm$html$Html$Attributes$class('buttons'),
-								elm$html$Html$Events$onClick(
-								author$project$Login$toMsg(author$project$Model$RegisterUser))
+								elm$html$Html$Events$onClick(author$project$Model$RegisterUser)
 							]),
 						_List_fromArray(
 							[
@@ -5345,8 +5339,7 @@ var author$project$Login$createAccountView = function (model) {
 									[
 										elm$html$Html$Attributes$class('link'),
 										elm$html$Html$Events$onClick(
-										author$project$Login$toMsg(
-											author$project$Model$TabNavigate(author$project$Model$LoggingInTab)))
+										author$project$Model$TabNavigate(author$project$Model$LoggingInTab))
 									]),
 								_List_fromArray(
 									[
@@ -5397,8 +5390,7 @@ var author$project$Login$loginView = function (model) {
 								_List_fromArray(
 									[
 										elm$html$Html$Attributes$placeholder('Username'),
-										elm$html$Html$Events$onInput(
-										author$project$Login$toInputMsg(author$project$Model$UpdateUserName)),
+										elm$html$Html$Events$onInput(author$project$Model$UpdateUserName),
 										elm$html$Html$Attributes$value(model.userInfo.userName)
 									]),
 								_List_Nil),
@@ -5413,8 +5405,7 @@ var author$project$Login$loginView = function (model) {
 											[
 												elm$html$Html$Attributes$placeholder('Password'),
 												elm$html$Html$Attributes$type_('password'),
-												elm$html$Html$Events$onInput(
-												author$project$Login$toInputMsg(author$project$Model$UpdatePassword)),
+												elm$html$Html$Events$onInput(author$project$Model$UpdatePassword),
 												elm$html$Html$Attributes$value(model.userInfo.password)
 											]),
 										_List_Nil),
@@ -5440,8 +5431,7 @@ var author$project$Login$loginView = function (model) {
 								_List_fromArray(
 									[
 										elm$html$Html$Attributes$class('button fullWidth'),
-										elm$html$Html$Events$onClick(
-										author$project$Login$toMsg(author$project$Model$StartLoginOrCancel))
+										elm$html$Html$Events$onClick(author$project$Model$StartLoginOrCancel)
 									]),
 								_List_fromArray(
 									[
@@ -5453,8 +5443,7 @@ var author$project$Login$loginView = function (model) {
 									[
 										elm$html$Html$Attributes$class('link'),
 										elm$html$Html$Events$onClick(
-										author$project$Login$toMsg(
-											author$project$Model$TabNavigate(author$project$Model$CreateAccountTab)))
+										author$project$Model$TabNavigate(author$project$Model$CreateAccountTab))
 									]),
 								_List_fromArray(
 									[
@@ -5516,8 +5505,7 @@ var author$project$Login$headersView = function (model) {
 												elm$html$Html$Attributes$class(
 												A2(author$project$Login$tabClassString, model, author$project$Model$CreateAccountTab)),
 												elm$html$Html$Events$onClick(
-												author$project$Login$toMsg(
-													author$project$Model$TabNavigate(author$project$Model$CreateAccountTab)))
+												author$project$Model$TabNavigate(author$project$Model$CreateAccountTab))
 											]),
 										_List_fromArray(
 											[
@@ -5530,8 +5518,7 @@ var author$project$Login$headersView = function (model) {
 												elm$html$Html$Attributes$class(
 												A2(author$project$Login$tabClassString, model, author$project$Model$LoggingInTab)),
 												elm$html$Html$Events$onClick(
-												author$project$Login$toMsg(
-													author$project$Model$TabNavigate(author$project$Model$LoggingInTab)))
+												author$project$Model$TabNavigate(author$project$Model$LoggingInTab))
 											]),
 										_List_fromArray(
 											[
@@ -9617,8 +9604,7 @@ var author$project$Show$showsView = function (model) {
 				_List_fromArray(
 					[
 						elm$html$Html$Attributes$class('button'),
-						elm$html$Html$Events$onClick(
-						author$project$Model$GotLoginMsg(author$project$Model$Logout))
+						elm$html$Html$Events$onClick(author$project$Model$Logout)
 					]),
 				_List_fromArray(
 					[
