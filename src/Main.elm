@@ -52,7 +52,7 @@ initdata =
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
-    loginResult DoneLogin
+    loginResult DoneLogin 
     --  showResults ShowResults
 
 
@@ -60,42 +60,38 @@ subscriptions model =
 -- Update
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
-    case  ( msg, model ) of
-    ( GotLoginMsg subMsg, Auth amdl ) ->     
-        loginUpdate subMsg amdl |>
-            updateWith Auth GotLoginMsg model
-    ( GotShowMsg subMsg, Shows smdl ) ->     
-        showUpdate subMsg smdl |>
-            updateWith Shows GotShowMsg model
-    ( GotLoginMsg (DoneLogin ml), Auth amdl ) ->
-        (model, Cmd.none)
-    ( GotLoginMsg _, Shows _) ->
-        (model, Cmd.none)
-    ( GotShowMsg _, Auth _ ) ->
-        (model,Cmd.none)
-    
+    case  model  of
+        Auth amdl  ->     
+            loginUpdate msg amdl |> 
+                updateWith Auth    
+        Shows smdl  -> 
+            showUpdate msg smdl |>
+                updateWith Shows  
 
--- For update function
-updateWith : (subModel -> Model) -> (subMsg -> Msg) -> Model -> ( subModel, Cmd subMsg ) -> ( Model, Cmd Msg )
-updateWith toModel toMsg model ( subModel, subCmd ) =
+updateWith : (subModel -> Model)   -> ( subModel, Cmd Msg ) -> ( Model, Cmd Msg )
+updateWith toModel   ( subModel, cmd ) =
     ( toModel subModel
-    , Cmd.map toMsg subCmd
+    , cmd
     )
+-- For update function
+ 
   
 
-showUpdate : ShowMsg -> ShowsModel -> ( ShowsModel, Cmd ShowMsg )
+showUpdate : Msg -> ShowsModel -> ( ShowsModel, Cmd Msg )
 showUpdate msg model =
     case msg of
         ShowResults  ->
             (model, Cmd.none)
+        _ ->
+           (model, Cmd.none)
+
         
 -- (a -> msg) -> Cmd a -> Cmd msg
-loginUpdate : LoginMsg -> AuthModel -> ( AuthModel, Cmd LoginMsg )
+loginUpdate : Msg -> AuthModel -> ( AuthModel, Cmd Msg )
 loginUpdate msg model =
     case msg of
         TabNavigate tab ->
-            updateTab tab model
-          
+            updateTab tab model          
         DoneLogin data ->
             case data.isLoggedIn of
                 True ->
@@ -164,8 +160,8 @@ loginUpdate msg model =
 
         RegisterUser ->
             ( model, registerUser model.userInfo )
-
-
+        _ ->
+           (model, Cmd.none)
 
 view : Model -> Html Msg
 view model =

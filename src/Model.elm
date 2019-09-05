@@ -45,12 +45,9 @@ type ActiveLoginTab
     | LoggingInTab
     | LoggedInTab
 
+
+
 type Msg
-    = GotLoginMsg LoginMsg 
-    | GotShowMsg ShowMsg
-
-
-type LoginMsg
     = TabNavigate ActiveLoginTab
     | DoneLogin LoginResultInfo
     | UpdateUserName String
@@ -60,8 +57,6 @@ type LoginMsg
     | StartLoginOrCancel
     | Logout
     | RegisterUser
-
-type ShowMsg
-    =  ShowResults  --(List ShowInfo)
-         
+    | ShowResults
+    
    

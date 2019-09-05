@@ -23,7 +23,7 @@ tabClassString model tab =
         "tab"
 
 
-updateTab : ActiveLoginTab -> AuthModel -> ( AuthModel, Cmd LoginMsg )
+updateTab : ActiveLoginTab -> AuthModel -> ( AuthModel, Cmd Msg )
 updateTab msg model =
     case msg of
         LoggingInTab ->
@@ -63,12 +63,12 @@ headersView model =
                     [ div
                         [ class
                             (tabClassString model CreateAccountTab)
-                        , onClick (toMsg (TabNavigate CreateAccountTab))
+                        , onClick (TabNavigate CreateAccountTab)
                         ]
                         [ text "Create Account" ]
                     , div
                         [ class (tabClassString model LoggingInTab)
-                        , onClick (toMsg (TabNavigate LoggingInTab))
+                        , onClick (TabNavigate LoggingInTab)
                         ]
                         [ text "Log In" ]
                     ]
@@ -95,14 +95,8 @@ headersView model =
             ]
         ]
 
-toInputMsg:  (String -> LoginMsg)  ->  String -> Msg
-toInputMsg subMsg val  =
-   GotLoginMsg (subMsg val)
 
 
-toMsg:  LoginMsg  -> Msg
-toMsg subMsg   =
-    GotLoginMsg subMsg
 
 -- toMsgNoParams: LoginMsg -> Msg
 -- toMsgNoParams subMsg   =
@@ -113,21 +107,21 @@ createAccountView model =
     div [ class "content" ]
         [ div [ class "form" ]
             [ div [ class "fields" ]
-                [ input [ placeholder "Username", onInput (toInputMsg UpdateUserName), value model.userInfo.userName ]
+                [ input [ placeholder "Username", onInput  UpdateUserName, value model.userInfo.userName ]
                     []
-                , input [ placeholder "Password", type_ "password", onInput (toInputMsg UpdateNewPassword), value model.userInfo.password ]
+                , input [ placeholder "Password", type_ "password", onInput UpdateNewPassword, value model.userInfo.password ]
                     []
                 , div []
-                    [ input [ placeholder "Confirm Password", type_ "password", onInput (toInputMsg UpdateNewConfirmPassword), value model.userInfo.passwordConfimation ]
+                    [ input [ placeholder "Confirm Password", type_ "password", onInput  UpdateNewConfirmPassword, value model.userInfo.passwordConfimation ]
                         []
                     , p [ class "error" ]
                         []
                     ]
                 ]
-            , div [ class "buttons", onClick (toMsg RegisterUser) ]
+            , div [ class "buttons", onClick  RegisterUser ]
                 [ div [ class "button fullWidth" ]
                     [ text "Create My Account" ]
-                , div [ class "link", onClick (toMsg (TabNavigate LoggingInTab)) ]
+                , div [ class "link", onClick  (TabNavigate LoggingInTab) ]
                     [ span []
                         [ text "I already have an account." ]
                     ]
@@ -145,19 +139,19 @@ loginView model =
         div [ class "content" ]
             [ div [ class "form" ]
             [ div [ class "fields" ]
-                [ input [ placeholder "Username", onInput (toInputMsg UpdateUserName), value model.userInfo.userName ]
+                [ input [ placeholder "Username", onInput UpdateUserName, value model.userInfo.userName ]
                     []
                 , div []
-                    [ input [ placeholder "Password", type_ "password", onInput (toInputMsg UpdatePassword), value model.userInfo.password ]
+                    [ input [ placeholder "Password", type_ "password", onInput UpdatePassword, value model.userInfo.password ]
                         []
                     , p [ class "error" ]
                         []
                     ]
                 ]
             , div [ class "buttons" ]
-                [ div [ class "button fullWidth", onClick (toMsg StartLoginOrCancel) ]
+                [ div [ class "button fullWidth", onClick  StartLoginOrCancel ]
                     [ text buttonText ]
-                , div [ class "link", onClick (toMsg (TabNavigate CreateAccountTab)) ]
+                , div [ class "link", onClick (TabNavigate CreateAccountTab) ]
                     [ span []
                         [ text "Create Account" ]
                     ]
