@@ -52,8 +52,7 @@ initdata =
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
-    Sub.none
-    --loginResult DoneLogin
+    loginResult DoneLogin
     --  showResults ShowResults
 
 
@@ -68,10 +67,13 @@ update msg model =
     ( GotShowMsg subMsg, Shows smdl ) ->     
         showUpdate subMsg smdl |>
             updateWith Shows GotShowMsg model
+    ( GotLoginMsg (DoneLogin ml), Auth amdl ) ->
+        (model, Cmd.none)
     ( GotLoginMsg _, Shows _) ->
         (model, Cmd.none)
     ( GotShowMsg _, Auth _ ) ->
         (model,Cmd.none)
+    
 
 -- For update function
 updateWith : (subModel -> Model) -> (subMsg -> Msg) -> Model -> ( subModel, Cmd subMsg ) -> ( Model, Cmd Msg )
@@ -190,11 +192,12 @@ main =
         }
 
 -- Outgoing ports
+port loginResult : (LoginResultInfo -> msg) -> Sub msg
 port registerUser : UserInfo -> Cmd msg
 port loginUser : UserInfo -> Cmd msg
 port logoutUser : UserInfo -> Cmd msg
-port startLoadShows : UserInfo -> Cmd msg
+-- port startLoadShows : UserInfo -> Cmd msg
 
 -- Incoming Ports
-port loginResult : (LoginResultInfo -> msg) -> Sub msg
-port showResults : (List ShowInfo -> msg) -> Sub msg
+
+-- port showResults : (List ShowInfo -> msg) -> Sub msg
