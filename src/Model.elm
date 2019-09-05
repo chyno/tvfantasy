@@ -43,8 +43,6 @@ type alias UserInfo =
 type ActiveLoginTab
     = CreateAccountTab
     | LoggingInTab
-    | LoggedInTab
-
 
 
 type Msg
@@ -57,7 +55,6 @@ type Msg
     | StartLoginOrCancel
     | Logout
     | RegisterUser
-    | StartViewShows 
     | InitShows 
     | ShowResults (List ShowInfo)
     

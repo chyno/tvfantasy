@@ -4913,35 +4913,28 @@ var author$project$Main$subscriptions = function (model) {
 var author$project$Main$Shows = function (a) {
 	return {$: 'Shows', a: a};
 };
+var author$project$Main$initShowsData = {showInfos: _List_Nil};
 var author$project$Model$CreateAccountTab = {$: 'CreateAccountTab'};
-var author$project$Model$LoggedInTab = {$: 'LoggedInTab'};
 var author$project$Login$updateTab = F2(
 	function (msg, model) {
-		switch (msg.$) {
-			case 'LoggingInTab':
-				return _Utils_Tuple2(
-					_Utils_update(
-						model,
-						{
-							activeTab: author$project$Model$LoggingInTab,
-							userInfo: {password: '', passwordConfimation: '', userName: ''}
-						}),
-					elm$core$Platform$Cmd$none);
-			case 'LoggedInTab':
-				return _Utils_Tuple2(
-					_Utils_update(
-						model,
-						{activeTab: author$project$Model$LoggedInTab}),
-					elm$core$Platform$Cmd$none);
-			default:
-				return _Utils_Tuple2(
-					_Utils_update(
-						model,
-						{
-							activeTab: author$project$Model$CreateAccountTab,
-							userInfo: {password: '', passwordConfimation: '', userName: ''}
-						}),
-					elm$core$Platform$Cmd$none);
+		if (msg.$ === 'LoggingInTab') {
+			return _Utils_Tuple2(
+				_Utils_update(
+					model,
+					{
+						activeTab: author$project$Model$LoggingInTab,
+						userInfo: {password: '', passwordConfimation: '', userName: ''}
+					}),
+				elm$core$Platform$Cmd$none);
+		} else {
+			return _Utils_Tuple2(
+				_Utils_update(
+					model,
+					{
+						activeTab: author$project$Model$CreateAccountTab,
+						userInfo: {password: '', passwordConfimation: '', userName: ''}
+					}),
+				elm$core$Platform$Cmd$none);
 		}
 	});
 var elm$json$Json$Encode$object = function (pairs) {
@@ -5024,7 +5017,7 @@ var author$project$Main$loginUpdate = F2(
 					return _Utils_Tuple2(
 						_Utils_update(
 							model,
-							{activeTab: author$project$Model$LoggedInTab, loadState: perzanko$elm_loading$Loading$Off, loginResult: data}),
+							{loadState: perzanko$elm_loading$Loading$Off, loginResult: data}),
 						author$project$Main$startLoadShows('model.userInfo'));
 				} else {
 					return _Utils_Tuple2(
@@ -5103,26 +5096,22 @@ var author$project$Main$loginUpdate = F2(
 					model,
 					author$project$Main$registerUser(model.userInfo));
 			default:
-				return _Utils_Tuple2(model, elm$core$Platform$Cmd$none);
+				return _Utils_Tuple2(
+					model,
+					author$project$Main$startLoadShows('should be command none'));
 		}
 	});
-var author$project$Main$initShowsData = {showInfos: _List_Nil};
 var author$project$Main$showUpdate = F2(
 	function (msg, model) {
-		switch (msg.$) {
-			case 'ShowResults':
-				var shws = msg.a;
-				return _Utils_Tuple2(
-					_Utils_update(
-						model,
-						{showInfos: shws}),
-					elm$core$Platform$Cmd$none);
-			case 'StartViewShows':
-				return _Utils_Tuple2(
-					author$project$Main$initShowsData,
-					author$project$Main$startLoadShows('usrInfo'));
-			default:
-				return _Utils_Tuple2(model, elm$core$Platform$Cmd$none);
+		if (msg.$ === 'ShowResults') {
+			var shws = msg.a;
+			return _Utils_Tuple2(
+				_Utils_update(
+					model,
+					{showInfos: shws}),
+				elm$core$Platform$Cmd$none);
+		} else {
+			return _Utils_Tuple2(model, elm$core$Platform$Cmd$none);
 		}
 	});
 var author$project$Main$updateWith = F2(
@@ -5135,18 +5124,28 @@ var author$project$Main$updateWith = F2(
 	});
 var author$project$Main$update = F2(
 	function (msg, model) {
-		if (model.$ === 'Auth') {
-			var amdl = model.a;
-			return A2(
-				author$project$Main$updateWith,
-				author$project$Main$Auth,
-				A2(author$project$Main$loginUpdate, msg, amdl));
+		if (msg.$ === 'ShowResults') {
+			var rslt = msg.a;
+			return _Utils_Tuple2(
+				author$project$Main$Shows(
+					_Utils_update(
+						author$project$Main$initShowsData,
+						{showInfos: rslt})),
+				elm$core$Platform$Cmd$none);
 		} else {
-			var smdl = model.a;
-			return A2(
-				author$project$Main$updateWith,
-				author$project$Main$Shows,
-				A2(author$project$Main$showUpdate, msg, smdl));
+			if (model.$ === 'Auth') {
+				var amdl = model.a;
+				return A2(
+					author$project$Main$updateWith,
+					author$project$Main$Auth,
+					A2(author$project$Main$loginUpdate, msg, amdl));
+			} else {
+				var smdl = model.a;
+				return A2(
+					author$project$Main$updateWith,
+					author$project$Main$Shows,
+					A2(author$project$Main$showUpdate, msg, smdl));
+			}
 		}
 	});
 var author$project$Model$RegisterUser = {$: 'RegisterUser'};
@@ -5580,13 +5579,10 @@ var author$project$Login$headersView = function (model) {
 									])),
 								function () {
 								var _n0 = model.activeTab;
-								switch (_n0.$) {
-									case 'CreateAccountTab':
-										return author$project$Login$createAccountView(model);
-									case 'LoggingInTab':
-										return author$project$Login$loginView(model);
-									default:
-										return author$project$Login$loginView(model);
+								if (_n0.$ === 'CreateAccountTab') {
+									return author$project$Login$createAccountView(model);
+								} else {
+									return author$project$Login$loginView(model);
 								}
 							}()
 							])),
@@ -5630,41 +5626,6 @@ var author$project$Login$headersView = function (model) {
 										elm$html$Html$text('Go ahead and create an account just like you would a centralized service.')
 									]))
 							]))
-					]))
-			]));
-};
-var author$project$Login$signedInView = function (model) {
-	return A2(
-		elm$html$Html$div,
-		_List_fromArray(
-			[
-				elm$html$Html$Attributes$class('message')
-			]),
-		_List_fromArray(
-			[
-				A2(
-				elm$html$Html$div,
-				_List_fromArray(
-					[
-						elm$html$Html$Attributes$class('pill green')
-					]),
-				_List_fromArray(
-					[
-						elm$html$Html$text('authenticated')
-					])),
-				A2(
-				elm$html$Html$h1,
-				_List_Nil,
-				_List_fromArray(
-					[
-						elm$html$Html$text('You\'re Signed In!')
-					])),
-				A2(
-				elm$html$Html$p,
-				_List_Nil,
-				_List_fromArray(
-					[
-						elm$html$Html$text('You just created an account using Hedgehog! Now, if you log out you will be able to sign back in with the same credentials.')
 					]))
 			]));
 };
@@ -9503,13 +9464,10 @@ var perzanko$elm_loading$Loading$render = F3(
 var author$project$Login$tabView = function (model) {
 	var vw = function () {
 		var _n0 = model.activeTab;
-		switch (_n0.$) {
-			case 'CreateAccountTab':
-				return author$project$Login$headersView(model);
-			case 'LoggingInTab':
-				return author$project$Login$headersView(model);
-			default:
-				return author$project$Login$signedInView(model);
+		if (_n0.$ === 'CreateAccountTab') {
+			return author$project$Login$headersView(model);
+		} else {
+			return author$project$Login$headersView(model);
 		}
 	}();
 	return A2(

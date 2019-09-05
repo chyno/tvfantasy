@@ -66,14 +66,18 @@ subscriptions model =
 -- Update
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
-    case  model  of
-        Auth amdl  ->
-            loginUpdate msg amdl |> 
-                    updateWith Auth    
-        Shows smdl  -> 
-            showUpdate msg smdl |>
-                updateWith Shows 
-        
+    case msg of
+        ShowResults rslt ->
+         (Shows { initShowsData | showInfos = rslt }, Cmd.none)
+        _ ->
+            case  model  of
+                Auth amdl  ->
+                    loginUpdate msg amdl |> 
+                            updateWith Auth    
+                Shows smdl  -> 
+                    showUpdate msg smdl |>
+                        updateWith Shows 
+                
                         
 updateWith : (subModel -> Model)   -> ( subModel, Cmd Msg ) -> ( Model, Cmd Msg )
 updateWith toModel   ( subModel, cmd ) =
@@ -89,8 +93,6 @@ showUpdate msg model =
     case msg of
         ShowResults shws ->
            ( { model | showInfos = shws }, Cmd.none)
-        StartViewShows  -> 
-            (initShowsData , startLoadShows "usrInfo")     
         _ ->  
             (model, Cmd.none)
 
@@ -106,7 +108,6 @@ loginUpdate msg model =
                 True ->
                     ( { model
                         | loginResult = data
-                        , activeTab = LoggedInTab
                         , loadState = Loading.Off
                       }
                     , startLoadShows "model.userInfo"
@@ -170,7 +171,7 @@ loginUpdate msg model =
         RegisterUser ->
             ( model, registerUser model.userInfo )         
         _ ->
-           (model, Cmd.none)  
+           (model, startLoadShows "should be command none")  
 
 view : Model -> Html Msg
 view model =

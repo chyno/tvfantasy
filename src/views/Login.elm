@@ -37,10 +37,6 @@ updateTab msg model =
               }
             , Cmd.none
             )
-
-        LoggedInTab ->
-            ( { model | activeTab = LoggedInTab }, Cmd.none )
-
         CreateAccountTab ->
             ( { model
                 | activeTab = CreateAccountTab
@@ -77,9 +73,6 @@ headersView model =
                         createAccountView model
 
                     LoggingInTab ->
-                        loginView model
-
-                    LoggedInTab ->
                         loginView model
                 ]
             , div [ class "message unauthenticated" ]
@@ -169,9 +162,6 @@ tabView model =
 
                 LoggingInTab ->
                     headersView model
-
-                LoggedInTab ->
-                    signedInView model
     in
     div []
         [ vw
@@ -188,13 +178,3 @@ tabView model =
         , div [] [ text model.loginResult.message ]
         ]
 
-signedInView : AuthModel -> Html Msg
-signedInView model =
-    div [ class "message" ]
-        [ div [ class "pill green" ]
-            [ text "authenticated" ]
-        , h1 []
-            [ text "You're Signed In!" ]
-        , p []
-            [ text "You just created an account using Hedgehog! Now, if you log out you will be able to sign back in with the same credentials." ]
-        ]
