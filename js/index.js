@@ -1,5 +1,5 @@
 import { hedgehog } from "./hedgehog.js";
-import { getLatestTvsShow } from "./tvapi.js";
+
 let app = Elm.Main.init({
   flags: "Hello",
   node: document.getElementById("elm")
@@ -60,14 +60,6 @@ app.ports.registerUser.subscribe(function(data) {
     );
 });
 
-app.ports.startLoadShows.subscribe(function(data) {
- // const tvShows = getFakeTvShows();
- // app.ports.showApiResults.send(tvShows);
- getLatestTvsShow().then(showData => {
-  app.ports.showApiResults.send(showData);
- });
-  
-});
 
 // Local Functions
 function isLoggedIn() {
@@ -89,41 +81,4 @@ function fakeLogin () {
        });
 }
 
-function appLoginSendResults(data) {
-  hedgehog.login(data.userName, data.password).then(
-   () => {
-     getLatestTvsShow().then(showData => {
-       app.ports.loginResult.send({
-         address: hedgehog.getWallet().getAddressString(),
-         isLoggedIn: isLoggedIn(),
-         message: "Success"
-          
-       });
-     });
-   },
-   e => {
-     app.ports.loginResult.send({
-       address: "",
-       isLoggedIn: false,
-       message: "Invalid Username or password" 
-     });
-   }
- );
-
-}
-// showApiResults
-function getFakeTvShows()  {
-   return [
-     {
-       
-        name: "Friends",
-        country: "US",
-        overview: "Lame show",
-        firstAirDate: "01912002",
-        voteAverage: 2
-        
-     }
-   ];
-
-}
 

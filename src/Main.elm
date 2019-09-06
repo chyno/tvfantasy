@@ -59,7 +59,6 @@ getTvShows =
     }
 
 -- Subscriptions
-
 subscriptions : Model -> Sub Msg
 subscriptions model =
     Sub.batch [
@@ -99,9 +98,7 @@ updateWith toModel   ( subModel, cmd ) =
     ( toModel subModel
     , cmd
     )
--- For update function
- 
-  
+
 
 showUpdate : Msg -> ShowsModel -> ( ShowsModel, Cmd Msg )
 showUpdate msg model =
@@ -212,8 +209,6 @@ main =
 port registerUser : UserInfo -> Cmd msg
 port loginUser : UserInfo -> Cmd msg
 port logoutUser : String -> Cmd msg
--- port startLoadShows : String -> Cmd msg
 
 -- Incoming Ports
 port loginResult : (LoginResultInfo -> msg) -> Sub msg
--- port showApiResults : ((List ShowInfo) -> msg) -> Sub msg
