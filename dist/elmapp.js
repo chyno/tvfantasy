@@ -4968,23 +4968,6 @@ var author$project$Main$loginUser = _Platform_outgoingPort(
 					elm$json$Json$Encode$string($.userName))
 				]));
 	});
-var author$project$Main$logoutUser = _Platform_outgoingPort(
-	'logoutUser',
-	function ($) {
-		return elm$json$Json$Encode$object(
-			_List_fromArray(
-				[
-					_Utils_Tuple2(
-					'password',
-					elm$json$Json$Encode$string($.password)),
-					_Utils_Tuple2(
-					'passwordConfimation',
-					elm$json$Json$Encode$string($.passwordConfimation)),
-					_Utils_Tuple2(
-					'userName',
-					elm$json$Json$Encode$string($.userName))
-				]));
-	});
 var author$project$Main$registerUser = _Platform_outgoingPort(
 	'registerUser',
 	function ($) {
@@ -5024,7 +5007,7 @@ var author$project$Main$loginUpdate = F2(
 						_Utils_update(
 							model,
 							{loadState: perzanko$elm_loading$Loading$Off, loginResult: data}),
-						author$project$Main$startLoadShows('should be command none'));
+						elm$core$Platform$Cmd$none);
 				}
 			case 'UpdateNewConfirmPassword':
 				var pswd = msg.a;
@@ -5087,20 +5070,15 @@ var author$project$Main$loginUpdate = F2(
 						model,
 						{loadState: perzanko$elm_loading$Loading$Off}),
 					elm$core$Platform$Cmd$none);
-			case 'Logout':
-				return _Utils_Tuple2(
-					author$project$Main$initdata,
-					author$project$Main$logoutUser(model.userInfo));
 			case 'RegisterUser':
 				return _Utils_Tuple2(
 					model,
 					author$project$Main$registerUser(model.userInfo));
 			default:
-				return _Utils_Tuple2(
-					model,
-					author$project$Main$startLoadShows('should be command none'));
+				return _Utils_Tuple2(model, elm$core$Platform$Cmd$none);
 		}
 	});
+var author$project$Main$logoutUser = _Platform_outgoingPort('logoutUser', elm$json$Json$Encode$string);
 var author$project$Main$showUpdate = F2(
 	function (msg, model) {
 		if (msg.$ === 'ShowResults') {
@@ -5124,28 +5102,33 @@ var author$project$Main$updateWith = F2(
 	});
 var author$project$Main$update = F2(
 	function (msg, model) {
-		if (msg.$ === 'ShowResults') {
-			var rslt = msg.a;
-			return _Utils_Tuple2(
-				author$project$Main$Shows(
-					_Utils_update(
-						author$project$Main$initShowsData,
-						{showInfos: rslt})),
-				elm$core$Platform$Cmd$none);
-		} else {
-			if (model.$ === 'Auth') {
-				var amdl = model.a;
-				return A2(
-					author$project$Main$updateWith,
-					author$project$Main$Auth,
-					A2(author$project$Main$loginUpdate, msg, amdl));
-			} else {
-				var smdl = model.a;
-				return A2(
-					author$project$Main$updateWith,
-					author$project$Main$Shows,
-					A2(author$project$Main$showUpdate, msg, smdl));
-			}
+		switch (msg.$) {
+			case 'ShowResults':
+				var rslt = msg.a;
+				return _Utils_Tuple2(
+					author$project$Main$Shows(
+						_Utils_update(
+							author$project$Main$initShowsData,
+							{showInfos: rslt})),
+					elm$core$Platform$Cmd$none);
+			case 'Logout':
+				return _Utils_Tuple2(
+					author$project$Main$Auth(author$project$Main$initdata),
+					author$project$Main$logoutUser('logging out...'));
+			default:
+				if (model.$ === 'Auth') {
+					var amdl = model.a;
+					return A2(
+						author$project$Main$updateWith,
+						author$project$Main$Auth,
+						A2(author$project$Main$loginUpdate, msg, amdl));
+				} else {
+					var smdl = model.a;
+					return A2(
+						author$project$Main$updateWith,
+						author$project$Main$Shows,
+						A2(author$project$Main$showUpdate, msg, smdl));
+				}
 		}
 	});
 var author$project$Model$RegisterUser = {$: 'RegisterUser'};

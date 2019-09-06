@@ -61,14 +61,14 @@ subscriptions model =
     ]
     --  
 
-
-
 -- Update
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
         ShowResults rslt ->
-         (Shows { initShowsData | showInfos = rslt }, Cmd.none)
+            (Shows { initShowsData | showInfos = rslt }, Cmd.none)
+        Logout ->
+            (Auth initdata, logoutUser "logging out..." ) 
         _ ->
             case  model  of
                 Auth amdl  ->
@@ -118,7 +118,7 @@ loginUpdate msg model =
                         | loginResult = data
                         , loadState = Loading.Off
                       }
-                    , startLoadShows "should be command none"
+                    , Cmd.none
                     ) 
 
         UpdateNewConfirmPassword pswd ->
@@ -165,13 +165,11 @@ loginUpdate msg model =
             else
               ({ model | loadState = Loading.Off } , Cmd.none )  
 
-        Logout ->
-            ( initdata, logoutUser model.userInfo ) 
 
         RegisterUser ->
             ( model, registerUser model.userInfo )         
         _ ->
-           (model, startLoadShows "should be command none")  
+           (model,  Cmd.none)  
 
 view : Model -> Html Msg
 view model =
@@ -200,7 +198,7 @@ main =
 -- Outgoing ports
 port registerUser : UserInfo -> Cmd msg
 port loginUser : UserInfo -> Cmd msg
-port logoutUser : UserInfo -> Cmd msg
+port logoutUser : String -> Cmd msg
 port startLoadShows : String -> Cmd msg
 
 -- Incoming Ports
