@@ -18,7 +18,7 @@ import Loading
 import Model exposing (..)
 import Show exposing (..)
 import Login exposing(..)
-
+import Http exposing (..)
 
 
 init : String -> ( Model, Cmd Msg )
@@ -51,13 +51,19 @@ initdata =
     , loadState = Loading.Off
     }
 
+getTvShows : Cmd Msg
+getTvShows =
+  Http.get
+    { url = "https://api.themoviedb.org/3/discover/tv?api_key=6aec6123c85be51886e8f69cd9a3a226&first_air_date.gte=2019-01-01&page=1"
+    , expect = Http.expectJson GotShows listOfShowsDecoder
+    }
+
 -- Subscriptions
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
     Sub.batch [
-        loginResult DoneLogin,
-        showApiResults ShowResults 
+        loginResult DoneLogin 
     ]
     --  
 
@@ -65,8 +71,17 @@ subscriptions model =
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
-        ShowResults rslt ->
-            (Shows { initShowsData | showInfos = rslt }, Cmd.none)
+        GotShows result ->
+            case result of
+                Ok shows ->
+                    (Shows { initShowsData | showInfos = shows }, Cmd.none)
+                Err _ ->
+                    case  model  of
+                        Auth amdl  ->
+                            (model, Cmd.none)
+                        _ ->
+                            (model, Cmd.none)
+                    
         Logout ->
             (Auth initdata, logoutUser "logging out..." ) 
         _ ->
@@ -91,8 +106,6 @@ updateWith toModel   ( subModel, cmd ) =
 showUpdate : Msg -> ShowsModel -> ( ShowsModel, Cmd Msg )
 showUpdate msg model =
     case msg of
-        ShowResults shws ->
-           ( { model | showInfos = shws }, Cmd.none)
         _ ->  
             (model, Cmd.none)
 
@@ -110,7 +123,7 @@ loginUpdate msg model =
                         | loginResult = data
                         , loadState = Loading.Off
                       }
-                    , startLoadShows "model.userInfo"
+                    , getTvShows
                     )  
 
                 False ->
@@ -199,8 +212,8 @@ main =
 port registerUser : UserInfo -> Cmd msg
 port loginUser : UserInfo -> Cmd msg
 port logoutUser : String -> Cmd msg
-port startLoadShows : String -> Cmd msg
+-- port startLoadShows : String -> Cmd msg
 
 -- Incoming Ports
 port loginResult : (LoginResultInfo -> msg) -> Sub msg
-port showApiResults : ((List ShowInfo) -> msg) -> Sub msg
+-- port showApiResults : ((List ShowInfo) -> msg) -> Sub msg

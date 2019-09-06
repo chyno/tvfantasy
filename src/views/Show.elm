@@ -14,7 +14,7 @@ showsView model =
     showDetails =
       \x -> tr[][
         td[][text x.name]
-        ,td[][text x.country]
+        -- ,td[][text x.country]
         ,td[][text x.overview]
         , td[][text x.firstAirDate]
         , td[][text (String.fromFloat x.voteAverage)]
@@ -24,7 +24,7 @@ showsView model =
     [ h1 [] [ text "These are your shows:" ]
       ,table[] (tr[] [
             th[][text "Name"]
-            ,th[][text "Country"]
+            -- ,th[][text "Country"]
             , th[][text "Description"]
             , th[][text "First Aired"]
             , th[][text "Vote Average"]
