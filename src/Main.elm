@@ -1,5 +1,5 @@
 port module Main exposing (main)
-import Route exposing (Route)
+import Route as Route
 import Json.Decode as Decode exposing (Value)
 import Browser
 import Browser.Navigation as Nav
