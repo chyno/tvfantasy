@@ -1,10 +1,12 @@
-module Login exposing (..)
+port module Login exposing (..)
 
 import Browser
+import Model exposing(..)
 import Html exposing ( ..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (onClick, onInput)
 import Json.Encode as E
+import Http exposing (..)
 import Loading exposing (LoadingState)
 import Loading
     exposing
@@ -96,7 +98,8 @@ type Msg
     | UpdateNewConfirmPassword String
     | StartLoginOrCancel
     | RegisterUser
-   
+    | DoneLogin LoginResultInfo
+    | ShowsResult (Result Http.Error (List ShowInfo))
 -- Model
 -- Auth Model
 type alias Model =
@@ -126,7 +129,9 @@ type ActiveLoginTab
 -- Subscriptions
 subscriptions : Model -> Sub Msg
 subscriptions model =
-    Sub.none 
+    Sub.batch [
+        hedgeHogloginResult DoneLogin 
+    ]
 
 -- toMsgNoParams: LoginMsg -> Msg
 -- toMsgNoParams subMsg   =
@@ -159,6 +164,86 @@ createAccountView model =
             ]
         ]
 
+-- Update
+update : Msg -> Model -> (Model, Cmd Msg )
+update msg model =
+    case msg of
+        TabNavigate tab ->
+            updateTab tab model          
+        DoneLogin data ->
+            case data.isLoggedIn of
+                True ->
+                    ( { model
+                        | loginResult = data
+                        , loadState = Loading.Off
+                      }
+                    , getTvShows
+                    )  
+
+                False ->
+                    ( { model
+                        | loginResult = data
+                        , loadState = Loading.Off
+                      }
+                    , Cmd.none
+                    ) 
+
+        UpdateNewConfirmPassword pswd ->
+            let
+                li =
+                    model.userInfo
+            in
+            ( { model | userInfo = { li | passwordConfimation = pswd } }, Cmd.none ) 
+
+        UpdatePassword pswd ->
+            let
+                li =
+                    model.userInfo
+            in
+            ( { model | userInfo = { li | password = pswd } }, Cmd.none ) 
+
+        UpdateNewPassword pswd ->
+            let
+                li =
+                    model.userInfo
+            in
+            ( { model | userInfo = { li | password = pswd } }, Cmd.none ) 
+
+        UpdateUserName usrname ->
+            let
+                li =
+                    model.userInfo
+            in
+            ( { model | userInfo = { li | userName = usrname } }, Cmd.none ) 
+
+        StartLoginOrCancel ->
+          if model.loadState == Loading.Off then 
+            ( { model
+                | loginResult =
+                    { isLoggedIn = False
+                    , address = "-"
+                    , message = ""
+                    }
+                , loadState = Loading.On
+                 
+              }
+            , loginUser model.userInfo
+            ) 
+            else
+              ({ model | loadState = Loading.Off } , Cmd.none )  
+
+
+        RegisterUser ->
+            ( model, registerUser model.userInfo )         
+        _ ->
+           (model,  Cmd.none)  
+
+getTvShows : Cmd Msg
+getTvShows =
+  Http.get
+    { url = "https://api.themoviedb.org/3/discover/tv?api_key=6aec6123c85be51886e8f69cd9a3a226&first_air_date.gte=2019-01-01&page=1"
+    , expect = Http.expectJson ShowsResult listOfShowsDecoder
+    }
 
 loginView : Model -> Html Msg
 loginView model =
@@ -215,3 +300,7 @@ tabView model =
         , div [] [ text model.loginResult.message ]
         ]
 
+port registerUser : UserInfo -> Cmd msg
+port loginUser : UserInfo -> Cmd msg
+-- Incoming Ports
+port hedgeHogloginResult : (LoginResultInfo -> msg) -> Sub msg

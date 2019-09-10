@@ -1,7 +1,7 @@
 port module Main exposing (main)
 import Show as Show
 import Login as Login
-
+import Model exposing(..)
 import Json.Decode as Decode exposing (Value)
 import Browser
 import Browser.Navigation as Nav
@@ -19,9 +19,8 @@ import Loading
         )
 import Http exposing (..)
 
-type Msg = GotAuth Login.Msg
-           | GotShow  Show.Msg
-           | DoneLogin Login.LoginResultInfo
+type Msg = GotAuthMsg Login.Msg
+           | GotShowMsg  Show.Msg
            | Logout
 
 
@@ -55,24 +54,16 @@ initdata =
     , loadState = Loading.Off
     }
 
-getTvShows : Cmd Msg
-getTvShows =
-    Cmd.none
---   Http.get
---     { url = "https://api.themoviedb.org/3/discover/tv?api_key=6aec6123c85be51886e8f69cd9a3a226&first_air_date.gte=2019-01-01&page=1"
---     , expect = Http.expectJson GotShow (Show.ShowsResult Show.listOfShowsDecoder)
---     }
+
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
-   Sub.batch [
-        hedgeHogloginResult DoneLogin 
-    ]
-    -- case model of
-    --     Auth auth ->
-    --         Sub.map GotAuth (Login.subscriptions auth)
-    --     Shows shows ->
-    --         Sub.map GotShow (Show.subscriptions shows)
+   case model of
+        Auth auth ->
+            Sub.map GotAuthMsg (Login.subscriptions auth)
+        Shows shows ->
+            Sub.map GotShowMsg (Show.subscriptions shows)
+        
 
     
     --  
@@ -80,15 +71,19 @@ subscriptions model =
 -- Update
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
-    case msg of
-        GotAuth loginMsg ->
-            (model, Cmd.none)
-        GotShow shwMsg ->
-            (model, Cmd.none)
-        DoneLogin  res ->
-            (model, Cmd.none)
-        Logout ->
-            (model, Cmd.none)
+    case ( msg, model ) of
+            (GotAuthMsg subMsg, Auth userInfo ) ->
+                Login.update subMsg userInfo
+                    |> updateWith Auth GotAuthMsg model
+            ( GotShowMsg subMsg, Shows shows ) ->
+                Show.update subMsg shows
+                    |> updateWith Shows GotShowMsg model
+            (Logout, _ ) ->
+                 (Auth initdata, logoutUser "logging out..." )
+            ( _, _ ) ->
+            -- Disregard messages that arrived for the wrong page.
+                ( model, Cmd.none )
+
 
 
         -- GotShows result ->
@@ -113,93 +108,13 @@ update msg model =
         --             showUpdate msg smdl |>
         --                 updateWith Shows 
                                         
--- updateWith : (subModel -> Model)   -> ( subModel, Cmd Msg ) -> ( Model, Cmd Msg )
--- updateWith toModel   ( subModel, cmd ) =
---     ( toModel subModel
---     , cmd
---     )
-
-
--- showUpdate : Msg -> ShowsModel -> ( ShowsModel, Cmd Msg )
--- showUpdate msg model =
---     case msg of
---         _ ->  
---             (model, Cmd.none)
-
-        
+updateWith : (subModel -> Model) -> (subMsg -> Msg) -> Model -> ( subModel, Cmd subMsg ) -> ( Model, Cmd Msg )
+updateWith toModel toMsg model ( subModel, subCmd ) =
+    ( toModel subModel
+    , Cmd.map toMsg subCmd
+    )
+  
 -- -- (a -> msg) -> Cmd a -> Cmd msg
--- loginUpdate : Msg -> AuthModel -> ( AuthModel, Cmd Msg )
--- loginUpdate msg model =
---     case msg of
---         TabNavigate tab ->
---             updateTab tab model          
---         DoneLogin data ->
---             case data.isLoggedIn of
---                 True ->
---                     ( { model
---                         | loginResult = data
---                         , loadState = Loading.Off
---                       }
---                     , getTvShows
---                     )  
-
---                 False ->
---                     ( { model
---                         | loginResult = data
---                         , loadState = Loading.Off
---                       }
---                     , Cmd.none
---                     ) 
-
---         UpdateNewConfirmPassword pswd ->
---             let
---                 li =
---                     model.userInfo
---             in
---             ( { model | userInfo = { li | passwordConfimation = pswd } }, Cmd.none ) 
-
---         UpdatePassword pswd ->
---             let
---                 li =
---                     model.userInfo
---             in
---             ( { model | userInfo = { li | password = pswd } }, Cmd.none ) 
-
---         UpdateNewPassword pswd ->
---             let
---                 li =
---                     model.userInfo
---             in
---             ( { model | userInfo = { li | password = pswd } }, Cmd.none ) 
-
---         UpdateUserName usrname ->
---             let
---                 li =
---                     model.userInfo
---             in
---             ( { model | userInfo = { li | userName = usrname } }, Cmd.none ) 
-
---         StartLoginOrCancel ->
---           if model.loadState == Loading.Off then 
---             ( { model
---                 | loginResult =
---                     { isLoggedIn = False
---                     , address = "-"
---                     , message = ""
---                     }
---                 , loadState = Loading.On
-                 
---               }
---             , loginUser model.userInfo
---             ) 
---             else
---               ({ model | loadState = Loading.Off } , Cmd.none )  
-
-
---         RegisterUser ->
---             ( model, registerUser model.userInfo )         
---         _ ->
---            (model,  Cmd.none)  
 
 view : Model -> Html Msg
 view model =
@@ -207,9 +122,9 @@ view model =
         toView mdl =
             case mdl of
                 Shows smdl->
-                    Show.showsView smdl |> Html.map GotShow                   
+                    Show.showsView smdl |> Html.map GotShowMsg                   
                 Auth amdl ->
-                    Login.tabView amdl |> Html.map GotAuth
+                    Login.tabView amdl |> Html.map GotAuthMsg
     in
     div [ id "root" ]
         [ div [ class "app" ]
@@ -226,9 +141,5 @@ main =
         }
 
 -- Outgoing ports
-port registerUser : Login.UserInfo -> Cmd msg
-port loginUser : Login.UserInfo -> Cmd msg
 port logoutUser : String -> Cmd msg
 
--- Incoming Ports
-port hedgeHogloginResult : (Login.LoginResultInfo -> msg) -> Sub msg
