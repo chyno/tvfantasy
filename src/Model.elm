@@ -1,18 +1,22 @@
 module Model exposing (..)
-import Json.Encode as E
+
 import Json.Decode as D
+import Json.Encode as E
+
 
 type alias ShowInfo =
-    { 
-      name: String,
-    --   country: String,
-      overview: String,
-      firstAirDate: String,
-      voteAverage: Float
-      
+    { name : String
+    , --   country: String,
+      overview : String
+    , firstAirDate : String
+    , voteAverage : Float
     }
 
-    -- Decoders
+
+
+-- Decoders
+
+
 showDecoder : D.Decoder ShowInfo
 showDecoder =
     D.map4
@@ -26,4 +30,4 @@ showDecoder =
 
 listOfShowsDecoder : D.Decoder (List ShowInfo)
 listOfShowsDecoder =
-   D.field "results" (D.list showDecoder)
+    D.field "results" (D.list showDecoder)

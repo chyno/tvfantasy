@@ -1,19 +1,20 @@
 port module Login exposing (..)
 
 import Browser
-import Model exposing(..)
-import Html exposing ( ..)
+import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (onClick, onInput)
-import Json.Encode as E
 import Http exposing (..)
-import Loading exposing (LoadingState)
+import Json.Encode as E
 import Loading
     exposing
         ( LoaderType(..)
+        , LoadingState
         , defaultConfig
         , render
         )
+import Model exposing (..)
+
 
 tabClassString : Model -> ActiveLoginTab -> String
 tabClassString model tab =
@@ -38,6 +39,7 @@ updateTab msg model =
               }
             , Cmd.none
             )
+
         CreateAccountTab ->
             ( { model
                 | activeTab = CreateAccountTab
@@ -100,8 +102,13 @@ type Msg
     | RegisterUser
     | DoneLogin LoginResultInfo
     | ShowsResult (Result Http.Error (List ShowInfo))
+
+
+
 -- Model
 -- Auth Model
+
+
 type alias Model =
     { userInfo : UserInfo
     , loginResult : LoginResultInfo
@@ -109,11 +116,13 @@ type alias Model =
     , loadState : LoadingState
     }
 
+
 type alias LoginResultInfo =
     { isLoggedIn : Bool
     , address : String
     , message : String
     }
+
 
 type alias UserInfo =
     { userName : String
@@ -121,42 +130,49 @@ type alias UserInfo =
     , passwordConfimation : String
     }
 
+
 type ActiveLoginTab
     = CreateAccountTab
     | LoggingInTab
 
 
+
 -- Subscriptions
+
+
 subscriptions : Model -> Sub Msg
 subscriptions model =
-    Sub.batch [
-        hedgeHogloginResult DoneLogin 
-    ]
+    Sub.batch
+        [ hedgeHogloginResult DoneLogin
+        ]
+
+
 
 -- toMsgNoParams: LoginMsg -> Msg
 -- toMsgNoParams subMsg   =
 --   GotLoginMsg subMsg
+
 
 createAccountView : Model -> Html Msg
 createAccountView model =
     div [ class "content" ]
         [ div [ class "form" ]
             [ div [ class "fields" ]
-                [ input [ placeholder "Username", onInput  UpdateUserName, value model.userInfo.userName ]
+                [ input [ placeholder "Username", onInput UpdateUserName, value model.userInfo.userName ]
                     []
                 , input [ placeholder "Password", type_ "password", onInput UpdateNewPassword, value model.userInfo.password ]
                     []
                 , div []
-                    [ input [ placeholder "Confirm Password", type_ "password", onInput  UpdateNewConfirmPassword, value model.userInfo.passwordConfimation ]
+                    [ input [ placeholder "Confirm Password", type_ "password", onInput UpdateNewConfirmPassword, value model.userInfo.passwordConfimation ]
                         []
                     , p [ class "error" ]
                         []
                     ]
                 ]
-            , div [ class "buttons", onClick  RegisterUser ]
+            , div [ class "buttons", onClick RegisterUser ]
                 [ div [ class "button fullWidth" ]
                     [ text "Create My Account" ]
-                , div [ class "link", onClick  (TabNavigate LoggingInTab) ]
+                , div [ class "link", onClick (TabNavigate LoggingInTab) ]
                     [ span []
                         [ text "I already have an account." ]
                     ]
@@ -164,12 +180,17 @@ createAccountView model =
             ]
         ]
 
+
+
 -- Update
-update : Msg -> Model -> (Model, Cmd Msg )
+
+
+update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
         TabNavigate tab ->
-            updateTab tab model          
+            updateTab tab model
+
         DoneLogin data ->
             case data.isLoggedIn of
                 True ->
@@ -178,7 +199,7 @@ update msg model =
                         , loadState = Loading.Off
                       }
                     , getTvShows
-                    )  
+                    )
 
                 False ->
                     ( { model
@@ -186,73 +207,79 @@ update msg model =
                         , loadState = Loading.Off
                       }
                     , Cmd.none
-                    ) 
+                    )
 
         UpdateNewConfirmPassword pswd ->
             let
                 li =
                     model.userInfo
             in
-            ( { model | userInfo = { li | passwordConfimation = pswd } }, Cmd.none ) 
+            ( { model | userInfo = { li | passwordConfimation = pswd } }, Cmd.none )
 
         UpdatePassword pswd ->
             let
                 li =
                     model.userInfo
             in
-            ( { model | userInfo = { li | password = pswd } }, Cmd.none ) 
+            ( { model | userInfo = { li | password = pswd } }, Cmd.none )
 
         UpdateNewPassword pswd ->
             let
                 li =
                     model.userInfo
             in
-            ( { model | userInfo = { li | password = pswd } }, Cmd.none ) 
+            ( { model | userInfo = { li | password = pswd } }, Cmd.none )
 
         UpdateUserName usrname ->
             let
                 li =
                     model.userInfo
             in
-            ( { model | userInfo = { li | userName = usrname } }, Cmd.none ) 
+            ( { model | userInfo = { li | userName = usrname } }, Cmd.none )
 
         StartLoginOrCancel ->
-          if model.loadState == Loading.Off then 
-            ( { model
-                | loginResult =
-                    { isLoggedIn = False
-                    , address = "-"
-                    , message = ""
-                    }
-                , loadState = Loading.On
-                 
-              }
-            , loginUser model.userInfo
-            ) 
-            else
-              ({ model | loadState = Loading.Off } , Cmd.none )  
+            if model.loadState == Loading.Off then
+                ( { model
+                    | loginResult =
+                        { isLoggedIn = False
+                        , address = "-"
+                        , message = ""
+                        }
+                    , loadState = Loading.On
+                  }
+                , loginUser model.userInfo
+                )
 
+            else
+                ( { model | loadState = Loading.Off }, Cmd.none )
 
         RegisterUser ->
-            ( model, registerUser model.userInfo )         
+            ( model, registerUser model.userInfo )
+
         _ ->
-           (model,  Cmd.none)  
+            ( model, Cmd.none )
+
 
 getTvShows : Cmd Msg
 getTvShows =
-  Http.get
-    { url = "https://api.themoviedb.org/3/discover/tv?api_key=6aec6123c85be51886e8f69cd9a3a226&first_air_date.gte=2019-01-01&page=1"
-    , expect = Http.expectJson ShowsResult listOfShowsDecoder
-    }
+    Http.get
+        { url = "https://api.themoviedb.org/3/discover/tv?api_key=6aec6123c85be51886e8f69cd9a3a226&first_air_date.gte=2019-01-01&page=1"
+        , expect = Http.expectJson ShowsResult listOfShowsDecoder
+        }
+
 
 loginView : Model -> Html Msg
 loginView model =
     let
-        buttonText = if model.loadState == Loading.Off then "Login" else "Cancel"
+        buttonText =
+            if model.loadState == Loading.Off then
+                "Login"
+
+            else
+                "Cancel"
     in
-    
-        div [ class "content" ]
-            [ div [ class "form" ]
+    div [ class "content" ]
+        [ div [ class "form" ]
             [ div [ class "fields" ]
                 [ input [ placeholder "Username", onInput UpdateUserName, value model.userInfo.userName ]
                     []
@@ -264,7 +291,7 @@ loginView model =
                     ]
                 ]
             , div [ class "buttons" ]
-                [ div [ class "button fullWidth", onClick  StartLoginOrCancel ]
+                [ div [ class "button fullWidth", onClick StartLoginOrCancel ]
                     [ text buttonText ]
                 , div [ class "link", onClick (TabNavigate CreateAccountTab) ]
                     [ span []
@@ -273,6 +300,7 @@ loginView model =
                 ]
             ]
         ]
+
 
 tabView : Model -> Html Msg
 tabView model =
@@ -300,7 +328,15 @@ tabView model =
         , div [] [ text model.loginResult.message ]
         ]
 
+
 port registerUser : UserInfo -> Cmd msg
+
+
 port loginUser : UserInfo -> Cmd msg
+
+
+
 -- Incoming Ports
+
+
 port hedgeHogloginResult : (LoginResultInfo -> msg) -> Sub msg

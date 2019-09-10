@@ -1,15 +1,12 @@
 port module Main exposing (main)
-import Show as Show
-import Login as Login
-import Model exposing(..)
-import Json.Decode as Decode exposing (Value)
-import Browser
-import Browser.Navigation as Nav
-import Url exposing (Url)
-import Html exposing (..)
+
 import Browser exposing (Document)
+import Browser.Navigation as Nav
+import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (onClick, onInput)
+import Http exposing (..)
+import Json.Decode as Decode exposing (Value)
 import Json.Encode as E
 import Loading
     exposing
@@ -17,26 +14,36 @@ import Loading
         , defaultConfig
         , render
         )
-import Http exposing (..)
+import Login as Login
+import Model exposing (..)
+import Show as Show
+import Url exposing (Url)
 
-type Msg = GotAuthMsg Login.Msg
-           | GotShowMsg  Show.Msg
-           | Logout
+
+type Msg
+    = GotAuthMsg Login.Msg
+    | GotShowMsg Show.Msg
+    | Logout
 
 
 init : String -> ( Model, Cmd Msg )
 init flag =
     let
-        root = Auth initdata
-    in 
-        ( root, Cmd.none )
+        root =
+            Auth initdata
+    in
+    ( root, Cmd.none )
+
 
 type Model
     = Auth Login.Model
     | Shows Show.Model
 
+
 initShowsData : Show.Model
-initShowsData = { showInfos = []}
+initShowsData =
+    { showInfos = [] }
+
 
 initdata : Login.Model
 initdata =
@@ -55,83 +62,94 @@ initdata =
     }
 
 
-
 subscriptions : Model -> Sub Msg
 subscriptions model =
-   case model of
+    case model of
         Auth auth ->
             Sub.map GotAuthMsg (Login.subscriptions auth)
+
         Shows shows ->
             Sub.map GotShowMsg (Show.subscriptions shows)
-        
 
-    
-    --  
+
 
 -- Update
+
+
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case ( msg, model ) of
-            (GotAuthMsg subMsg, Auth userInfo ) ->
-                Login.update subMsg userInfo
-                    |> updateWith Auth GotAuthMsg model
-            ( GotShowMsg subMsg, Shows shows ) ->
-                Show.update subMsg shows
-                    |> updateWith Shows GotShowMsg model
-            (Logout, _ ) ->
-                 (Auth initdata, logoutUser "logging out..." )
-            ( _, _ ) ->
+        ( GotAuthMsg subMsg, Auth userInfo ) ->
+            Login.update subMsg userInfo
+                |> updateWith Auth GotAuthMsg model
+
+        ( GotShowMsg subMsg, Shows shows ) ->
+            Show.update subMsg shows
+                |> updateWith Shows GotShowMsg model
+
+        ( Logout, _ ) ->
+            ( Auth initdata, logoutUser "logging out..." )
+
+        ( _, _ ) ->
             -- Disregard messages that arrived for the wrong page.
-                ( model, Cmd.none )
+            ( model, Cmd.none )
 
 
 
-        -- GotShows result ->
-        --     case result of
-        --         Ok shows ->
-        --             (Shows { initShowsData | showInfos = shows }, Cmd.none)
-        --         Err _ ->
-        --             case  model  of
-        --                 Auth amdl  ->
-        --                     (model, Cmd.none)
-        --                 _ ->
-        --                     (model, Cmd.none)
-                    
-        -- Logout ->
-        --     (Auth initdata, logoutUser "logging out..." ) 
-        -- _ ->
-        --     case  model  of
-        --         Auth amdl  ->
-        --             loginUpdate msg amdl |> 
-        --                     updateWith Auth    
-        --         Shows smdl  -> 
-        --             showUpdate msg smdl |>
-        --                 updateWith Shows 
-                                        
+-- GotShows result ->
+--     case result of
+--         Ok shows ->
+--             (Shows { initShowsData | showInfos = shows }, Cmd.none)
+--         Err _ ->
+--             case  model  of
+--                 Auth amdl  ->
+--                     (model, Cmd.none)
+--                 _ ->
+--                     (model, Cmd.none)
+-- Logout ->
+--     (Auth initdata, logoutUser "logging out..." )
+-- _ ->
+--     case  model  of
+--         Auth amdl  ->
+--             loginUpdate msg amdl |>
+--                     updateWith Auth
+--         Shows smdl  ->
+--             showUpdate msg smdl |>
+--                 updateWith Shows
+
+
 updateWith : (subModel -> Model) -> (subMsg -> Msg) -> Model -> ( subModel, Cmd subMsg ) -> ( Model, Cmd Msg )
 updateWith toModel toMsg model ( subModel, subCmd ) =
     ( toModel subModel
     , Cmd.map toMsg subCmd
     )
-  
+
+
+
 -- -- (a -> msg) -> Cmd a -> Cmd msg
+
 
 view : Model -> Html Msg
 view model =
     let
         toView mdl =
             case mdl of
-                Shows smdl->
-                    Show.showsView smdl |> Html.map GotShowMsg                   
+                Shows smdl ->
+                    Show.showsView smdl |> Html.map GotShowMsg
+
                 Auth amdl ->
                     Login.tabView amdl |> Html.map GotAuthMsg
     in
     div [ id "root" ]
         [ div [ class "app" ]
-            [ model |> toView    ]
+            [ model |> toView ]
         ]
 
+
+
 -- main : Program Value Model Msg
+
+
 main =
     Browser.element
         { view = view
@@ -140,6 +158,9 @@ main =
         , subscriptions = subscriptions
         }
 
--- Outgoing ports
-port logoutUser : String -> Cmd msg
 
+
+-- Outgoing ports
+
+
+port logoutUser : String -> Cmd msg
