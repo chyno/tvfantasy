@@ -5,8 +5,7 @@ import Html exposing ( ..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (onClick, onInput)
 import Json.Encode as E
-import Model exposing (..)
- 
+import Loading exposing (LoadingState)
 import Loading
     exposing
         ( LoaderType(..)
@@ -14,7 +13,7 @@ import Loading
         , render
         )
 
-tabClassString : AuthModel -> ActiveLoginTab -> String
+tabClassString : Model -> ActiveLoginTab -> String
 tabClassString model tab =
     if model.activeTab == tab then
         "tab active"
@@ -23,7 +22,7 @@ tabClassString model tab =
         "tab"
 
 
-updateTab : ActiveLoginTab -> AuthModel -> ( AuthModel, Cmd Msg )
+updateTab : ActiveLoginTab -> Model -> ( Model, Cmd Msg )
 updateTab msg model =
     case msg of
         LoggingInTab ->
@@ -50,7 +49,7 @@ updateTab msg model =
             )
 
 
-headersView : AuthModel -> Html Msg
+headersView : Model -> Html Msg
 headersView model =
     div [ id "root" ]
         [ div [ class "app" ]
@@ -89,13 +88,51 @@ headersView model =
         ]
 
 
+type Msg
+    = TabNavigate ActiveLoginTab
+    | UpdateUserName String
+    | UpdatePassword String
+    | UpdateNewPassword String
+    | UpdateNewConfirmPassword String
+    | StartLoginOrCancel
+    | RegisterUser
+   
+-- Model
+-- Auth Model
+type alias Model =
+    { userInfo : UserInfo
+    , loginResult : LoginResultInfo
+    , activeTab : ActiveLoginTab
+    , loadState : LoadingState
+    }
 
+type alias LoginResultInfo =
+    { isLoggedIn : Bool
+    , address : String
+    , message : String
+    }
+
+type alias UserInfo =
+    { userName : String
+    , password : String
+    , passwordConfimation : String
+    }
+
+type ActiveLoginTab
+    = CreateAccountTab
+    | LoggingInTab
+
+
+-- Subscriptions
+subscriptions : Model -> Sub Msg
+subscriptions model =
+    Sub.none 
 
 -- toMsgNoParams: LoginMsg -> Msg
 -- toMsgNoParams subMsg   =
 --   GotLoginMsg subMsg
 
-createAccountView : AuthModel -> Html Msg
+createAccountView : Model -> Html Msg
 createAccountView model =
     div [ class "content" ]
         [ div [ class "form" ]
@@ -123,7 +160,7 @@ createAccountView model =
         ]
 
 
-loginView : AuthModel -> Html Msg
+loginView : Model -> Html Msg
 loginView model =
     let
         buttonText = if model.loadState == Loading.Off then "Login" else "Cancel"
@@ -152,7 +189,7 @@ loginView model =
             ]
         ]
 
-tabView : AuthModel -> Html Msg
+tabView : Model -> Html Msg
 tabView model =
     let
         vw =

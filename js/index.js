@@ -73,7 +73,7 @@ function isLoggedIn() {
 }
 
 function fakeLogin () {
-  app.ports.loginResult.send({
+  app.ports.hedgeHogloginResult.send({
          address: '1234',
          isLoggedIn: true,
          message: "Success 2",
