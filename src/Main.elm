@@ -66,14 +66,16 @@ initdata =
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
-   Sub.none
-   -- Sub.batch[hedgeHogloginResult DoneLogin]
-    -- case model of
-    --     Auth auth ->
-    --         Sub.map GotAuthMsg (Login.subscriptions auth)
+    let childSub =
+                case model of
+                    Auth auth ->
+                        Sub.map GotAuthMsg (Login.subscriptions auth)
 
-    --     Shows shows ->
-    --         Sub.map GotShowMsg (Show.subscriptions shows)
+                    Shows shows ->
+                        Sub.map GotShowMsg (Show.subscriptions shows)
+    in
+        Sub.batch[hedgeHogloginResult DoneLogin, childSub]
+   
 
 
 

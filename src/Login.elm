@@ -300,7 +300,6 @@ tabView model =
 
 
 port registerUser : UserInfo -> Cmd msg
-
 port loginUser : UserInfo -> Cmd msg
 
 

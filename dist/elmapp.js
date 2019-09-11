@@ -5016,8 +5016,68 @@ var author$project$Main$init = function (flag) {
 };
 var elm$core$Platform$Sub$batch = _Platform_batch;
 var elm$core$Platform$Sub$none = elm$core$Platform$Sub$batch(_List_Nil);
-var author$project$Main$subscriptions = function (model) {
+var author$project$Login$subscriptions = function (model) {
 	return elm$core$Platform$Sub$none;
+};
+var author$project$Main$DoneLogin = function (a) {
+	return {$: 'DoneLogin', a: a};
+};
+var author$project$Main$GotAuthMsg = function (a) {
+	return {$: 'GotAuthMsg', a: a};
+};
+var author$project$Main$GotShowMsg = function (a) {
+	return {$: 'GotShowMsg', a: a};
+};
+var elm$json$Json$Decode$andThen = _Json_andThen;
+var elm$json$Json$Decode$bool = _Json_decodeBool;
+var elm$json$Json$Decode$field = _Json_decodeField;
+var elm$json$Json$Decode$string = _Json_decodeString;
+var elm$json$Json$Decode$succeed = _Json_succeed;
+var author$project$Main$hedgeHogloginResult = _Platform_incomingPort(
+	'hedgeHogloginResult',
+	A2(
+		elm$json$Json$Decode$andThen,
+		function (message) {
+			return A2(
+				elm$json$Json$Decode$andThen,
+				function (isLoggedIn) {
+					return A2(
+						elm$json$Json$Decode$andThen,
+						function (address) {
+							return elm$json$Json$Decode$succeed(
+								{address: address, isLoggedIn: isLoggedIn, message: message});
+						},
+						A2(elm$json$Json$Decode$field, 'address', elm$json$Json$Decode$string));
+				},
+				A2(elm$json$Json$Decode$field, 'isLoggedIn', elm$json$Json$Decode$bool));
+		},
+		A2(elm$json$Json$Decode$field, 'message', elm$json$Json$Decode$string)));
+var author$project$Show$subscriptions = function (model) {
+	return elm$core$Platform$Sub$none;
+};
+var elm$core$Platform$Sub$map = _Platform_map;
+var author$project$Main$subscriptions = function (model) {
+	var childSub = function () {
+		if (model.$ === 'Auth') {
+			var auth = model.a;
+			return A2(
+				elm$core$Platform$Sub$map,
+				author$project$Main$GotAuthMsg,
+				author$project$Login$subscriptions(auth));
+		} else {
+			var shows = model.a;
+			return A2(
+				elm$core$Platform$Sub$map,
+				author$project$Main$GotShowMsg,
+				author$project$Show$subscriptions(shows));
+		}
+	}();
+	return elm$core$Platform$Sub$batch(
+		_List_fromArray(
+			[
+				author$project$Main$hedgeHogloginResult(author$project$Main$DoneLogin),
+				childSub
+			]));
 };
 var elm$json$Json$Encode$object = function (pairs) {
 	return _Json_wrap(
@@ -5164,12 +5224,6 @@ var author$project$Login$update = F2(
 					author$project$Login$registerUser(model.userInfo));
 		}
 	});
-var author$project$Main$GotAuthMsg = function (a) {
-	return {$: 'GotAuthMsg', a: a};
-};
-var author$project$Main$GotShowMsg = function (a) {
-	return {$: 'GotShowMsg', a: a};
-};
 var author$project$Main$Shows = function (a) {
 	return {$: 'Shows', a: a};
 };
@@ -5180,10 +5234,8 @@ var author$project$Model$ShowInfo = F4(
 	function (name, overview, firstAirDate, voteAverage) {
 		return {firstAirDate: firstAirDate, name: name, overview: overview, voteAverage: voteAverage};
 	});
-var elm$json$Json$Decode$field = _Json_decodeField;
 var elm$json$Json$Decode$float = _Json_decodeFloat;
 var elm$json$Json$Decode$map4 = _Json_map4;
-var elm$json$Json$Decode$string = _Json_decodeString;
 var author$project$Model$showDecoder = A5(
 	elm$json$Json$Decode$map4,
 	author$project$Model$ShowInfo,
@@ -6160,7 +6212,6 @@ var author$project$Login$UpdateUserName = function (a) {
 };
 var elm$json$Json$Decode$map = _Json_map1;
 var elm$json$Json$Decode$map2 = _Json_map2;
-var elm$json$Json$Decode$succeed = _Json_succeed;
 var elm$virtual_dom$VirtualDom$toHandlerInt = function (handler) {
 	switch (handler.$) {
 		case 'Normal':
