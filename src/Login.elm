@@ -100,28 +100,23 @@ type Msg
     | UpdateNewConfirmPassword String
     | StartLoginOrCancel
     | RegisterUser
-    | DoneLogin LoginResultInfo
-    | ShowsResult (Result Http.Error (List ShowInfo))
-
-
+    
 
 -- Model
 -- Auth Model
 
 
+ 
+
 type alias Model =
     { userInfo : UserInfo
-    , loginResult : LoginResultInfo
+    , loginResult: Model.LoginResultInfo
     , activeTab : ActiveLoginTab
     , loadState : LoadingState
     }
 
 
-type alias LoginResultInfo =
-    { isLoggedIn : Bool
-    , address : String
-    , message : String
-    }
+
 
 
 type alias UserInfo =
@@ -142,10 +137,8 @@ type ActiveLoginTab
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
-    Sub.batch
-        [ hedgeHogloginResult DoneLogin
-        ]
-
+    Sub.none
+    
 
 
 -- toMsgNoParams: LoginMsg -> Msg
@@ -188,27 +181,11 @@ createAccountView model =
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
+        
         TabNavigate tab ->
             updateTab tab model
 
-        DoneLogin data ->
-            case data.isLoggedIn of
-                True ->
-                    ( { model
-                        | loginResult = data
-                        , loadState = Loading.Off
-                      }
-                    , getTvShows
-                    )
-
-                False ->
-                    ( { model
-                        | loginResult = data
-                        , loadState = Loading.Off
-                      }
-                    , Cmd.none
-                    )
-
+        
         UpdateNewConfirmPassword pswd ->
             let
                 li =
@@ -256,16 +233,9 @@ update msg model =
         RegisterUser ->
             ( model, registerUser model.userInfo )
 
-        _ ->
-            ( model, Cmd.none )
 
 
-getTvShows : Cmd Msg
-getTvShows =
-    Http.get
-        { url = "https://api.themoviedb.org/3/discover/tv?api_key=6aec6123c85be51886e8f69cd9a3a226&first_air_date.gte=2019-01-01&page=1"
-        , expect = Http.expectJson ShowsResult listOfShowsDecoder
-        }
+
 
 
 loginView : Model -> Html Msg
@@ -331,7 +301,6 @@ tabView model =
 
 port registerUser : UserInfo -> Cmd msg
 
-
 port loginUser : UserInfo -> Cmd msg
 
 
@@ -339,4 +308,3 @@ port loginUser : UserInfo -> Cmd msg
 -- Incoming Ports
 
 
-port hedgeHogloginResult : (LoginResultInfo -> msg) -> Sub msg

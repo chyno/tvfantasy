@@ -15,7 +15,7 @@ import Loading
         , render
         )
 import Login as Login
-import Model exposing (..)
+import Model 
 import Show as Show
 import Url exposing (Url)
 
@@ -23,8 +23,8 @@ import Url exposing (Url)
 type Msg
     = GotAuthMsg Login.Msg
     | GotShowMsg Show.Msg
-    | Logout
-
+    | ShowsResult (Result Http.Error (List Model.ShowInfo))
+    | DoneLogin Model.LoginResultInfo
 
 init : String -> ( Model, Cmd Msg )
 init flag =
@@ -35,10 +35,12 @@ init flag =
     ( root, Cmd.none )
 
 
+
 type Model
     = Auth Login.Model
     | Shows Show.Model
-
+   
+    
 
 initShowsData : Show.Model
 initShowsData =
@@ -64,18 +66,18 @@ initdata =
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
-    case model of
-        Auth auth ->
-            Sub.map GotAuthMsg (Login.subscriptions auth)
+   Sub.none
+   -- Sub.batch[hedgeHogloginResult DoneLogin]
+    -- case model of
+    --     Auth auth ->
+    --         Sub.map GotAuthMsg (Login.subscriptions auth)
 
-        Shows shows ->
-            Sub.map GotShowMsg (Show.subscriptions shows)
+    --     Shows shows ->
+    --         Sub.map GotShowMsg (Show.subscriptions shows)
 
 
 
 -- Update
-
-
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case ( msg, model ) of
@@ -86,15 +88,25 @@ update msg model =
         ( GotShowMsg subMsg, Shows shows ) ->
             Show.update subMsg shows
                 |> updateWith Shows GotShowMsg model
-
-        ( Logout, _ ) ->
-            ( Auth initdata, logoutUser "logging out..." )
-
+        (DoneLogin data, mdl) ->
+            case data.isLoggedIn of
+                True ->
+                    (Shows initShowsData, getTvShows)  
+                False ->
+                    ( mdl , Cmd.none
+                    ) 
+            
         ( _, _ ) ->
             -- Disregard messages that arrived for the wrong page.
             ( model, Cmd.none )
 
 
+getTvShows : Cmd Msg
+getTvShows =
+    Http.get
+        { url = "https://api.themoviedb.org/3/discover/tv?api_key=6aec6123c85be51886e8f69cd9a3a226&first_air_date.gte=2019-01-01&page=1"
+        , expect = Http.expectJson ShowsResult Model.listOfShowsDecoder
+        }
 
 -- GotShows result ->
 --     case result of
@@ -161,6 +173,6 @@ main =
 
 
 -- Outgoing ports
-
-
 port logoutUser : String -> Cmd msg
+
+port hedgeHogloginResult : (Model.LoginResultInfo -> msg) -> Sub msg

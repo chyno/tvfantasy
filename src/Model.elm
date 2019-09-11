@@ -1,8 +1,17 @@
-module Model exposing (..)
+module Model exposing (Navigation(..), ShowInfo, listOfShowsDecoder,showDecoder , LoginResultInfo)
 
 import Json.Decode as D
 import Json.Encode as E
 
+
+type alias LoginResultInfo =
+    { isLoggedIn : Bool
+    , address : String
+    , message : String
+    }
+    
+type Navigation =  StartShow
+                |  Lougout
 
 type alias ShowInfo =
     { name : String
@@ -31,3 +40,4 @@ showDecoder =
 listOfShowsDecoder : D.Decoder (List ShowInfo)
 listOfShowsDecoder =
     D.field "results" (D.list showDecoder)
+

@@ -5014,76 +5014,176 @@ var author$project$Main$init = function (flag) {
 	var root = author$project$Main$Auth(author$project$Main$initdata);
 	return _Utils_Tuple2(root, elm$core$Platform$Cmd$none);
 };
-var author$project$Login$DoneLogin = function (a) {
-	return {$: 'DoneLogin', a: a};
-};
-var elm$json$Json$Decode$andThen = _Json_andThen;
-var elm$json$Json$Decode$bool = _Json_decodeBool;
-var elm$json$Json$Decode$field = _Json_decodeField;
-var elm$json$Json$Decode$string = _Json_decodeString;
-var elm$json$Json$Decode$succeed = _Json_succeed;
-var author$project$Login$hedgeHogloginResult = _Platform_incomingPort(
-	'hedgeHogloginResult',
-	A2(
-		elm$json$Json$Decode$andThen,
-		function (message) {
-			return A2(
-				elm$json$Json$Decode$andThen,
-				function (isLoggedIn) {
-					return A2(
-						elm$json$Json$Decode$andThen,
-						function (address) {
-							return elm$json$Json$Decode$succeed(
-								{address: address, isLoggedIn: isLoggedIn, message: message});
-						},
-						A2(elm$json$Json$Decode$field, 'address', elm$json$Json$Decode$string));
-				},
-				A2(elm$json$Json$Decode$field, 'isLoggedIn', elm$json$Json$Decode$bool));
-		},
-		A2(elm$json$Json$Decode$field, 'message', elm$json$Json$Decode$string)));
 var elm$core$Platform$Sub$batch = _Platform_batch;
-var author$project$Login$subscriptions = function (model) {
-	return elm$core$Platform$Sub$batch(
-		_List_fromArray(
-			[
-				author$project$Login$hedgeHogloginResult(author$project$Login$DoneLogin)
-			]));
+var elm$core$Platform$Sub$none = elm$core$Platform$Sub$batch(_List_Nil);
+var author$project$Main$subscriptions = function (model) {
+	return elm$core$Platform$Sub$none;
 };
+var elm$json$Json$Encode$object = function (pairs) {
+	return _Json_wrap(
+		A3(
+			elm$core$List$foldl,
+			F2(
+				function (_n0, obj) {
+					var k = _n0.a;
+					var v = _n0.b;
+					return A3(_Json_addField, k, v, obj);
+				}),
+			_Json_emptyObject(_Utils_Tuple0),
+			pairs));
+};
+var elm$json$Json$Encode$string = _Json_wrap;
+var author$project$Login$loginUser = _Platform_outgoingPort(
+	'loginUser',
+	function ($) {
+		return elm$json$Json$Encode$object(
+			_List_fromArray(
+				[
+					_Utils_Tuple2(
+					'password',
+					elm$json$Json$Encode$string($.password)),
+					_Utils_Tuple2(
+					'passwordConfimation',
+					elm$json$Json$Encode$string($.passwordConfimation)),
+					_Utils_Tuple2(
+					'userName',
+					elm$json$Json$Encode$string($.userName))
+				]));
+	});
+var author$project$Login$registerUser = _Platform_outgoingPort(
+	'registerUser',
+	function ($) {
+		return elm$json$Json$Encode$object(
+			_List_fromArray(
+				[
+					_Utils_Tuple2(
+					'password',
+					elm$json$Json$Encode$string($.password)),
+					_Utils_Tuple2(
+					'passwordConfimation',
+					elm$json$Json$Encode$string($.passwordConfimation)),
+					_Utils_Tuple2(
+					'userName',
+					elm$json$Json$Encode$string($.userName))
+				]));
+	});
+var author$project$Login$CreateAccountTab = {$: 'CreateAccountTab'};
+var author$project$Login$updateTab = F2(
+	function (msg, model) {
+		if (msg.$ === 'LoggingInTab') {
+			return _Utils_Tuple2(
+				_Utils_update(
+					model,
+					{
+						activeTab: author$project$Login$LoggingInTab,
+						userInfo: {password: '', passwordConfimation: '', userName: ''}
+					}),
+				elm$core$Platform$Cmd$none);
+		} else {
+			return _Utils_Tuple2(
+				_Utils_update(
+					model,
+					{
+						activeTab: author$project$Login$CreateAccountTab,
+						userInfo: {password: '', passwordConfimation: '', userName: ''}
+					}),
+				elm$core$Platform$Cmd$none);
+		}
+	});
+var perzanko$elm_loading$Loading$On = {$: 'On'};
+var author$project$Login$update = F2(
+	function (msg, model) {
+		switch (msg.$) {
+			case 'TabNavigate':
+				var tab = msg.a;
+				return A2(author$project$Login$updateTab, tab, model);
+			case 'UpdateNewConfirmPassword':
+				var pswd = msg.a;
+				var li = model.userInfo;
+				return _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{
+							userInfo: _Utils_update(
+								li,
+								{passwordConfimation: pswd})
+						}),
+					elm$core$Platform$Cmd$none);
+			case 'UpdatePassword':
+				var pswd = msg.a;
+				var li = model.userInfo;
+				return _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{
+							userInfo: _Utils_update(
+								li,
+								{password: pswd})
+						}),
+					elm$core$Platform$Cmd$none);
+			case 'UpdateNewPassword':
+				var pswd = msg.a;
+				var li = model.userInfo;
+				return _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{
+							userInfo: _Utils_update(
+								li,
+								{password: pswd})
+						}),
+					elm$core$Platform$Cmd$none);
+			case 'UpdateUserName':
+				var usrname = msg.a;
+				var li = model.userInfo;
+				return _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{
+							userInfo: _Utils_update(
+								li,
+								{userName: usrname})
+						}),
+					elm$core$Platform$Cmd$none);
+			case 'StartLoginOrCancel':
+				return _Utils_eq(model.loadState, perzanko$elm_loading$Loading$Off) ? _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{
+							loadState: perzanko$elm_loading$Loading$On,
+							loginResult: {address: '-', isLoggedIn: false, message: ''}
+						}),
+					author$project$Login$loginUser(model.userInfo)) : _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{loadState: perzanko$elm_loading$Loading$Off}),
+					elm$core$Platform$Cmd$none);
+			default:
+				return _Utils_Tuple2(
+					model,
+					author$project$Login$registerUser(model.userInfo));
+		}
+	});
 var author$project$Main$GotAuthMsg = function (a) {
 	return {$: 'GotAuthMsg', a: a};
 };
 var author$project$Main$GotShowMsg = function (a) {
 	return {$: 'GotShowMsg', a: a};
 };
-var elm$core$Platform$Sub$none = elm$core$Platform$Sub$batch(_List_Nil);
-var author$project$Show$subscriptions = function (model) {
-	return elm$core$Platform$Sub$none;
+var author$project$Main$Shows = function (a) {
+	return {$: 'Shows', a: a};
 };
-var elm$core$Platform$Sub$map = _Platform_map;
-var author$project$Main$subscriptions = function (model) {
-	if (model.$ === 'Auth') {
-		var auth = model.a;
-		return A2(
-			elm$core$Platform$Sub$map,
-			author$project$Main$GotAuthMsg,
-			author$project$Login$subscriptions(auth));
-	} else {
-		var shows = model.a;
-		return A2(
-			elm$core$Platform$Sub$map,
-			author$project$Main$GotShowMsg,
-			author$project$Show$subscriptions(shows));
-	}
-};
-var author$project$Login$ShowsResult = function (a) {
+var author$project$Main$ShowsResult = function (a) {
 	return {$: 'ShowsResult', a: a};
 };
 var author$project$Model$ShowInfo = F4(
 	function (name, overview, firstAirDate, voteAverage) {
 		return {firstAirDate: firstAirDate, name: name, overview: overview, voteAverage: voteAverage};
 	});
+var elm$json$Json$Decode$field = _Json_decodeField;
 var elm$json$Json$Decode$float = _Json_decodeFloat;
 var elm$json$Json$Decode$map4 = _Json_map4;
+var elm$json$Json$Decode$string = _Json_decodeString;
 var author$project$Model$showDecoder = A5(
 	elm$json$Json$Decode$map4,
 	author$project$Model$ShowInfo,
@@ -5977,178 +6077,12 @@ var elm$http$Http$get = function (r) {
 	return elm$http$Http$request(
 		{body: elm$http$Http$emptyBody, expect: r.expect, headers: _List_Nil, method: 'GET', timeout: elm$core$Maybe$Nothing, tracker: elm$core$Maybe$Nothing, url: r.url});
 };
-var author$project$Login$getTvShows = elm$http$Http$get(
+var author$project$Main$getTvShows = elm$http$Http$get(
 	{
-		expect: A2(elm$http$Http$expectJson, author$project$Login$ShowsResult, author$project$Model$listOfShowsDecoder),
+		expect: A2(elm$http$Http$expectJson, author$project$Main$ShowsResult, author$project$Model$listOfShowsDecoder),
 		url: 'https://api.themoviedb.org/3/discover/tv?api_key=6aec6123c85be51886e8f69cd9a3a226&first_air_date.gte=2019-01-01&page=1'
 	});
-var elm$json$Json$Encode$object = function (pairs) {
-	return _Json_wrap(
-		A3(
-			elm$core$List$foldl,
-			F2(
-				function (_n0, obj) {
-					var k = _n0.a;
-					var v = _n0.b;
-					return A3(_Json_addField, k, v, obj);
-				}),
-			_Json_emptyObject(_Utils_Tuple0),
-			pairs));
-};
-var elm$json$Json$Encode$string = _Json_wrap;
-var author$project$Login$loginUser = _Platform_outgoingPort(
-	'loginUser',
-	function ($) {
-		return elm$json$Json$Encode$object(
-			_List_fromArray(
-				[
-					_Utils_Tuple2(
-					'password',
-					elm$json$Json$Encode$string($.password)),
-					_Utils_Tuple2(
-					'passwordConfimation',
-					elm$json$Json$Encode$string($.passwordConfimation)),
-					_Utils_Tuple2(
-					'userName',
-					elm$json$Json$Encode$string($.userName))
-				]));
-	});
-var author$project$Login$registerUser = _Platform_outgoingPort(
-	'registerUser',
-	function ($) {
-		return elm$json$Json$Encode$object(
-			_List_fromArray(
-				[
-					_Utils_Tuple2(
-					'password',
-					elm$json$Json$Encode$string($.password)),
-					_Utils_Tuple2(
-					'passwordConfimation',
-					elm$json$Json$Encode$string($.passwordConfimation)),
-					_Utils_Tuple2(
-					'userName',
-					elm$json$Json$Encode$string($.userName))
-				]));
-	});
-var author$project$Login$CreateAccountTab = {$: 'CreateAccountTab'};
-var author$project$Login$updateTab = F2(
-	function (msg, model) {
-		if (msg.$ === 'LoggingInTab') {
-			return _Utils_Tuple2(
-				_Utils_update(
-					model,
-					{
-						activeTab: author$project$Login$LoggingInTab,
-						userInfo: {password: '', passwordConfimation: '', userName: ''}
-					}),
-				elm$core$Platform$Cmd$none);
-		} else {
-			return _Utils_Tuple2(
-				_Utils_update(
-					model,
-					{
-						activeTab: author$project$Login$CreateAccountTab,
-						userInfo: {password: '', passwordConfimation: '', userName: ''}
-					}),
-				elm$core$Platform$Cmd$none);
-		}
-	});
-var perzanko$elm_loading$Loading$On = {$: 'On'};
-var author$project$Login$update = F2(
-	function (msg, model) {
-		switch (msg.$) {
-			case 'TabNavigate':
-				var tab = msg.a;
-				return A2(author$project$Login$updateTab, tab, model);
-			case 'DoneLogin':
-				var data = msg.a;
-				var _n1 = data.isLoggedIn;
-				if (_n1) {
-					return _Utils_Tuple2(
-						_Utils_update(
-							model,
-							{loadState: perzanko$elm_loading$Loading$Off, loginResult: data}),
-						author$project$Login$getTvShows);
-				} else {
-					return _Utils_Tuple2(
-						_Utils_update(
-							model,
-							{loadState: perzanko$elm_loading$Loading$Off, loginResult: data}),
-						elm$core$Platform$Cmd$none);
-				}
-			case 'UpdateNewConfirmPassword':
-				var pswd = msg.a;
-				var li = model.userInfo;
-				return _Utils_Tuple2(
-					_Utils_update(
-						model,
-						{
-							userInfo: _Utils_update(
-								li,
-								{passwordConfimation: pswd})
-						}),
-					elm$core$Platform$Cmd$none);
-			case 'UpdatePassword':
-				var pswd = msg.a;
-				var li = model.userInfo;
-				return _Utils_Tuple2(
-					_Utils_update(
-						model,
-						{
-							userInfo: _Utils_update(
-								li,
-								{password: pswd})
-						}),
-					elm$core$Platform$Cmd$none);
-			case 'UpdateNewPassword':
-				var pswd = msg.a;
-				var li = model.userInfo;
-				return _Utils_Tuple2(
-					_Utils_update(
-						model,
-						{
-							userInfo: _Utils_update(
-								li,
-								{password: pswd})
-						}),
-					elm$core$Platform$Cmd$none);
-			case 'UpdateUserName':
-				var usrname = msg.a;
-				var li = model.userInfo;
-				return _Utils_Tuple2(
-					_Utils_update(
-						model,
-						{
-							userInfo: _Utils_update(
-								li,
-								{userName: usrname})
-						}),
-					elm$core$Platform$Cmd$none);
-			case 'StartLoginOrCancel':
-				return _Utils_eq(model.loadState, perzanko$elm_loading$Loading$Off) ? _Utils_Tuple2(
-					_Utils_update(
-						model,
-						{
-							loadState: perzanko$elm_loading$Loading$On,
-							loginResult: {address: '-', isLoggedIn: false, message: ''}
-						}),
-					author$project$Login$loginUser(model.userInfo)) : _Utils_Tuple2(
-					_Utils_update(
-						model,
-						{loadState: perzanko$elm_loading$Loading$Off}),
-					elm$core$Platform$Cmd$none);
-			case 'RegisterUser':
-				return _Utils_Tuple2(
-					model,
-					author$project$Login$registerUser(model.userInfo));
-			default:
-				return _Utils_Tuple2(model, elm$core$Platform$Cmd$none);
-		}
-	});
-var author$project$Main$Shows = function (a) {
-	return {$: 'Shows', a: a};
-};
-var author$project$Main$logoutUser = _Platform_outgoingPort('logoutUser', elm$json$Json$Encode$string);
+var author$project$Main$initShowsData = {showInfos: _List_Nil};
 var elm$core$Platform$Cmd$map = _Platform_map;
 var author$project$Main$updateWith = F4(
 	function (toModel, toMsg, model, _n0) {
@@ -6194,11 +6128,19 @@ var author$project$Main$update = F2(
 					} else {
 						break _n0$3;
 					}
+				case 'DoneLogin':
+					var data = _n0.a.a;
+					var mdl = _n0.b;
+					var _n1 = data.isLoggedIn;
+					if (_n1) {
+						return _Utils_Tuple2(
+							author$project$Main$Shows(author$project$Main$initShowsData),
+							author$project$Main$getTvShows);
+					} else {
+						return _Utils_Tuple2(mdl, elm$core$Platform$Cmd$none);
+					}
 				default:
-					var _n1 = _n0.a;
-					return _Utils_Tuple2(
-						author$project$Main$Auth(author$project$Main$initdata),
-						author$project$Main$logoutUser('logging out...'));
+					break _n0$3;
 			}
 		}
 		return _Utils_Tuple2(model, elm$core$Platform$Cmd$none);
@@ -6218,6 +6160,7 @@ var author$project$Login$UpdateUserName = function (a) {
 };
 var elm$json$Json$Decode$map = _Json_map1;
 var elm$json$Json$Decode$map2 = _Json_map2;
+var elm$json$Json$Decode$succeed = _Json_succeed;
 var elm$virtual_dom$VirtualDom$toHandlerInt = function (handler) {
 	switch (handler.$) {
 		case 'Normal':
