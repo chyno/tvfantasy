@@ -23,7 +23,6 @@ import Url exposing (Url)
 type Msg
     = GotAuthMsg Login.Msg
     | GotShowMsg Show.Msg
-    | ShowsResult (Result Http.Error (List Model.ShowInfo))
     | DoneLogin Model.LoginResultInfo
 
 init : String -> ( Model, Cmd Msg )
@@ -40,11 +39,7 @@ type Model
     = Auth Login.Model
     | Shows Show.Model
    
-    
 
-initShowsData : Show.Model
-initShowsData =
-    { showInfos = [] }
 
 
 initdata : Login.Model
@@ -93,22 +88,18 @@ update msg model =
         (DoneLogin data, mdl) ->
             case data.isLoggedIn of
                 True ->
-                    (Shows initShowsData, getTvShows)  
+                    Show.update Show.InitShows Show.initShowsData
+                        |> updateWith Shows GotShowMsg model
+                      
                 False ->
-                    ( mdl , Cmd.none
-                    ) 
+                    ( mdl , Cmd.none ) 
             
         ( _, _ ) ->
             -- Disregard messages that arrived for the wrong page.
             ( model, Cmd.none )
 
 
-getTvShows : Cmd Msg
-getTvShows =
-    Http.get
-        { url = "https://api.themoviedb.org/3/discover/tv?api_key=6aec6123c85be51886e8f69cd9a3a226&first_air_date.gte=2019-01-01&page=1"
-        , expect = Http.expectJson ShowsResult Model.listOfShowsDecoder
-        }
+
 
 -- GotShows result ->
 --     case result of
@@ -149,7 +140,7 @@ view model =
         toView mdl =
             case mdl of
                 Shows smdl ->
-                    Show.showsView smdl |> Html.map GotShowMsg
+                    Show.view smdl |> Html.map GotShowMsg
 
                 Auth amdl ->
                     Login.tabView amdl |> Html.map GotAuthMsg

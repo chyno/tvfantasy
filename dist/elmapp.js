@@ -5227,9 +5227,17 @@ var author$project$Login$update = F2(
 var author$project$Main$Shows = function (a) {
 	return {$: 'Shows', a: a};
 };
-var author$project$Main$ShowsResult = function (a) {
-	return {$: 'ShowsResult', a: a};
-};
+var elm$core$Platform$Cmd$map = _Platform_map;
+var author$project$Main$updateWith = F4(
+	function (toModel, toMsg, model, _n0) {
+		var subModel = _n0.a;
+		var subCmd = _n0.b;
+		return _Utils_Tuple2(
+			toModel(subModel),
+			A2(elm$core$Platform$Cmd$map, toMsg, subCmd));
+	});
+var author$project$Show$InitShows = {$: 'InitShows'};
+var author$project$Show$initShowsData = {showInfos: _List_Nil};
 var author$project$Model$ShowInfo = F4(
 	function (name, overview, firstAirDate, voteAverage) {
 		return {firstAirDate: firstAirDate, name: name, overview: overview, voteAverage: voteAverage};
@@ -5248,6 +5256,9 @@ var author$project$Model$listOfShowsDecoder = A2(
 	elm$json$Json$Decode$field,
 	'results',
 	elm$json$Json$Decode$list(author$project$Model$showDecoder));
+var author$project$Show$ShowsResult = function (a) {
+	return {$: 'ShowsResult', a: a};
+};
 var elm$core$Result$mapError = F2(
 	function (f, result) {
 		if (result.$ === 'Ok') {
@@ -6129,24 +6140,28 @@ var elm$http$Http$get = function (r) {
 	return elm$http$Http$request(
 		{body: elm$http$Http$emptyBody, expect: r.expect, headers: _List_Nil, method: 'GET', timeout: elm$core$Maybe$Nothing, tracker: elm$core$Maybe$Nothing, url: r.url});
 };
-var author$project$Main$getTvShows = elm$http$Http$get(
+var author$project$Show$getTvShows = elm$http$Http$get(
 	{
-		expect: A2(elm$http$Http$expectJson, author$project$Main$ShowsResult, author$project$Model$listOfShowsDecoder),
+		expect: A2(elm$http$Http$expectJson, author$project$Show$ShowsResult, author$project$Model$listOfShowsDecoder),
 		url: 'https://api.themoviedb.org/3/discover/tv?api_key=6aec6123c85be51886e8f69cd9a3a226&first_air_date.gte=2019-01-01&page=1'
-	});
-var author$project$Main$initShowsData = {showInfos: _List_Nil};
-var elm$core$Platform$Cmd$map = _Platform_map;
-var author$project$Main$updateWith = F4(
-	function (toModel, toMsg, model, _n0) {
-		var subModel = _n0.a;
-		var subCmd = _n0.b;
-		return _Utils_Tuple2(
-			toModel(subModel),
-			A2(elm$core$Platform$Cmd$map, toMsg, subCmd));
 	});
 var author$project$Show$update = F2(
 	function (msg, model) {
-		return _Utils_Tuple2(model, elm$core$Platform$Cmd$none);
+		if (msg.$ === 'InitShows') {
+			return _Utils_Tuple2(model, author$project$Show$getTvShows);
+		} else {
+			var result = msg.a;
+			if (result.$ === 'Ok') {
+				var shows = result.a;
+				return _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{showInfos: shows}),
+					elm$core$Platform$Cmd$none);
+			} else {
+				return _Utils_Tuple2(model, elm$core$Platform$Cmd$none);
+			}
+		}
 	});
 var author$project$Main$update = F2(
 	function (msg, model) {
@@ -6180,19 +6195,20 @@ var author$project$Main$update = F2(
 					} else {
 						break _n0$3;
 					}
-				case 'DoneLogin':
+				default:
 					var data = _n0.a.a;
 					var mdl = _n0.b;
 					var _n1 = data.isLoggedIn;
 					if (_n1) {
-						return _Utils_Tuple2(
-							author$project$Main$Shows(author$project$Main$initShowsData),
-							author$project$Main$getTvShows);
+						return A4(
+							author$project$Main$updateWith,
+							author$project$Main$Shows,
+							author$project$Main$GotShowMsg,
+							model,
+							A2(author$project$Show$update, author$project$Show$InitShows, author$project$Show$initShowsData));
 					} else {
 						return _Utils_Tuple2(mdl, elm$core$Platform$Cmd$none);
 					}
-				default:
-					break _n0$3;
 			}
 		}
 		return _Utils_Tuple2(model, elm$core$Platform$Cmd$none);
@@ -10355,7 +10371,7 @@ var elm$html$Html$table = _VirtualDom_node('table');
 var elm$html$Html$td = _VirtualDom_node('td');
 var elm$html$Html$th = _VirtualDom_node('th');
 var elm$html$Html$tr = _VirtualDom_node('tr');
-var author$project$Show$showsView = function (model) {
+var author$project$Show$view = function (model) {
 	var showDetails = function (x) {
 		return A2(
 			elm$html$Html$tr,
@@ -10469,7 +10485,7 @@ var author$project$Main$view = function (model) {
 			return A2(
 				elm$html$Html$map,
 				author$project$Main$GotShowMsg,
-				author$project$Show$showsView(smdl));
+				author$project$Show$view(smdl));
 		} else {
 			var amdl = mdl.a;
 			return A2(

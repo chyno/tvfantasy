@@ -1,4 +1,4 @@
-module Show exposing (..)
+module Show exposing (Model, view, Msg(..), update, subscriptions, initShowsData)
 
 import Browser
 import Html exposing (..)
@@ -9,9 +9,10 @@ import Loading exposing (LoadingState)
 import Model exposing (..)
 
 
-type Msg
-    = InitShows
 
+type Msg
+    =   InitShows
+    | ShowsResult (Result Http.Error (List Model.ShowInfo))
 
 
 -- Model
@@ -21,26 +22,47 @@ type alias Model =
     { showInfos : List ShowInfo
     }
 
+initShowsData : Model
+initShowsData = 
+    {
+        showInfos = []
+    }
 
+getTvShows : Cmd Msg
+getTvShows =
+    Http.get
+        { url = "https://api.themoviedb.org/3/discover/tv?api_key=6aec6123c85be51886e8f69cd9a3a226&first_air_date.gte=2019-01-01&page=1"
+        , expect = Http.expectJson ShowsResult Model.listOfShowsDecoder
+        }
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
-        _ ->
-            ( model, Cmd.none )
-
+        InitShows ->
+            (model, getTvShows)
+        ShowsResult result ->
+            case result of
+                Ok shows ->
+                    ({ model | showInfos = shows }, Cmd.none)
+                Err _ ->
+                    (model, Cmd.none)
+         
+             
 
 
 -- Subscriptions
-
-
 subscriptions : Model -> Sub Msg
 subscriptions model =
     Sub.none
 
 
-showsView : Model -> Html Msg
-showsView model =
+
+loadingView :  Html Msg
+loadingView  =
+    div[][text "Loading ...."]
+
+view : Model -> Html Msg
+view model =
     let
         showDetails =
             \x ->
