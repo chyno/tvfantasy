@@ -1,4 +1,4 @@
-module Show exposing (Model, view, Msg(..), update, subscriptions, initShowsData)
+module Page.Show exposing (Model, view, Msg(..), update, subscriptions, initShowsData)
 
 import Browser
 import Html exposing (..)

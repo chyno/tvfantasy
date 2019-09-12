@@ -1,14 +1,10 @@
-module Model exposing (Navigation(..), ShowInfo, listOfShowsDecoder,showDecoder , LoginResultInfo)
+module Model exposing (Navigation(..), ShowInfo, listOfShowsDecoder,showDecoder )
 
 import Json.Decode as D
 import Json.Encode as E
 
 
-type alias LoginResultInfo =
-    { isLoggedIn : Bool
-    , address : String
-    , message : String
-    }
+
     
 type Navigation =  StartShow
                 |  Lougout

@@ -14,50 +14,27 @@ import Loading
         , defaultConfig
         , render
         )
-import Login as Login
-import Model 
-import Show as Show
+import Page.Login as Login
+import Page.Show as Show
 import Url exposing (Url)
-
+import Model
 
 type Msg
     = GotAuthMsg Login.Msg
     | GotShowMsg Show.Msg
-    | DoneLogin Model.LoginResultInfo
+    | DoneLogin Login.LoginResultInfo
 
 init : String -> ( Model, Cmd Msg )
 init flag =
     let
         root =
-            Auth initdata
+            Auth Login.initdata
     in
     ( root, Cmd.none )
-
-
 
 type Model
     = Auth Login.Model
     | Shows Show.Model
-   
-
-
-
-initdata : Login.Model
-initdata =
-    { loginResult =
-        { isLoggedIn = False
-        , address = "-"
-        , message = ""
-        }
-    , userInfo =
-        { userName = ""
-        , password = ""
-        , passwordConfimation = ""
-        }
-    , activeTab = Login.LoggingInTab
-    , loadState = Loading.Off
-    }
-
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
@@ -98,29 +75,6 @@ update msg model =
             -- Disregard messages that arrived for the wrong page.
             ( model, Cmd.none )
 
-
-
-
--- GotShows result ->
---     case result of
---         Ok shows ->
---             (Shows { initShowsData | showInfos = shows }, Cmd.none)
---         Err _ ->
---             case  model  of
---                 Auth amdl  ->
---                     (model, Cmd.none)
---                 _ ->
---                     (model, Cmd.none)
--- Logout ->
---     (Auth initdata, logoutUser "logging out..." )
--- _ ->
---     case  model  of
---         Auth amdl  ->
---             loginUpdate msg amdl |>
---                     updateWith Auth
---         Shows smdl  ->
---             showUpdate msg smdl |>
---                 updateWith Shows
 
 
 updateWith : (subModel -> Model) -> (subMsg -> Msg) -> Model -> ( subModel, Cmd subMsg ) -> ( Model, Cmd Msg )
@@ -168,4 +122,4 @@ main =
 -- Outgoing ports
 port logoutUser : String -> Cmd msg
 
-port hedgeHogloginResult : (Model.LoginResultInfo -> msg) -> Sub msg
+port hedgeHogloginResult : (Login.LoginResultInfo -> msg) -> Sub msg

@@ -1,4 +1,4 @@
-port module Login exposing (..)
+port module Page.Login exposing (subscriptions, LoginResultInfo, Model, Msg(..), view, initdata, update)
 
 import Browser
 import Html exposing (..)
@@ -15,6 +15,22 @@ import Loading
         )
 import Model exposing (..)
 
+initdata : Model
+initdata =
+    { loginResult =
+        { isLoggedIn = False
+        , address = "-"
+        , message = ""
+        }
+    , userInfo =
+        { userName = ""
+        , password = ""
+        , passwordConfimation = ""
+        }
+    , activeTab = LoggingInTab
+    , loadState = Loading.Off
+    }
+
 
 tabClassString : Model -> ActiveLoginTab -> String
 tabClassString model tab =
@@ -23,6 +39,13 @@ tabClassString model tab =
 
     else
         "tab"
+
+
+type alias LoginResultInfo =
+    { isLoggedIn : Bool
+    , address : String
+    , message : String
+    }
 
 
 updateTab : ActiveLoginTab -> Model -> ( Model, Cmd Msg )
@@ -100,23 +123,19 @@ type Msg
     | UpdateNewConfirmPassword String
     | StartLoginOrCancel
     | RegisterUser
-    
+
+
 
 -- Model
 -- Auth Model
 
 
- 
-
 type alias Model =
     { userInfo : UserInfo
-    , loginResult: Model.LoginResultInfo
+    , loginResult : LoginResultInfo
     , activeTab : ActiveLoginTab
     , loadState : LoadingState
     }
-
-
-
 
 
 type alias UserInfo =
@@ -138,7 +157,7 @@ type ActiveLoginTab
 subscriptions : Model -> Sub Msg
 subscriptions model =
     Sub.none
-    
+
 
 
 -- toMsgNoParams: LoginMsg -> Msg
@@ -181,11 +200,9 @@ createAccountView model =
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
-        
         TabNavigate tab ->
             updateTab tab model
 
-        
         UpdateNewConfirmPassword pswd ->
             let
                 li =
@@ -234,10 +251,6 @@ update msg model =
             ( model, registerUser model.userInfo )
 
 
-
-
-
-
 loginView : Model -> Html Msg
 loginView model =
     let
@@ -272,8 +285,8 @@ loginView model =
         ]
 
 
-tabView : Model -> Html Msg
-tabView model =
+view : Model -> Html Msg
+view model =
     let
         vw =
             case model.activeTab of
@@ -300,10 +313,10 @@ tabView model =
 
 
 port registerUser : UserInfo -> Cmd msg
+
+
 port loginUser : UserInfo -> Cmd msg
 
 
 
 -- Incoming Ports
-
-
