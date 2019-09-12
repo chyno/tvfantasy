@@ -1,4 +1,4 @@
-module Page.Show exposing (Model, view, Msg(..), update, subscriptions, initShowsData)
+module Page.Show exposing (Model, view, Msg(..), update, subscriptions, init, ShowInfo)
 
 import Browser
 import Html exposing (..)
@@ -6,63 +6,77 @@ import Html.Attributes exposing (..)
 import Html.Events exposing (onClick, onInput)
 import Http exposing (..)
 import Loading exposing (LoadingState)
-import Model exposing (..)
-
-
+import Shared exposing (..)
+import Json.Decode as D
+import Json.Encode as E
 
 type Msg
-    =   InitShows
-    | ShowsResult (Result Http.Error (List Model.ShowInfo))
+    = OnFetchShows (Result Http.Error (List ShowInfo))
 
+init : Flags -> ( Model, Cmd Msg )
+init flags =
+    ( { showInfos = Loading }, fetchShows flags )
 
 -- Model
 
 
 type alias Model =
-    { showInfos : List ShowInfo
+    { showInfos : RemoteData (List ShowInfo)
     }
 
-initShowsData : Model
-initShowsData = 
-    {
-        showInfos = []
+type alias ShowInfo =
+    { name : String
+    , --   country: String,
+      overview : String
+    , firstAirDate : String
+    , voteAverage : Float
     }
 
-getTvShows : Cmd Msg
-getTvShows =
+fetchShows : Flags -> Cmd Msg
+fetchShows flags =
     Http.get
-        { url = "https://api.themoviedb.org/3/discover/tv?api_key=6aec6123c85be51886e8f69cd9a3a226&first_air_date.gte=2019-01-01&page=1"
-        , expect = Http.expectJson ShowsResult Model.listOfShowsDecoder
+        { url = flags.api
+        , expect = Http.expectJson OnFetchShows listOfShowsDecoder
         }
+
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
-        InitShows ->
-            (model, getTvShows)
-        ShowsResult result ->
-            case result of
-                Ok shows ->
-                    ({ model | showInfos = shows }, Cmd.none)
-                Err _ ->
-                    (model, Cmd.none)
-         
-             
+        OnFetchShows (Ok shows) ->
+            ( { model | showInfos = Loaded shows }, Cmd.none )
+        OnFetchShows (Err err) ->
+            ( { model | showInfos = Failure }, Cmd.none )
 
-
+        
 -- Subscriptions
 subscriptions : Model -> Sub Msg
 subscriptions model =
     Sub.none
 
 
-
-loadingView :  Html Msg
-loadingView  =
-    div[][text "Loading ...."]
-
 view : Model -> Html Msg
 view model =
+    let
+        content =
+            case model.showInfos of
+                NotAsked ->
+                    text ""
+
+                Loading ->
+                    text "Loading ..."
+
+                Loaded players ->
+                    viewWithData players
+
+                Failure ->
+                    text "Error"
+    in
+    section [ class "p-4" ]
+        [ content ]
+
+viewWithData : List ShowInfo -> Html Msg
+viewWithData shows =
     let
         showDetails =
             \x ->
@@ -86,12 +100,25 @@ view model =
                 , th [] [ text "First Aired" ]
                 , th [] [ text "Vote Average" ]
                 ]
-                :: List.map showDetails model.showInfos
+                :: List.map showDetails shows
             )
         , div [ class "button" ] [ text "Log Out" ]
         ]
 
+showDecoder : D.Decoder ShowInfo
+showDecoder =
+    D.map4
+        ShowInfo
+        (D.field "name" D.string)
+        -- (D.field "country" D.string))
+        (D.field "overview" D.string)
+        (D.field "first_air_date" D.string)
+        (D.field "vote_average" D.float)
 
+
+listOfShowsDecoder : D.Decoder (List ShowInfo)
+listOfShowsDecoder =
+    D.field "results" (D.list showDecoder)
 
 -- , onClick  Logout
 -- , onClick StartLogout

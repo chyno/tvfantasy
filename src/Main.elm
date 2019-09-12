@@ -1,125 +1,220 @@
-port module Main exposing (main)
+module Main exposing (init, main, subscriptions)
 
-import Browser exposing (Document)
-import Browser.Navigation as Nav
-import Html exposing (..)
-import Html.Attributes exposing (..)
-import Html.Events exposing (onClick, onInput)
-import Http exposing (..)
-import Json.Decode as Decode exposing (Value)
-import Json.Encode as E
-import Loading
-    exposing
-        ( LoaderType(..)
-        , defaultConfig
-        , render
-        )
+import Browser exposing (UrlRequest)
+import Browser.Navigation as Nav exposing (Key)
+import Html exposing (Html, a, div, section, text)
+import Html.Attributes exposing (class, href)
 import Page.Login as Login
 import Page.Show as Show
+import Routes exposing (Route)
+import Shared exposing (..)
 import Url exposing (Url)
-import Model
+
+
+type alias Model =
+    { flags : Flags
+    , navKey : Key
+    , route : Route
+    , page : Page
+    }
+
+
+type Page
+    = PageNone
+    | PageLogin Login.Model
+    | PageShow Show.Model
+
 
 type Msg
-    = GotAuthMsg Login.Msg
-    | GotShowMsg Show.Msg
-    | DoneLogin Login.LoginResultInfo
+    = OnUrlChange Url
+    | OnUrlRequest UrlRequest
+    | LoginMsg Login.Msg
+    | ShowMsg Show.Msg
 
-init : String -> ( Model, Cmd Msg )
-init flag =
+
+init : Flags -> Url -> Key -> ( Model, Cmd Msg )
+init flags url navKey =
     let
-        root =
-            Auth Login.initdata
+        model =
+            { flags = flags
+            , navKey = navKey
+            , route = Routes.parseUrl url
+            , page = PageNone
+            }
     in
-    ( root, Cmd.none )
+    ( model, Cmd.none )
+        |> loadCurrentPage
 
-type Model
-    = Auth Login.Model
-    | Shows Show.Model
+
+loadCurrentPage : ( Model, Cmd Msg ) -> ( Model, Cmd Msg )
+loadCurrentPage ( model, cmd ) =
+    let
+        ( page, newCmd ) =
+            case model.route of
+                Routes.ShowsRoute ->
+                    let
+                        ( pageModel, pageCmd ) =
+                            Show.init model.flags
+                    in
+                    ( PageShow pageModel, Cmd.map ShowMsg pageCmd )
+
+                Routes.LoginRoute ->
+                    let
+                        ( pageModel, pageCmd ) =
+                            Login.init
+                    in
+                    ( PageLogin pageModel, Cmd.map LoginMsg pageCmd )
+
+                Routes.ShowRoute showId ->
+                    ( PageNone, Cmd.none )
+
+                Routes.NotFoundRoute ->
+                    ( PageNone, Cmd.none )
+    in
+    ( { model | page = page }, Cmd.batch [ cmd, newCmd ] )
+
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
-    let childSub =
-                case model of
-                    Auth auth ->
-                        Sub.map GotAuthMsg (Login.subscriptions auth)
+    case model.page of
+        PageLogin pageModel ->
+            Sub.map LoginMsg (Login.subscriptions pageModel)
 
-                    Shows shows ->
-                        Sub.map GotShowMsg (Show.subscriptions shows)
-    in
-        Sub.batch[hedgeHogloginResult DoneLogin, childSub]
-   
+        PageShow pageModel ->
+            Sub.map ShowMsg (Show.subscriptions pageModel)
 
+        PageNone ->
+            Sub.none
 
 
--- Update
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
-    case ( msg, model ) of
-        ( GotAuthMsg subMsg, Auth userInfo ) ->
-            Login.update subMsg userInfo
-                |> updateWith Auth GotAuthMsg model
+    case ( msg, model.page ) of
+        ( OnUrlRequest urlRequest, _ ) ->
+            case urlRequest of
+                Browser.Internal url ->
+                    ( model
+                    , Nav.pushUrl model.navKey (Url.toString url)
+                    )
 
-        ( GotShowMsg subMsg, Shows shows ) ->
-            Show.update subMsg shows
-                |> updateWith Shows GotShowMsg model
-        (DoneLogin data, mdl) ->
-            case data.isLoggedIn of
-                True ->
-                    Show.update Show.InitShows Show.initShowsData
-                        |> updateWith Shows GotShowMsg model
-                      
-                False ->
-                    ( mdl , Cmd.none ) 
-            
-        ( _, _ ) ->
-            -- Disregard messages that arrived for the wrong page.
-            ( model, Cmd.none )
+                Browser.External url ->
+                    ( model
+                    , Nav.load url
+                    )
 
+        ( OnUrlChange url, _ ) ->
+            let
+                newRoute =
+                    Routes.parseUrl url
+            in
+            ( { model | route = newRoute }, Cmd.none )
+                |> loadCurrentPage
 
-
-updateWith : (subModel -> Model) -> (subMsg -> Msg) -> Model -> ( subModel, Cmd subMsg ) -> ( Model, Cmd Msg )
-updateWith toModel toMsg model ( subModel, subCmd ) =
-    ( toModel subModel
-    , Cmd.map toMsg subCmd
-    )
-
-
-
--- -- (a -> msg) -> Cmd a -> Cmd msg
-
-
-view : Model -> Html Msg
-view model =
-    let
-        toView mdl =
-            case mdl of
-                Shows smdl ->
-                    Show.view smdl |> Html.map GotShowMsg
-
-                Auth amdl ->
-                    Login.tabView amdl |> Html.map GotAuthMsg
-    in
-    div [ id "root" ]
-        [ div [ class "app" ]
-            [ model |> toView ]
-        ]
+        ( LoginMsg subMsg, PageLogin pageModel ) ->
+            let
+                ( newPageModel, newCmd ) =
+                    Login.update subMsg pageModel
+            in
+            ( { model | page = PageLogin newPageModel }
+            , Cmd.map LoginMsg newCmd
+            )
+        (ShowMsg _, _ ) ->
+            (model, Cmd.none)
+        (LoginMsg _, PageNone )  ->
+            (model, Cmd.none)
+        (LoginMsg _, PageShow _ )  ->
+            (model, Cmd.none)
 
 
 
--- main : Program Value Model Msg
+-- ( ListMsg subMsg, _ ) ->
+--     ( model, Cmd.none )
+-- ( EditMsg subMsg, PageEdit pageModel ) ->
+--     let
+--         ( newPageModel, newCmd ) =
+--             Edit.update model.flags subMsg pageModel
+--     in
+--     ( { model | page = PageEdit newPageModel }
+--     , Cmd.map EditMsg newCmd
+--     )
+-- ( EditMsg subMsg, _ ) ->
+--     ( model, Cmd.none )
 
 
+main : Program Flags Model Msg
 main =
-    Browser.element
-        { view = view
-        , init = init
+    Browser.application
+        { init = init
+        , view = view
         , update = update
         , subscriptions = subscriptions
+        , onUrlRequest = OnUrlRequest
+        , onUrlChange = OnUrlChange
         }
 
 
 
--- Outgoing ports
-port logoutUser : String -> Cmd msg
+-- VIEWS
 
-port hedgeHogloginResult : (Login.LoginResultInfo -> msg) -> Sub msg
+
+view : Model -> Browser.Document Msg
+view model =
+    { title = "App"
+    , body = [ currentPage model ]
+    }
+
+
+currentPage : Model -> Html Msg
+currentPage model =
+    let
+        page =
+            case model.page of
+                PageLogin pageModel ->
+                    Login.view pageModel
+                        |> Html.map LoginMsg
+
+                PageShow pageModel ->
+                    Show.view pageModel
+                        |> Html.map ShowMsg
+
+                PageNone ->
+                    notFoundView
+    in
+    section []
+        [ nav model
+        , page
+        ]
+
+
+nav : Model -> Html Msg
+nav model =
+    let
+        links =
+            case model.route of
+                Routes.ShowsRoute ->
+                    [ a [ href Routes.showsPath, class "text-white" ] [ text "Shows" ] ]
+
+                Routes.LoginRoute ->
+                    [ linkToLogin ]
+
+                Routes.ShowRoute _ ->
+                    [ linkToLogin ]
+
+                -- Todo need show page
+                Routes.NotFoundRoute ->
+                    [ linkToLogin ]
+
+        linkToLogin =
+            a [ href Routes.loginPath, class "text-white" ] [ text "Login" ]
+    in
+    div
+        [ class "mb-2 text-white bg-black p-4" ]
+        links
+
+
+notFoundView : Html msg
+notFoundView =
+    div []
+        [ text "Not found"
+        ]
+

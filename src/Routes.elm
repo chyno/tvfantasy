@@ -1,21 +1,22 @@
-module Routes exposing (Route(..), parseUrl, playerPath, playersPath)
+module Routes exposing (Route(..), parseUrl, showPath, showsPath, loginPath)
 
 import Url exposing (Url)
 import Url.Parser exposing (..)
 
 
 type Route
-    = PlayersRoute
-    | PlayerRoute String
+    = ShowsRoute
+    | ShowRoute String
+    | LoginRoute
     | NotFoundRoute
 
 
 matchers : Parser (Route -> a) a
 matchers =
     oneOf
-        [ map PlayersRoute top
-        , map PlayerRoute (s "players" </> string)
-        , map PlayersRoute (s "players")
+        [ map ShowsRoute top
+        , map ShowRoute (s "shows" </> string)
+        , map LoginRoute (s "login")
         ]
 
 
@@ -32,19 +33,22 @@ parseUrl url =
 pathFor : Route -> String
 pathFor route =
     case route of
-        PlayersRoute ->
-            "/players"
-
-        PlayerRoute id ->
-            "/players/" ++ id
+        ShowsRoute ->
+            "/shows"
+        LoginRoute ->
+            "/login"
+        ShowRoute id ->
+            "/Show/" ++ id
 
         NotFoundRoute ->
             "/"
 
+loginPath =
+    pathFor LoginRoute
 
-playersPath =
-    pathFor PlayersRoute
+showsPath =
+    pathFor ShowsRoute
 
 
-playerPath id =
-    pathFor (PlayerRoute id)
+showPath id =
+    pathFor (ShowRoute id)

@@ -1,7 +1,11 @@
 import { hedgehog } from "./hedgehog.js";
 
+var flags = {
+  api: 'https://api.themoviedb.org/3/discover/tv?api_key=6aec6123c85be51886e8f69cd9a3a226&first_air_date.gte=2019-01-01&page=1'
+};
+
 let app = Elm.Main.init({
-  flags: "Hello",
+  flags: flags,
   node: document.getElementById("elm")
 });
 

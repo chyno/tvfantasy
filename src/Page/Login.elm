@@ -1,10 +1,11 @@
-port module Page.Login exposing (subscriptions, LoginResultInfo, Model, Msg(..), view, initdata, update)
+port module Page.Login exposing (subscriptions, LoginResultInfo, Model, Msg(..), view, init, update)
 
 import Browser
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (onClick, onInput)
 import Http exposing (..)
+import Shared exposing (..)
 import Json.Encode as E
 import Loading
     exposing
@@ -13,7 +14,9 @@ import Loading
         , defaultConfig
         , render
         )
-import Model exposing (..)
+
+
+
 
 initdata : Model
 initdata =
@@ -31,6 +34,9 @@ initdata =
     , loadState = Loading.Off
     }
 
+init :  ( Model, Cmd Msg )
+init  =
+    ( initdata, Cmd.none) 
 
 tabClassString : Model -> ActiveLoginTab -> String
 tabClassString model tab =
@@ -313,10 +319,11 @@ view model =
 
 
 port registerUser : UserInfo -> Cmd msg
-
-
 port loginUser : UserInfo -> Cmd msg
 
 
 
 -- Incoming Ports
+-- Outgoing ports
+port logoutUser : String -> Cmd msg
+port hedgeHogloginResult : (LoginResultInfo -> msg) -> Sub msg

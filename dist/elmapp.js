@@ -2488,6 +2488,23 @@ function _Http_track(router, xhr, tracker)
 	});
 }
 
+function _Url_percentEncode(string)
+{
+	return encodeURIComponent(string);
+}
+
+function _Url_percentDecode(string)
+{
+	try
+	{
+		return elm$core$Maybe$Just(decodeURIComponent(string));
+	}
+	catch (e)
+	{
+		return elm$core$Maybe$Nothing;
+	}
+}
+
 
 
 // HELPERS
@@ -4047,43 +4064,6 @@ function _VirtualDom_dekey(keyedNode)
 
 
 
-var _Bitwise_and = F2(function(a, b)
-{
-	return a & b;
-});
-
-var _Bitwise_or = F2(function(a, b)
-{
-	return a | b;
-});
-
-var _Bitwise_xor = F2(function(a, b)
-{
-	return a ^ b;
-});
-
-function _Bitwise_complement(a)
-{
-	return ~a;
-};
-
-var _Bitwise_shiftLeftBy = F2(function(offset, a)
-{
-	return a << offset;
-});
-
-var _Bitwise_shiftRightBy = F2(function(offset, a)
-{
-	return a >> offset;
-});
-
-var _Bitwise_shiftRightZfBy = F2(function(offset, a)
-{
-	return a >>> offset;
-});
-
-
-
 
 // ELEMENT
 
@@ -4522,14 +4502,67 @@ function _Browser_load(url)
 		}
 	}));
 }
-var author$project$Main$Auth = function (a) {
-	return {$: 'Auth', a: a};
+
+
+
+var _Bitwise_and = F2(function(a, b)
+{
+	return a & b;
+});
+
+var _Bitwise_or = F2(function(a, b)
+{
+	return a | b;
+});
+
+var _Bitwise_xor = F2(function(a, b)
+{
+	return a ^ b;
+});
+
+function _Bitwise_complement(a)
+{
+	return ~a;
 };
-var author$project$Login$LoggingInTab = {$: 'LoggingInTab'};
+
+var _Bitwise_shiftLeftBy = F2(function(offset, a)
+{
+	return a << offset;
+});
+
+var _Bitwise_shiftRightBy = F2(function(offset, a)
+{
+	return a >> offset;
+});
+
+var _Bitwise_shiftRightZfBy = F2(function(offset, a)
+{
+	return a >>> offset;
+});
+var author$project$Main$OnUrlChange = function (a) {
+	return {$: 'OnUrlChange', a: a};
+};
+var author$project$Main$OnUrlRequest = function (a) {
+	return {$: 'OnUrlRequest', a: a};
+};
+var author$project$Main$PageNone = {$: 'PageNone'};
+var author$project$Main$LoginMsg = function (a) {
+	return {$: 'LoginMsg', a: a};
+};
+var author$project$Main$PageLogin = function (a) {
+	return {$: 'PageLogin', a: a};
+};
+var author$project$Main$PageShow = function (a) {
+	return {$: 'PageShow', a: a};
+};
+var author$project$Main$ShowMsg = function (a) {
+	return {$: 'ShowMsg', a: a};
+};
+var author$project$Page$Login$LoggingInTab = {$: 'LoggingInTab'};
 var elm$core$Basics$False = {$: 'False'};
 var perzanko$elm_loading$Loading$Off = {$: 'Off'};
-var author$project$Main$initdata = {
-	activeTab: author$project$Login$LoggingInTab,
+var author$project$Page$Login$initdata = {
+	activeTab: author$project$Page$Login$LoggingInTab,
 	loadState: perzanko$elm_loading$Loading$Off,
 	loginResult: {address: '-', isLoggedIn: false, message: ''},
 	userInfo: {password: '', passwordConfimation: '', userName: ''}
@@ -5010,254 +5043,32 @@ var elm$json$Json$Decode$errorToStringHelp = F2(
 	});
 var elm$core$Platform$Cmd$batch = _Platform_batch;
 var elm$core$Platform$Cmd$none = elm$core$Platform$Cmd$batch(_List_Nil);
-var author$project$Main$init = function (flag) {
-	var root = author$project$Main$Auth(author$project$Main$initdata);
-	return _Utils_Tuple2(root, elm$core$Platform$Cmd$none);
+var author$project$Page$Login$init = _Utils_Tuple2(author$project$Page$Login$initdata, elm$core$Platform$Cmd$none);
+var author$project$Page$Show$OnFetchShows = function (a) {
+	return {$: 'OnFetchShows', a: a};
 };
-var elm$core$Platform$Sub$batch = _Platform_batch;
-var elm$core$Platform$Sub$none = elm$core$Platform$Sub$batch(_List_Nil);
-var author$project$Login$subscriptions = function (model) {
-	return elm$core$Platform$Sub$none;
-};
-var author$project$Main$DoneLogin = function (a) {
-	return {$: 'DoneLogin', a: a};
-};
-var author$project$Main$GotAuthMsg = function (a) {
-	return {$: 'GotAuthMsg', a: a};
-};
-var author$project$Main$GotShowMsg = function (a) {
-	return {$: 'GotShowMsg', a: a};
-};
-var elm$json$Json$Decode$andThen = _Json_andThen;
-var elm$json$Json$Decode$bool = _Json_decodeBool;
-var elm$json$Json$Decode$field = _Json_decodeField;
-var elm$json$Json$Decode$string = _Json_decodeString;
-var elm$json$Json$Decode$succeed = _Json_succeed;
-var author$project$Main$hedgeHogloginResult = _Platform_incomingPort(
-	'hedgeHogloginResult',
-	A2(
-		elm$json$Json$Decode$andThen,
-		function (message) {
-			return A2(
-				elm$json$Json$Decode$andThen,
-				function (isLoggedIn) {
-					return A2(
-						elm$json$Json$Decode$andThen,
-						function (address) {
-							return elm$json$Json$Decode$succeed(
-								{address: address, isLoggedIn: isLoggedIn, message: message});
-						},
-						A2(elm$json$Json$Decode$field, 'address', elm$json$Json$Decode$string));
-				},
-				A2(elm$json$Json$Decode$field, 'isLoggedIn', elm$json$Json$Decode$bool));
-		},
-		A2(elm$json$Json$Decode$field, 'message', elm$json$Json$Decode$string)));
-var author$project$Show$subscriptions = function (model) {
-	return elm$core$Platform$Sub$none;
-};
-var elm$core$Platform$Sub$map = _Platform_map;
-var author$project$Main$subscriptions = function (model) {
-	var childSub = function () {
-		if (model.$ === 'Auth') {
-			var auth = model.a;
-			return A2(
-				elm$core$Platform$Sub$map,
-				author$project$Main$GotAuthMsg,
-				author$project$Login$subscriptions(auth));
-		} else {
-			var shows = model.a;
-			return A2(
-				elm$core$Platform$Sub$map,
-				author$project$Main$GotShowMsg,
-				author$project$Show$subscriptions(shows));
-		}
-	}();
-	return elm$core$Platform$Sub$batch(
-		_List_fromArray(
-			[
-				author$project$Main$hedgeHogloginResult(author$project$Main$DoneLogin),
-				childSub
-			]));
-};
-var elm$json$Json$Encode$object = function (pairs) {
-	return _Json_wrap(
-		A3(
-			elm$core$List$foldl,
-			F2(
-				function (_n0, obj) {
-					var k = _n0.a;
-					var v = _n0.b;
-					return A3(_Json_addField, k, v, obj);
-				}),
-			_Json_emptyObject(_Utils_Tuple0),
-			pairs));
-};
-var elm$json$Json$Encode$string = _Json_wrap;
-var author$project$Login$loginUser = _Platform_outgoingPort(
-	'loginUser',
-	function ($) {
-		return elm$json$Json$Encode$object(
-			_List_fromArray(
-				[
-					_Utils_Tuple2(
-					'password',
-					elm$json$Json$Encode$string($.password)),
-					_Utils_Tuple2(
-					'passwordConfimation',
-					elm$json$Json$Encode$string($.passwordConfimation)),
-					_Utils_Tuple2(
-					'userName',
-					elm$json$Json$Encode$string($.userName))
-				]));
-	});
-var author$project$Login$registerUser = _Platform_outgoingPort(
-	'registerUser',
-	function ($) {
-		return elm$json$Json$Encode$object(
-			_List_fromArray(
-				[
-					_Utils_Tuple2(
-					'password',
-					elm$json$Json$Encode$string($.password)),
-					_Utils_Tuple2(
-					'passwordConfimation',
-					elm$json$Json$Encode$string($.passwordConfimation)),
-					_Utils_Tuple2(
-					'userName',
-					elm$json$Json$Encode$string($.userName))
-				]));
-	});
-var author$project$Login$CreateAccountTab = {$: 'CreateAccountTab'};
-var author$project$Login$updateTab = F2(
-	function (msg, model) {
-		if (msg.$ === 'LoggingInTab') {
-			return _Utils_Tuple2(
-				_Utils_update(
-					model,
-					{
-						activeTab: author$project$Login$LoggingInTab,
-						userInfo: {password: '', passwordConfimation: '', userName: ''}
-					}),
-				elm$core$Platform$Cmd$none);
-		} else {
-			return _Utils_Tuple2(
-				_Utils_update(
-					model,
-					{
-						activeTab: author$project$Login$CreateAccountTab,
-						userInfo: {password: '', passwordConfimation: '', userName: ''}
-					}),
-				elm$core$Platform$Cmd$none);
-		}
-	});
-var perzanko$elm_loading$Loading$On = {$: 'On'};
-var author$project$Login$update = F2(
-	function (msg, model) {
-		switch (msg.$) {
-			case 'TabNavigate':
-				var tab = msg.a;
-				return A2(author$project$Login$updateTab, tab, model);
-			case 'UpdateNewConfirmPassword':
-				var pswd = msg.a;
-				var li = model.userInfo;
-				return _Utils_Tuple2(
-					_Utils_update(
-						model,
-						{
-							userInfo: _Utils_update(
-								li,
-								{passwordConfimation: pswd})
-						}),
-					elm$core$Platform$Cmd$none);
-			case 'UpdatePassword':
-				var pswd = msg.a;
-				var li = model.userInfo;
-				return _Utils_Tuple2(
-					_Utils_update(
-						model,
-						{
-							userInfo: _Utils_update(
-								li,
-								{password: pswd})
-						}),
-					elm$core$Platform$Cmd$none);
-			case 'UpdateNewPassword':
-				var pswd = msg.a;
-				var li = model.userInfo;
-				return _Utils_Tuple2(
-					_Utils_update(
-						model,
-						{
-							userInfo: _Utils_update(
-								li,
-								{password: pswd})
-						}),
-					elm$core$Platform$Cmd$none);
-			case 'UpdateUserName':
-				var usrname = msg.a;
-				var li = model.userInfo;
-				return _Utils_Tuple2(
-					_Utils_update(
-						model,
-						{
-							userInfo: _Utils_update(
-								li,
-								{userName: usrname})
-						}),
-					elm$core$Platform$Cmd$none);
-			case 'StartLoginOrCancel':
-				return _Utils_eq(model.loadState, perzanko$elm_loading$Loading$Off) ? _Utils_Tuple2(
-					_Utils_update(
-						model,
-						{
-							loadState: perzanko$elm_loading$Loading$On,
-							loginResult: {address: '-', isLoggedIn: false, message: ''}
-						}),
-					author$project$Login$loginUser(model.userInfo)) : _Utils_Tuple2(
-					_Utils_update(
-						model,
-						{loadState: perzanko$elm_loading$Loading$Off}),
-					elm$core$Platform$Cmd$none);
-			default:
-				return _Utils_Tuple2(
-					model,
-					author$project$Login$registerUser(model.userInfo));
-		}
-	});
-var author$project$Main$Shows = function (a) {
-	return {$: 'Shows', a: a};
-};
-var elm$core$Platform$Cmd$map = _Platform_map;
-var author$project$Main$updateWith = F4(
-	function (toModel, toMsg, model, _n0) {
-		var subModel = _n0.a;
-		var subCmd = _n0.b;
-		return _Utils_Tuple2(
-			toModel(subModel),
-			A2(elm$core$Platform$Cmd$map, toMsg, subCmd));
-	});
-var author$project$Show$InitShows = {$: 'InitShows'};
-var author$project$Show$initShowsData = {showInfos: _List_Nil};
-var author$project$Model$ShowInfo = F4(
+var author$project$Page$Show$ShowInfo = F4(
 	function (name, overview, firstAirDate, voteAverage) {
 		return {firstAirDate: firstAirDate, name: name, overview: overview, voteAverage: voteAverage};
 	});
+var elm$json$Json$Decode$field = _Json_decodeField;
 var elm$json$Json$Decode$float = _Json_decodeFloat;
 var elm$json$Json$Decode$map4 = _Json_map4;
-var author$project$Model$showDecoder = A5(
+var elm$json$Json$Decode$string = _Json_decodeString;
+var author$project$Page$Show$showDecoder = A5(
 	elm$json$Json$Decode$map4,
-	author$project$Model$ShowInfo,
+	author$project$Page$Show$ShowInfo,
 	A2(elm$json$Json$Decode$field, 'name', elm$json$Json$Decode$string),
 	A2(elm$json$Json$Decode$field, 'overview', elm$json$Json$Decode$string),
 	A2(elm$json$Json$Decode$field, 'first_air_date', elm$json$Json$Decode$string),
 	A2(elm$json$Json$Decode$field, 'vote_average', elm$json$Json$Decode$float));
 var elm$json$Json$Decode$list = _Json_decodeList;
-var author$project$Model$listOfShowsDecoder = A2(
+var author$project$Page$Show$listOfShowsDecoder = A2(
 	elm$json$Json$Decode$field,
 	'results',
-	elm$json$Json$Decode$list(author$project$Model$showDecoder));
-var author$project$Show$ShowsResult = function (a) {
-	return {$: 'ShowsResult', a: a};
+	elm$json$Json$Decode$list(author$project$Page$Show$showDecoder));
+var elm$core$Basics$identity = function (x) {
+	return x;
 };
 var elm$core$Result$mapError = F2(
 	function (f, result) {
@@ -5275,9 +5086,6 @@ var elm$core$Basics$composeR = F3(
 		return g(
 			f(x));
 	});
-var elm$core$Basics$identity = function (x) {
-	return x;
-};
 var elm$core$Dict$RBEmpty_elm_builtin = {$: 'RBEmpty_elm_builtin'};
 var elm$core$Dict$empty = elm$core$Dict$RBEmpty_elm_builtin;
 var elm$core$Basics$compare = _Utils_compare;
@@ -6140,94 +5948,620 @@ var elm$http$Http$get = function (r) {
 	return elm$http$Http$request(
 		{body: elm$http$Http$emptyBody, expect: r.expect, headers: _List_Nil, method: 'GET', timeout: elm$core$Maybe$Nothing, tracker: elm$core$Maybe$Nothing, url: r.url});
 };
-var author$project$Show$getTvShows = elm$http$Http$get(
-	{
-		expect: A2(elm$http$Http$expectJson, author$project$Show$ShowsResult, author$project$Model$listOfShowsDecoder),
-		url: 'https://api.themoviedb.org/3/discover/tv?api_key=6aec6123c85be51886e8f69cd9a3a226&first_air_date.gte=2019-01-01&page=1'
+var author$project$Page$Show$fetchShows = function (flags) {
+	return elm$http$Http$get(
+		{
+			expect: A2(elm$http$Http$expectJson, author$project$Page$Show$OnFetchShows, author$project$Page$Show$listOfShowsDecoder),
+			url: flags.api
+		});
+};
+var author$project$Shared$Loading = {$: 'Loading'};
+var author$project$Page$Show$init = function (flags) {
+	return _Utils_Tuple2(
+		{showInfos: author$project$Shared$Loading},
+		author$project$Page$Show$fetchShows(flags));
+};
+var elm$core$Platform$Cmd$map = _Platform_map;
+var author$project$Main$loadCurrentPage = function (_n0) {
+	var model = _n0.a;
+	var cmd = _n0.b;
+	var _n1 = function () {
+		var _n2 = model.route;
+		switch (_n2.$) {
+			case 'ShowsRoute':
+				var _n3 = author$project$Page$Show$init(model.flags);
+				var pageModel = _n3.a;
+				var pageCmd = _n3.b;
+				return _Utils_Tuple2(
+					author$project$Main$PageShow(pageModel),
+					A2(elm$core$Platform$Cmd$map, author$project$Main$ShowMsg, pageCmd));
+			case 'LoginRoute':
+				var _n4 = author$project$Page$Login$init;
+				var pageModel = _n4.a;
+				var pageCmd = _n4.b;
+				return _Utils_Tuple2(
+					author$project$Main$PageLogin(pageModel),
+					A2(elm$core$Platform$Cmd$map, author$project$Main$LoginMsg, pageCmd));
+			case 'ShowRoute':
+				var showId = _n2.a;
+				return _Utils_Tuple2(author$project$Main$PageNone, elm$core$Platform$Cmd$none);
+			default:
+				return _Utils_Tuple2(author$project$Main$PageNone, elm$core$Platform$Cmd$none);
+		}
+	}();
+	var page = _n1.a;
+	var newCmd = _n1.b;
+	return _Utils_Tuple2(
+		_Utils_update(
+			model,
+			{page: page}),
+		elm$core$Platform$Cmd$batch(
+			_List_fromArray(
+				[cmd, newCmd])));
+};
+var author$project$Routes$NotFoundRoute = {$: 'NotFoundRoute'};
+var author$project$Routes$LoginRoute = {$: 'LoginRoute'};
+var author$project$Routes$ShowRoute = function (a) {
+	return {$: 'ShowRoute', a: a};
+};
+var author$project$Routes$ShowsRoute = {$: 'ShowsRoute'};
+var elm$core$List$map = F2(
+	function (f, xs) {
+		return A3(
+			elm$core$List$foldr,
+			F2(
+				function (x, acc) {
+					return A2(
+						elm$core$List$cons,
+						f(x),
+						acc);
+				}),
+			_List_Nil,
+			xs);
 	});
-var author$project$Show$update = F2(
-	function (msg, model) {
-		if (msg.$ === 'InitShows') {
-			return _Utils_Tuple2(model, author$project$Show$getTvShows);
+var elm$url$Url$Parser$Parser = function (a) {
+	return {$: 'Parser', a: a};
+};
+var elm$url$Url$Parser$State = F5(
+	function (visited, unvisited, params, frag, value) {
+		return {frag: frag, params: params, unvisited: unvisited, value: value, visited: visited};
+	});
+var elm$url$Url$Parser$mapState = F2(
+	function (func, _n0) {
+		var visited = _n0.visited;
+		var unvisited = _n0.unvisited;
+		var params = _n0.params;
+		var frag = _n0.frag;
+		var value = _n0.value;
+		return A5(
+			elm$url$Url$Parser$State,
+			visited,
+			unvisited,
+			params,
+			frag,
+			func(value));
+	});
+var elm$url$Url$Parser$map = F2(
+	function (subValue, _n0) {
+		var parseArg = _n0.a;
+		return elm$url$Url$Parser$Parser(
+			function (_n1) {
+				var visited = _n1.visited;
+				var unvisited = _n1.unvisited;
+				var params = _n1.params;
+				var frag = _n1.frag;
+				var value = _n1.value;
+				return A2(
+					elm$core$List$map,
+					elm$url$Url$Parser$mapState(value),
+					parseArg(
+						A5(elm$url$Url$Parser$State, visited, unvisited, params, frag, subValue)));
+			});
+	});
+var elm$core$List$append = F2(
+	function (xs, ys) {
+		if (!ys.b) {
+			return xs;
 		} else {
-			var result = msg.a;
-			if (result.$ === 'Ok') {
-				var shows = result.a;
+			return A3(elm$core$List$foldr, elm$core$List$cons, ys, xs);
+		}
+	});
+var elm$core$List$concat = function (lists) {
+	return A3(elm$core$List$foldr, elm$core$List$append, _List_Nil, lists);
+};
+var elm$core$List$concatMap = F2(
+	function (f, list) {
+		return elm$core$List$concat(
+			A2(elm$core$List$map, f, list));
+	});
+var elm$url$Url$Parser$oneOf = function (parsers) {
+	return elm$url$Url$Parser$Parser(
+		function (state) {
+			return A2(
+				elm$core$List$concatMap,
+				function (_n0) {
+					var parser = _n0.a;
+					return parser(state);
+				},
+				parsers);
+		});
+};
+var elm$url$Url$Parser$s = function (str) {
+	return elm$url$Url$Parser$Parser(
+		function (_n0) {
+			var visited = _n0.visited;
+			var unvisited = _n0.unvisited;
+			var params = _n0.params;
+			var frag = _n0.frag;
+			var value = _n0.value;
+			if (!unvisited.b) {
+				return _List_Nil;
+			} else {
+				var next = unvisited.a;
+				var rest = unvisited.b;
+				return _Utils_eq(next, str) ? _List_fromArray(
+					[
+						A5(
+						elm$url$Url$Parser$State,
+						A2(elm$core$List$cons, next, visited),
+						rest,
+						params,
+						frag,
+						value)
+					]) : _List_Nil;
+			}
+		});
+};
+var elm$url$Url$Parser$slash = F2(
+	function (_n0, _n1) {
+		var parseBefore = _n0.a;
+		var parseAfter = _n1.a;
+		return elm$url$Url$Parser$Parser(
+			function (state) {
+				return A2(
+					elm$core$List$concatMap,
+					parseAfter,
+					parseBefore(state));
+			});
+	});
+var elm$url$Url$Parser$custom = F2(
+	function (tipe, stringToSomething) {
+		return elm$url$Url$Parser$Parser(
+			function (_n0) {
+				var visited = _n0.visited;
+				var unvisited = _n0.unvisited;
+				var params = _n0.params;
+				var frag = _n0.frag;
+				var value = _n0.value;
+				if (!unvisited.b) {
+					return _List_Nil;
+				} else {
+					var next = unvisited.a;
+					var rest = unvisited.b;
+					var _n2 = stringToSomething(next);
+					if (_n2.$ === 'Just') {
+						var nextValue = _n2.a;
+						return _List_fromArray(
+							[
+								A5(
+								elm$url$Url$Parser$State,
+								A2(elm$core$List$cons, next, visited),
+								rest,
+								params,
+								frag,
+								value(nextValue))
+							]);
+					} else {
+						return _List_Nil;
+					}
+				}
+			});
+	});
+var elm$url$Url$Parser$string = A2(elm$url$Url$Parser$custom, 'STRING', elm$core$Maybe$Just);
+var elm$url$Url$Parser$top = elm$url$Url$Parser$Parser(
+	function (state) {
+		return _List_fromArray(
+			[state]);
+	});
+var author$project$Routes$matchers = elm$url$Url$Parser$oneOf(
+	_List_fromArray(
+		[
+			A2(elm$url$Url$Parser$map, author$project$Routes$ShowsRoute, elm$url$Url$Parser$top),
+			A2(
+			elm$url$Url$Parser$map,
+			author$project$Routes$ShowRoute,
+			A2(
+				elm$url$Url$Parser$slash,
+				elm$url$Url$Parser$s('shows'),
+				elm$url$Url$Parser$string)),
+			A2(
+			elm$url$Url$Parser$map,
+			author$project$Routes$LoginRoute,
+			elm$url$Url$Parser$s('login'))
+		]));
+var elm$url$Url$Parser$getFirstMatch = function (states) {
+	getFirstMatch:
+	while (true) {
+		if (!states.b) {
+			return elm$core$Maybe$Nothing;
+		} else {
+			var state = states.a;
+			var rest = states.b;
+			var _n1 = state.unvisited;
+			if (!_n1.b) {
+				return elm$core$Maybe$Just(state.value);
+			} else {
+				if ((_n1.a === '') && (!_n1.b.b)) {
+					return elm$core$Maybe$Just(state.value);
+				} else {
+					var $temp$states = rest;
+					states = $temp$states;
+					continue getFirstMatch;
+				}
+			}
+		}
+	}
+};
+var elm$url$Url$Parser$removeFinalEmpty = function (segments) {
+	if (!segments.b) {
+		return _List_Nil;
+	} else {
+		if ((segments.a === '') && (!segments.b.b)) {
+			return _List_Nil;
+		} else {
+			var segment = segments.a;
+			var rest = segments.b;
+			return A2(
+				elm$core$List$cons,
+				segment,
+				elm$url$Url$Parser$removeFinalEmpty(rest));
+		}
+	}
+};
+var elm$url$Url$Parser$preparePath = function (path) {
+	var _n0 = A2(elm$core$String$split, '/', path);
+	if (_n0.b && (_n0.a === '')) {
+		var segments = _n0.b;
+		return elm$url$Url$Parser$removeFinalEmpty(segments);
+	} else {
+		var segments = _n0;
+		return elm$url$Url$Parser$removeFinalEmpty(segments);
+	}
+};
+var elm$url$Url$percentDecode = _Url_percentDecode;
+var elm$url$Url$Parser$addToParametersHelp = F2(
+	function (value, maybeList) {
+		if (maybeList.$ === 'Nothing') {
+			return elm$core$Maybe$Just(
+				_List_fromArray(
+					[value]));
+		} else {
+			var list = maybeList.a;
+			return elm$core$Maybe$Just(
+				A2(elm$core$List$cons, value, list));
+		}
+	});
+var elm$url$Url$Parser$addParam = F2(
+	function (segment, dict) {
+		var _n0 = A2(elm$core$String$split, '=', segment);
+		if ((_n0.b && _n0.b.b) && (!_n0.b.b.b)) {
+			var rawKey = _n0.a;
+			var _n1 = _n0.b;
+			var rawValue = _n1.a;
+			var _n2 = elm$url$Url$percentDecode(rawKey);
+			if (_n2.$ === 'Nothing') {
+				return dict;
+			} else {
+				var key = _n2.a;
+				var _n3 = elm$url$Url$percentDecode(rawValue);
+				if (_n3.$ === 'Nothing') {
+					return dict;
+				} else {
+					var value = _n3.a;
+					return A3(
+						elm$core$Dict$update,
+						key,
+						elm$url$Url$Parser$addToParametersHelp(value),
+						dict);
+				}
+			}
+		} else {
+			return dict;
+		}
+	});
+var elm$url$Url$Parser$prepareQuery = function (maybeQuery) {
+	if (maybeQuery.$ === 'Nothing') {
+		return elm$core$Dict$empty;
+	} else {
+		var qry = maybeQuery.a;
+		return A3(
+			elm$core$List$foldr,
+			elm$url$Url$Parser$addParam,
+			elm$core$Dict$empty,
+			A2(elm$core$String$split, '&', qry));
+	}
+};
+var elm$url$Url$Parser$parse = F2(
+	function (_n0, url) {
+		var parser = _n0.a;
+		return elm$url$Url$Parser$getFirstMatch(
+			parser(
+				A5(
+					elm$url$Url$Parser$State,
+					_List_Nil,
+					elm$url$Url$Parser$preparePath(url.path),
+					elm$url$Url$Parser$prepareQuery(url.query),
+					url.fragment,
+					elm$core$Basics$identity)));
+	});
+var author$project$Routes$parseUrl = function (url) {
+	var _n0 = A2(elm$url$Url$Parser$parse, author$project$Routes$matchers, url);
+	if (_n0.$ === 'Just') {
+		var route = _n0.a;
+		return route;
+	} else {
+		return author$project$Routes$NotFoundRoute;
+	}
+};
+var author$project$Main$init = F3(
+	function (flags, url, navKey) {
+		var model = {
+			flags: flags,
+			navKey: navKey,
+			page: author$project$Main$PageNone,
+			route: author$project$Routes$parseUrl(url)
+		};
+		return author$project$Main$loadCurrentPage(
+			_Utils_Tuple2(model, elm$core$Platform$Cmd$none));
+	});
+var elm$core$Platform$Sub$batch = _Platform_batch;
+var elm$core$Platform$Sub$none = elm$core$Platform$Sub$batch(_List_Nil);
+var author$project$Page$Login$subscriptions = function (model) {
+	return elm$core$Platform$Sub$none;
+};
+var author$project$Page$Show$subscriptions = function (model) {
+	return elm$core$Platform$Sub$none;
+};
+var elm$core$Platform$Sub$map = _Platform_map;
+var author$project$Main$subscriptions = function (model) {
+	var _n0 = model.page;
+	switch (_n0.$) {
+		case 'PageLogin':
+			var pageModel = _n0.a;
+			return A2(
+				elm$core$Platform$Sub$map,
+				author$project$Main$LoginMsg,
+				author$project$Page$Login$subscriptions(pageModel));
+		case 'PageShow':
+			var pageModel = _n0.a;
+			return A2(
+				elm$core$Platform$Sub$map,
+				author$project$Main$ShowMsg,
+				author$project$Page$Show$subscriptions(pageModel));
+		default:
+			return elm$core$Platform$Sub$none;
+	}
+};
+var elm$json$Json$Encode$object = function (pairs) {
+	return _Json_wrap(
+		A3(
+			elm$core$List$foldl,
+			F2(
+				function (_n0, obj) {
+					var k = _n0.a;
+					var v = _n0.b;
+					return A3(_Json_addField, k, v, obj);
+				}),
+			_Json_emptyObject(_Utils_Tuple0),
+			pairs));
+};
+var elm$json$Json$Encode$string = _Json_wrap;
+var author$project$Page$Login$loginUser = _Platform_outgoingPort(
+	'loginUser',
+	function ($) {
+		return elm$json$Json$Encode$object(
+			_List_fromArray(
+				[
+					_Utils_Tuple2(
+					'password',
+					elm$json$Json$Encode$string($.password)),
+					_Utils_Tuple2(
+					'passwordConfimation',
+					elm$json$Json$Encode$string($.passwordConfimation)),
+					_Utils_Tuple2(
+					'userName',
+					elm$json$Json$Encode$string($.userName))
+				]));
+	});
+var author$project$Page$Login$registerUser = _Platform_outgoingPort(
+	'registerUser',
+	function ($) {
+		return elm$json$Json$Encode$object(
+			_List_fromArray(
+				[
+					_Utils_Tuple2(
+					'password',
+					elm$json$Json$Encode$string($.password)),
+					_Utils_Tuple2(
+					'passwordConfimation',
+					elm$json$Json$Encode$string($.passwordConfimation)),
+					_Utils_Tuple2(
+					'userName',
+					elm$json$Json$Encode$string($.userName))
+				]));
+	});
+var author$project$Page$Login$CreateAccountTab = {$: 'CreateAccountTab'};
+var author$project$Page$Login$updateTab = F2(
+	function (msg, model) {
+		if (msg.$ === 'LoggingInTab') {
+			return _Utils_Tuple2(
+				_Utils_update(
+					model,
+					{
+						activeTab: author$project$Page$Login$LoggingInTab,
+						userInfo: {password: '', passwordConfimation: '', userName: ''}
+					}),
+				elm$core$Platform$Cmd$none);
+		} else {
+			return _Utils_Tuple2(
+				_Utils_update(
+					model,
+					{
+						activeTab: author$project$Page$Login$CreateAccountTab,
+						userInfo: {password: '', passwordConfimation: '', userName: ''}
+					}),
+				elm$core$Platform$Cmd$none);
+		}
+	});
+var perzanko$elm_loading$Loading$On = {$: 'On'};
+var author$project$Page$Login$update = F2(
+	function (msg, model) {
+		switch (msg.$) {
+			case 'TabNavigate':
+				var tab = msg.a;
+				return A2(author$project$Page$Login$updateTab, tab, model);
+			case 'UpdateNewConfirmPassword':
+				var pswd = msg.a;
+				var li = model.userInfo;
 				return _Utils_Tuple2(
 					_Utils_update(
 						model,
-						{showInfos: shows}),
+						{
+							userInfo: _Utils_update(
+								li,
+								{passwordConfimation: pswd})
+						}),
 					elm$core$Platform$Cmd$none);
-			} else {
-				return _Utils_Tuple2(model, elm$core$Platform$Cmd$none);
-			}
+			case 'UpdatePassword':
+				var pswd = msg.a;
+				var li = model.userInfo;
+				return _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{
+							userInfo: _Utils_update(
+								li,
+								{password: pswd})
+						}),
+					elm$core$Platform$Cmd$none);
+			case 'UpdateNewPassword':
+				var pswd = msg.a;
+				var li = model.userInfo;
+				return _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{
+							userInfo: _Utils_update(
+								li,
+								{password: pswd})
+						}),
+					elm$core$Platform$Cmd$none);
+			case 'UpdateUserName':
+				var usrname = msg.a;
+				var li = model.userInfo;
+				return _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{
+							userInfo: _Utils_update(
+								li,
+								{userName: usrname})
+						}),
+					elm$core$Platform$Cmd$none);
+			case 'StartLoginOrCancel':
+				return _Utils_eq(model.loadState, perzanko$elm_loading$Loading$Off) ? _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{
+							loadState: perzanko$elm_loading$Loading$On,
+							loginResult: {address: '-', isLoggedIn: false, message: ''}
+						}),
+					author$project$Page$Login$loginUser(model.userInfo)) : _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{loadState: perzanko$elm_loading$Loading$Off}),
+					elm$core$Platform$Cmd$none);
+			default:
+				return _Utils_Tuple2(
+					model,
+					author$project$Page$Login$registerUser(model.userInfo));
 		}
 	});
-var author$project$Main$update = F2(
-	function (msg, model) {
-		var _n0 = _Utils_Tuple2(msg, model);
-		_n0$3:
-		while (true) {
-			switch (_n0.a.$) {
-				case 'GotAuthMsg':
-					if (_n0.b.$ === 'Auth') {
-						var subMsg = _n0.a.a;
-						var userInfo = _n0.b.a;
-						return A4(
-							author$project$Main$updateWith,
-							author$project$Main$Auth,
-							author$project$Main$GotAuthMsg,
-							model,
-							A2(author$project$Login$update, subMsg, userInfo));
-					} else {
-						break _n0$3;
-					}
-				case 'GotShowMsg':
-					if (_n0.b.$ === 'Shows') {
-						var subMsg = _n0.a.a;
-						var shows = _n0.b.a;
-						return A4(
-							author$project$Main$updateWith,
-							author$project$Main$Shows,
-							author$project$Main$GotShowMsg,
-							model,
-							A2(author$project$Show$update, subMsg, shows));
-					} else {
-						break _n0$3;
-					}
-				default:
-					var data = _n0.a.a;
-					var mdl = _n0.b;
-					var _n1 = data.isLoggedIn;
-					if (_n1) {
-						return A4(
-							author$project$Main$updateWith,
-							author$project$Main$Shows,
-							author$project$Main$GotShowMsg,
-							model,
-							A2(author$project$Show$update, author$project$Show$InitShows, author$project$Show$initShowsData));
-					} else {
-						return _Utils_Tuple2(mdl, elm$core$Platform$Cmd$none);
-					}
-			}
-		}
-		return _Utils_Tuple2(model, elm$core$Platform$Cmd$none);
+var elm$browser$Browser$External = function (a) {
+	return {$: 'External', a: a};
+};
+var elm$browser$Browser$Internal = function (a) {
+	return {$: 'Internal', a: a};
+};
+var elm$browser$Browser$Dom$NotFound = function (a) {
+	return {$: 'NotFound', a: a};
+};
+var elm$core$Basics$never = function (_n0) {
+	never:
+	while (true) {
+		var nvr = _n0.a;
+		var $temp$_n0 = nvr;
+		_n0 = $temp$_n0;
+		continue never;
+	}
+};
+var elm$core$Task$Perform = function (a) {
+	return {$: 'Perform', a: a};
+};
+var elm$core$Task$init = elm$core$Task$succeed(_Utils_Tuple0);
+var elm$core$Task$map = F2(
+	function (func, taskA) {
+		return A2(
+			elm$core$Task$andThen,
+			function (a) {
+				return elm$core$Task$succeed(
+					func(a));
+			},
+			taskA);
 	});
-var author$project$Login$TabNavigate = function (a) {
-	return {$: 'TabNavigate', a: a};
-};
-var author$project$Login$RegisterUser = {$: 'RegisterUser'};
-var author$project$Login$UpdateNewConfirmPassword = function (a) {
-	return {$: 'UpdateNewConfirmPassword', a: a};
-};
-var author$project$Login$UpdateNewPassword = function (a) {
-	return {$: 'UpdateNewPassword', a: a};
-};
-var author$project$Login$UpdateUserName = function (a) {
-	return {$: 'UpdateUserName', a: a};
-};
+var elm$core$Task$spawnCmd = F2(
+	function (router, _n0) {
+		var task = _n0.a;
+		return _Scheduler_spawn(
+			A2(
+				elm$core$Task$andThen,
+				elm$core$Platform$sendToApp(router),
+				task));
+	});
+var elm$core$Task$onEffects = F3(
+	function (router, commands, state) {
+		return A2(
+			elm$core$Task$map,
+			function (_n0) {
+				return _Utils_Tuple0;
+			},
+			elm$core$Task$sequence(
+				A2(
+					elm$core$List$map,
+					elm$core$Task$spawnCmd(router),
+					commands)));
+	});
+var elm$core$Task$onSelfMsg = F3(
+	function (_n0, _n1, _n2) {
+		return elm$core$Task$succeed(_Utils_Tuple0);
+	});
+var elm$core$Task$cmdMap = F2(
+	function (tagger, _n0) {
+		var task = _n0.a;
+		return elm$core$Task$Perform(
+			A2(elm$core$Task$map, tagger, task));
+	});
+_Platform_effectManagers['Task'] = _Platform_createManager(elm$core$Task$init, elm$core$Task$onEffects, elm$core$Task$onSelfMsg, elm$core$Task$cmdMap);
+var elm$core$Task$command = _Platform_leaf('Task');
+var elm$core$Task$perform = F2(
+	function (toMessage, task) {
+		return elm$core$Task$command(
+			elm$core$Task$Perform(
+				A2(elm$core$Task$map, toMessage, task)));
+	});
 var elm$json$Json$Decode$map = _Json_map1;
 var elm$json$Json$Decode$map2 = _Json_map2;
+var elm$json$Json$Decode$succeed = _Json_succeed;
 var elm$virtual_dom$VirtualDom$toHandlerInt = function (handler) {
 	switch (handler.$) {
 		case 'Normal':
@@ -6240,10 +6574,252 @@ var elm$virtual_dom$VirtualDom$toHandlerInt = function (handler) {
 			return 3;
 	}
 };
+var elm$core$String$length = _String_length;
+var elm$core$String$slice = _String_slice;
+var elm$core$String$dropLeft = F2(
+	function (n, string) {
+		return (n < 1) ? string : A3(
+			elm$core$String$slice,
+			n,
+			elm$core$String$length(string),
+			string);
+	});
+var elm$core$String$startsWith = _String_startsWith;
+var elm$url$Url$Http = {$: 'Http'};
+var elm$url$Url$Https = {$: 'Https'};
+var elm$core$String$indexes = _String_indexes;
+var elm$core$String$isEmpty = function (string) {
+	return string === '';
+};
+var elm$core$String$left = F2(
+	function (n, string) {
+		return (n < 1) ? '' : A3(elm$core$String$slice, 0, n, string);
+	});
+var elm$core$String$contains = _String_contains;
+var elm$core$String$toInt = _String_toInt;
+var elm$url$Url$Url = F6(
+	function (protocol, host, port_, path, query, fragment) {
+		return {fragment: fragment, host: host, path: path, port_: port_, protocol: protocol, query: query};
+	});
+var elm$url$Url$chompBeforePath = F5(
+	function (protocol, path, params, frag, str) {
+		if (elm$core$String$isEmpty(str) || A2(elm$core$String$contains, '@', str)) {
+			return elm$core$Maybe$Nothing;
+		} else {
+			var _n0 = A2(elm$core$String$indexes, ':', str);
+			if (!_n0.b) {
+				return elm$core$Maybe$Just(
+					A6(elm$url$Url$Url, protocol, str, elm$core$Maybe$Nothing, path, params, frag));
+			} else {
+				if (!_n0.b.b) {
+					var i = _n0.a;
+					var _n1 = elm$core$String$toInt(
+						A2(elm$core$String$dropLeft, i + 1, str));
+					if (_n1.$ === 'Nothing') {
+						return elm$core$Maybe$Nothing;
+					} else {
+						var port_ = _n1;
+						return elm$core$Maybe$Just(
+							A6(
+								elm$url$Url$Url,
+								protocol,
+								A2(elm$core$String$left, i, str),
+								port_,
+								path,
+								params,
+								frag));
+					}
+				} else {
+					return elm$core$Maybe$Nothing;
+				}
+			}
+		}
+	});
+var elm$url$Url$chompBeforeQuery = F4(
+	function (protocol, params, frag, str) {
+		if (elm$core$String$isEmpty(str)) {
+			return elm$core$Maybe$Nothing;
+		} else {
+			var _n0 = A2(elm$core$String$indexes, '/', str);
+			if (!_n0.b) {
+				return A5(elm$url$Url$chompBeforePath, protocol, '/', params, frag, str);
+			} else {
+				var i = _n0.a;
+				return A5(
+					elm$url$Url$chompBeforePath,
+					protocol,
+					A2(elm$core$String$dropLeft, i, str),
+					params,
+					frag,
+					A2(elm$core$String$left, i, str));
+			}
+		}
+	});
+var elm$url$Url$chompBeforeFragment = F3(
+	function (protocol, frag, str) {
+		if (elm$core$String$isEmpty(str)) {
+			return elm$core$Maybe$Nothing;
+		} else {
+			var _n0 = A2(elm$core$String$indexes, '?', str);
+			if (!_n0.b) {
+				return A4(elm$url$Url$chompBeforeQuery, protocol, elm$core$Maybe$Nothing, frag, str);
+			} else {
+				var i = _n0.a;
+				return A4(
+					elm$url$Url$chompBeforeQuery,
+					protocol,
+					elm$core$Maybe$Just(
+						A2(elm$core$String$dropLeft, i + 1, str)),
+					frag,
+					A2(elm$core$String$left, i, str));
+			}
+		}
+	});
+var elm$url$Url$chompAfterProtocol = F2(
+	function (protocol, str) {
+		if (elm$core$String$isEmpty(str)) {
+			return elm$core$Maybe$Nothing;
+		} else {
+			var _n0 = A2(elm$core$String$indexes, '#', str);
+			if (!_n0.b) {
+				return A3(elm$url$Url$chompBeforeFragment, protocol, elm$core$Maybe$Nothing, str);
+			} else {
+				var i = _n0.a;
+				return A3(
+					elm$url$Url$chompBeforeFragment,
+					protocol,
+					elm$core$Maybe$Just(
+						A2(elm$core$String$dropLeft, i + 1, str)),
+					A2(elm$core$String$left, i, str));
+			}
+		}
+	});
+var elm$url$Url$fromString = function (str) {
+	return A2(elm$core$String$startsWith, 'http://', str) ? A2(
+		elm$url$Url$chompAfterProtocol,
+		elm$url$Url$Http,
+		A2(elm$core$String$dropLeft, 7, str)) : (A2(elm$core$String$startsWith, 'https://', str) ? A2(
+		elm$url$Url$chompAfterProtocol,
+		elm$url$Url$Https,
+		A2(elm$core$String$dropLeft, 8, str)) : elm$core$Maybe$Nothing);
+};
+var elm$browser$Browser$Navigation$load = _Browser_load;
+var elm$browser$Browser$Navigation$pushUrl = _Browser_pushUrl;
+var elm$url$Url$addPort = F2(
+	function (maybePort, starter) {
+		if (maybePort.$ === 'Nothing') {
+			return starter;
+		} else {
+			var port_ = maybePort.a;
+			return starter + (':' + elm$core$String$fromInt(port_));
+		}
+	});
+var elm$url$Url$addPrefixed = F3(
+	function (prefix, maybeSegment, starter) {
+		if (maybeSegment.$ === 'Nothing') {
+			return starter;
+		} else {
+			var segment = maybeSegment.a;
+			return _Utils_ap(
+				starter,
+				_Utils_ap(prefix, segment));
+		}
+	});
+var elm$url$Url$toString = function (url) {
+	var http = function () {
+		var _n0 = url.protocol;
+		if (_n0.$ === 'Http') {
+			return 'http://';
+		} else {
+			return 'https://';
+		}
+	}();
+	return A3(
+		elm$url$Url$addPrefixed,
+		'#',
+		url.fragment,
+		A3(
+			elm$url$Url$addPrefixed,
+			'?',
+			url.query,
+			_Utils_ap(
+				A2(
+					elm$url$Url$addPort,
+					url.port_,
+					_Utils_ap(http, url.host)),
+				url.path)));
+};
+var author$project$Main$update = F2(
+	function (msg, model) {
+		var _n0 = _Utils_Tuple2(msg, model.page);
+		switch (_n0.a.$) {
+			case 'OnUrlRequest':
+				var urlRequest = _n0.a.a;
+				if (urlRequest.$ === 'Internal') {
+					var url = urlRequest.a;
+					return _Utils_Tuple2(
+						model,
+						A2(
+							elm$browser$Browser$Navigation$pushUrl,
+							model.navKey,
+							elm$url$Url$toString(url)));
+				} else {
+					var url = urlRequest.a;
+					return _Utils_Tuple2(
+						model,
+						elm$browser$Browser$Navigation$load(url));
+				}
+			case 'OnUrlChange':
+				var url = _n0.a.a;
+				var newRoute = author$project$Routes$parseUrl(url);
+				return author$project$Main$loadCurrentPage(
+					_Utils_Tuple2(
+						_Utils_update(
+							model,
+							{route: newRoute}),
+						elm$core$Platform$Cmd$none));
+			case 'ShowMsg':
+				return _Utils_Tuple2(model, elm$core$Platform$Cmd$none);
+			default:
+				switch (_n0.b.$) {
+					case 'PageLogin':
+						var subMsg = _n0.a.a;
+						var pageModel = _n0.b.a;
+						var _n2 = A2(author$project$Page$Login$update, subMsg, pageModel);
+						var newPageModel = _n2.a;
+						var newCmd = _n2.b;
+						return _Utils_Tuple2(
+							_Utils_update(
+								model,
+								{
+									page: author$project$Main$PageLogin(newPageModel)
+								}),
+							A2(elm$core$Platform$Cmd$map, author$project$Main$LoginMsg, newCmd));
+					case 'PageNone':
+						var _n3 = _n0.b;
+						return _Utils_Tuple2(model, elm$core$Platform$Cmd$none);
+					default:
+						return _Utils_Tuple2(model, elm$core$Platform$Cmd$none);
+				}
+		}
+	});
+var author$project$Routes$pathFor = function (route) {
+	switch (route.$) {
+		case 'ShowsRoute':
+			return '/shows';
+		case 'LoginRoute':
+			return '/login';
+		case 'ShowRoute':
+			var id = route.a;
+			return '/Show/' + id;
+		default:
+			return '/';
+	}
+};
+var author$project$Routes$loginPath = author$project$Routes$pathFor(author$project$Routes$LoginRoute);
+var author$project$Routes$showsPath = author$project$Routes$pathFor(author$project$Routes$ShowsRoute);
+var elm$html$Html$a = _VirtualDom_node('a');
 var elm$html$Html$div = _VirtualDom_node('div');
-var elm$html$Html$input = _VirtualDom_node('input');
-var elm$html$Html$p = _VirtualDom_node('p');
-var elm$html$Html$span = _VirtualDom_node('span');
 var elm$virtual_dom$VirtualDom$text = _VirtualDom_text;
 var elm$html$Html$text = elm$virtual_dom$VirtualDom$text;
 var elm$html$Html$Attributes$stringProperty = F2(
@@ -6254,6 +6830,84 @@ var elm$html$Html$Attributes$stringProperty = F2(
 			elm$json$Json$Encode$string(string));
 	});
 var elm$html$Html$Attributes$class = elm$html$Html$Attributes$stringProperty('className');
+var elm$html$Html$Attributes$href = function (url) {
+	return A2(
+		elm$html$Html$Attributes$stringProperty,
+		'href',
+		_VirtualDom_noJavaScriptUri(url));
+};
+var author$project$Main$nav = function (model) {
+	var linkToLogin = A2(
+		elm$html$Html$a,
+		_List_fromArray(
+			[
+				elm$html$Html$Attributes$href(author$project$Routes$loginPath),
+				elm$html$Html$Attributes$class('text-white')
+			]),
+		_List_fromArray(
+			[
+				elm$html$Html$text('Login')
+			]));
+	var links = function () {
+		var _n0 = model.route;
+		switch (_n0.$) {
+			case 'ShowsRoute':
+				return _List_fromArray(
+					[
+						A2(
+						elm$html$Html$a,
+						_List_fromArray(
+							[
+								elm$html$Html$Attributes$href(author$project$Routes$showsPath),
+								elm$html$Html$Attributes$class('text-white')
+							]),
+						_List_fromArray(
+							[
+								elm$html$Html$text('Shows')
+							]))
+					]);
+			case 'LoginRoute':
+				return _List_fromArray(
+					[linkToLogin]);
+			case 'ShowRoute':
+				return _List_fromArray(
+					[linkToLogin]);
+			default:
+				return _List_fromArray(
+					[linkToLogin]);
+		}
+	}();
+	return A2(
+		elm$html$Html$div,
+		_List_fromArray(
+			[
+				elm$html$Html$Attributes$class('mb-2 text-white bg-black p-4')
+			]),
+		links);
+};
+var author$project$Main$notFoundView = A2(
+	elm$html$Html$div,
+	_List_Nil,
+	_List_fromArray(
+		[
+			elm$html$Html$text('Not found')
+		]));
+var author$project$Page$Login$TabNavigate = function (a) {
+	return {$: 'TabNavigate', a: a};
+};
+var author$project$Page$Login$RegisterUser = {$: 'RegisterUser'};
+var author$project$Page$Login$UpdateNewConfirmPassword = function (a) {
+	return {$: 'UpdateNewConfirmPassword', a: a};
+};
+var author$project$Page$Login$UpdateNewPassword = function (a) {
+	return {$: 'UpdateNewPassword', a: a};
+};
+var author$project$Page$Login$UpdateUserName = function (a) {
+	return {$: 'UpdateUserName', a: a};
+};
+var elm$html$Html$input = _VirtualDom_node('input');
+var elm$html$Html$p = _VirtualDom_node('p');
+var elm$html$Html$span = _VirtualDom_node('span');
 var elm$html$Html$Attributes$placeholder = elm$html$Html$Attributes$stringProperty('placeholder');
 var elm$html$Html$Attributes$type_ = elm$html$Html$Attributes$stringProperty('type');
 var elm$html$Html$Attributes$value = elm$html$Html$Attributes$stringProperty('value');
@@ -6305,7 +6959,7 @@ var elm$html$Html$Events$onInput = function (tagger) {
 			elm$html$Html$Events$alwaysStop,
 			A2(elm$json$Json$Decode$map, tagger, elm$html$Html$Events$targetValue)));
 };
-var author$project$Login$createAccountView = function (model) {
+var author$project$Page$Login$createAccountView = function (model) {
 	return A2(
 		elm$html$Html$div,
 		_List_fromArray(
@@ -6335,7 +6989,7 @@ var author$project$Login$createAccountView = function (model) {
 								_List_fromArray(
 									[
 										elm$html$Html$Attributes$placeholder('Username'),
-										elm$html$Html$Events$onInput(author$project$Login$UpdateUserName),
+										elm$html$Html$Events$onInput(author$project$Page$Login$UpdateUserName),
 										elm$html$Html$Attributes$value(model.userInfo.userName)
 									]),
 								_List_Nil),
@@ -6345,7 +6999,7 @@ var author$project$Login$createAccountView = function (model) {
 									[
 										elm$html$Html$Attributes$placeholder('Password'),
 										elm$html$Html$Attributes$type_('password'),
-										elm$html$Html$Events$onInput(author$project$Login$UpdateNewPassword),
+										elm$html$Html$Events$onInput(author$project$Page$Login$UpdateNewPassword),
 										elm$html$Html$Attributes$value(model.userInfo.password)
 									]),
 								_List_Nil),
@@ -6360,7 +7014,7 @@ var author$project$Login$createAccountView = function (model) {
 											[
 												elm$html$Html$Attributes$placeholder('Confirm Password'),
 												elm$html$Html$Attributes$type_('password'),
-												elm$html$Html$Events$onInput(author$project$Login$UpdateNewConfirmPassword),
+												elm$html$Html$Events$onInput(author$project$Page$Login$UpdateNewConfirmPassword),
 												elm$html$Html$Attributes$value(model.userInfo.passwordConfimation)
 											]),
 										_List_Nil),
@@ -6378,7 +7032,7 @@ var author$project$Login$createAccountView = function (model) {
 						_List_fromArray(
 							[
 								elm$html$Html$Attributes$class('buttons'),
-								elm$html$Html$Events$onClick(author$project$Login$RegisterUser)
+								elm$html$Html$Events$onClick(author$project$Page$Login$RegisterUser)
 							]),
 						_List_fromArray(
 							[
@@ -6398,7 +7052,7 @@ var author$project$Login$createAccountView = function (model) {
 									[
 										elm$html$Html$Attributes$class('link'),
 										elm$html$Html$Events$onClick(
-										author$project$Login$TabNavigate(author$project$Login$LoggingInTab))
+										author$project$Page$Login$TabNavigate(author$project$Page$Login$LoggingInTab))
 									]),
 								_List_fromArray(
 									[
@@ -6414,11 +7068,11 @@ var author$project$Login$createAccountView = function (model) {
 					]))
 			]));
 };
-var author$project$Login$StartLoginOrCancel = {$: 'StartLoginOrCancel'};
-var author$project$Login$UpdatePassword = function (a) {
+var author$project$Page$Login$StartLoginOrCancel = {$: 'StartLoginOrCancel'};
+var author$project$Page$Login$UpdatePassword = function (a) {
 	return {$: 'UpdatePassword', a: a};
 };
-var author$project$Login$loginView = function (model) {
+var author$project$Page$Login$loginView = function (model) {
 	var buttonText = _Utils_eq(model.loadState, perzanko$elm_loading$Loading$Off) ? 'Login' : 'Cancel';
 	return A2(
 		elm$html$Html$div,
@@ -6449,7 +7103,7 @@ var author$project$Login$loginView = function (model) {
 								_List_fromArray(
 									[
 										elm$html$Html$Attributes$placeholder('Username'),
-										elm$html$Html$Events$onInput(author$project$Login$UpdateUserName),
+										elm$html$Html$Events$onInput(author$project$Page$Login$UpdateUserName),
 										elm$html$Html$Attributes$value(model.userInfo.userName)
 									]),
 								_List_Nil),
@@ -6464,7 +7118,7 @@ var author$project$Login$loginView = function (model) {
 											[
 												elm$html$Html$Attributes$placeholder('Password'),
 												elm$html$Html$Attributes$type_('password'),
-												elm$html$Html$Events$onInput(author$project$Login$UpdatePassword),
+												elm$html$Html$Events$onInput(author$project$Page$Login$UpdatePassword),
 												elm$html$Html$Attributes$value(model.userInfo.password)
 											]),
 										_List_Nil),
@@ -6490,7 +7144,7 @@ var author$project$Login$loginView = function (model) {
 								_List_fromArray(
 									[
 										elm$html$Html$Attributes$class('button fullWidth'),
-										elm$html$Html$Events$onClick(author$project$Login$StartLoginOrCancel)
+										elm$html$Html$Events$onClick(author$project$Page$Login$StartLoginOrCancel)
 									]),
 								_List_fromArray(
 									[
@@ -6502,7 +7156,7 @@ var author$project$Login$loginView = function (model) {
 									[
 										elm$html$Html$Attributes$class('link'),
 										elm$html$Html$Events$onClick(
-										author$project$Login$TabNavigate(author$project$Login$CreateAccountTab))
+										author$project$Page$Login$TabNavigate(author$project$Page$Login$CreateAccountTab))
 									]),
 								_List_fromArray(
 									[
@@ -6518,13 +7172,13 @@ var author$project$Login$loginView = function (model) {
 					]))
 			]));
 };
-var author$project$Login$tabClassString = F2(
+var author$project$Page$Login$tabClassString = F2(
 	function (model, tab) {
 		return _Utils_eq(model.activeTab, tab) ? 'tab active' : 'tab';
 	});
 var elm$html$Html$h1 = _VirtualDom_node('h1');
 var elm$html$Html$Attributes$id = elm$html$Html$Attributes$stringProperty('id');
-var author$project$Login$headersView = function (model) {
+var author$project$Page$Login$headersView = function (model) {
 	return A2(
 		elm$html$Html$div,
 		_List_fromArray(
@@ -6562,9 +7216,9 @@ var author$project$Login$headersView = function (model) {
 										_List_fromArray(
 											[
 												elm$html$Html$Attributes$class(
-												A2(author$project$Login$tabClassString, model, author$project$Login$CreateAccountTab)),
+												A2(author$project$Page$Login$tabClassString, model, author$project$Page$Login$CreateAccountTab)),
 												elm$html$Html$Events$onClick(
-												author$project$Login$TabNavigate(author$project$Login$CreateAccountTab))
+												author$project$Page$Login$TabNavigate(author$project$Page$Login$CreateAccountTab))
 											]),
 										_List_fromArray(
 											[
@@ -6575,9 +7229,9 @@ var author$project$Login$headersView = function (model) {
 										_List_fromArray(
 											[
 												elm$html$Html$Attributes$class(
-												A2(author$project$Login$tabClassString, model, author$project$Login$LoggingInTab)),
+												A2(author$project$Page$Login$tabClassString, model, author$project$Page$Login$LoggingInTab)),
 												elm$html$Html$Events$onClick(
-												author$project$Login$TabNavigate(author$project$Login$LoggingInTab))
+												author$project$Page$Login$TabNavigate(author$project$Page$Login$LoggingInTab))
 											]),
 										_List_fromArray(
 											[
@@ -6587,9 +7241,9 @@ var author$project$Login$headersView = function (model) {
 								function () {
 								var _n0 = model.activeTab;
 								if (_n0.$ === 'CreateAccountTab') {
-									return author$project$Login$createAccountView(model);
+									return author$project$Page$Login$createAccountView(model);
 								} else {
-									return author$project$Login$loginView(model);
+									return author$project$Page$Login$loginView(model);
 								}
 							}()
 							])),
@@ -6778,17 +7432,6 @@ var rtfeldman$elm_css$Css$backgroundColor = function (c) {
 var rtfeldman$elm_css$Css$borderRadius = rtfeldman$elm_css$Css$prop1('border-radius');
 var rtfeldman$elm_css$Css$flexEnd = rtfeldman$elm_css$Css$prop1('flex-end');
 var rtfeldman$elm_css$Css$height = rtfeldman$elm_css$Css$prop1('height');
-var elm$core$String$length = _String_length;
-var elm$core$String$slice = _String_slice;
-var elm$core$String$dropLeft = F2(
-	function (n, string) {
-		return (n < 1) ? string : A3(
-			elm$core$String$slice,
-			n,
-			elm$core$String$length(string),
-			string);
-	});
-var elm$core$String$startsWith = _String_startsWith;
 var elm$core$String$foldr = _String_foldr;
 var elm$core$String$toList = function (string) {
 	return A3(elm$core$String$foldr, elm$core$List$cons, _List_Nil, string);
@@ -6823,9 +7466,6 @@ var elm$core$List$tail = function (list) {
 	} else {
 		return elm$core$Maybe$Nothing;
 	}
-};
-var elm$core$String$isEmpty = function (string) {
-	return string === '';
 };
 var elm$core$Basics$pow = _Basics_pow;
 var elm$core$String$fromChar = function (_char) {
@@ -7193,20 +7833,6 @@ var elm$core$List$isEmpty = function (xs) {
 		return false;
 	}
 };
-var elm$core$List$map = F2(
-	function (f, xs) {
-		return A3(
-			elm$core$List$foldr,
-			F2(
-				function (x, acc) {
-					return A2(
-						elm$core$List$cons,
-						f(x),
-						acc);
-				}),
-			_List_Nil,
-			xs);
-	});
 var rtfeldman$elm_css$Css$Internal$printKeyframeSelector = function (_n0) {
 	var percentage = _n0.a;
 	var properties = _n0.b;
@@ -7358,22 +7984,6 @@ var elm$core$List$singleton = function (value) {
 var rtfeldman$elm_css$Css$Preprocess$stylesheet = function (snippets) {
 	return {charset: elm$core$Maybe$Nothing, imports: _List_Nil, namespaces: _List_Nil, snippets: snippets};
 };
-var elm$core$List$append = F2(
-	function (xs, ys) {
-		if (!ys.b) {
-			return xs;
-		} else {
-			return A3(elm$core$List$foldr, elm$core$List$cons, ys, xs);
-		}
-	});
-var elm$core$List$concat = function (lists) {
-	return A3(elm$core$List$foldr, elm$core$List$append, _List_Nil, lists);
-};
-var elm$core$List$concatMap = F2(
-	function (f, list) {
-		return elm$core$List$concat(
-			A2(elm$core$List$map, f, list));
-	});
 var rtfeldman$elm_css$Css$Preprocess$unwrapSnippet = function (_n0) {
 	var declarations = _n0.a;
 	return declarations;
@@ -10330,13 +10940,13 @@ var perzanko$elm_loading$Loading$render = F3(
 			return elm$html$Html$text(' ');
 		}
 	});
-var author$project$Login$tabView = function (model) {
+var author$project$Page$Login$view = function (model) {
 	var vw = function () {
 		var _n0 = model.activeTab;
 		if (_n0.$ === 'CreateAccountTab') {
-			return author$project$Login$headersView(model);
+			return author$project$Page$Login$headersView(model);
 		} else {
-			return author$project$Login$headersView(model);
+			return author$project$Page$Login$headersView(model);
 		}
 	}();
 	return A2(
@@ -10371,7 +10981,7 @@ var elm$html$Html$table = _VirtualDom_node('table');
 var elm$html$Html$td = _VirtualDom_node('td');
 var elm$html$Html$th = _VirtualDom_node('th');
 var elm$html$Html$tr = _VirtualDom_node('tr');
-var author$project$Show$view = function (model) {
+var author$project$Page$Show$viewWithData = function (shows) {
 	var showDetails = function (x) {
 		return A2(
 			elm$html$Html$tr,
@@ -10463,7 +11073,7 @@ var author$project$Show$view = function (model) {
 										elm$html$Html$text('Vote Average')
 									]))
 							])),
-					A2(elm$core$List$map, showDetails, model.showInfos))),
+					A2(elm$core$List$map, showDetails, shows))),
 				A2(
 				elm$html$Html$div,
 				_List_fromArray(
@@ -10476,232 +11086,80 @@ var author$project$Show$view = function (model) {
 					]))
 			]));
 };
-var elm$virtual_dom$VirtualDom$map = _VirtualDom_map;
-var elm$html$Html$map = elm$virtual_dom$VirtualDom$map;
-var author$project$Main$view = function (model) {
-	var toView = function (mdl) {
-		if (mdl.$ === 'Shows') {
-			var smdl = mdl.a;
-			return A2(
-				elm$html$Html$map,
-				author$project$Main$GotShowMsg,
-				author$project$Show$view(smdl));
-		} else {
-			var amdl = mdl.a;
-			return A2(
-				elm$html$Html$map,
-				author$project$Main$GotAuthMsg,
-				author$project$Login$tabView(amdl));
+var elm$html$Html$section = _VirtualDom_node('section');
+var author$project$Page$Show$view = function (model) {
+	var content = function () {
+		var _n0 = model.showInfos;
+		switch (_n0.$) {
+			case 'NotAsked':
+				return elm$html$Html$text('');
+			case 'Loading':
+				return elm$html$Html$text('Loading ...');
+			case 'Loaded':
+				var players = _n0.a;
+				return author$project$Page$Show$viewWithData(players);
+			default:
+				return elm$html$Html$text('Error');
 		}
-	};
+	}();
 	return A2(
-		elm$html$Html$div,
+		elm$html$Html$section,
 		_List_fromArray(
 			[
-				elm$html$Html$Attributes$id('root')
+				elm$html$Html$Attributes$class('p-4')
 			]),
 		_List_fromArray(
+			[content]));
+};
+var elm$virtual_dom$VirtualDom$map = _VirtualDom_map;
+var elm$html$Html$map = elm$virtual_dom$VirtualDom$map;
+var author$project$Main$currentPage = function (model) {
+	var page = function () {
+		var _n0 = model.page;
+		switch (_n0.$) {
+			case 'PageLogin':
+				var pageModel = _n0.a;
+				return A2(
+					elm$html$Html$map,
+					author$project$Main$LoginMsg,
+					author$project$Page$Login$view(pageModel));
+			case 'PageShow':
+				var pageModel = _n0.a;
+				return A2(
+					elm$html$Html$map,
+					author$project$Main$ShowMsg,
+					author$project$Page$Show$view(pageModel));
+			default:
+				return author$project$Main$notFoundView;
+		}
+	}();
+	return A2(
+		elm$html$Html$section,
+		_List_Nil,
+		_List_fromArray(
 			[
-				A2(
-				elm$html$Html$div,
-				_List_fromArray(
-					[
-						elm$html$Html$Attributes$class('app')
-					]),
-				_List_fromArray(
-					[
-						toView(model)
-					]))
+				author$project$Main$nav(model),
+				page
 			]));
 };
-var elm$browser$Browser$External = function (a) {
-	return {$: 'External', a: a};
+var author$project$Main$view = function (model) {
+	return {
+		body: _List_fromArray(
+			[
+				author$project$Main$currentPage(model)
+			]),
+		title: 'App'
+	};
 };
-var elm$browser$Browser$Internal = function (a) {
-	return {$: 'Internal', a: a};
-};
-var elm$browser$Browser$Dom$NotFound = function (a) {
-	return {$: 'NotFound', a: a};
-};
-var elm$core$Basics$never = function (_n0) {
-	never:
-	while (true) {
-		var nvr = _n0.a;
-		var $temp$_n0 = nvr;
-		_n0 = $temp$_n0;
-		continue never;
-	}
-};
-var elm$core$Task$Perform = function (a) {
-	return {$: 'Perform', a: a};
-};
-var elm$core$Task$init = elm$core$Task$succeed(_Utils_Tuple0);
-var elm$core$Task$map = F2(
-	function (func, taskA) {
-		return A2(
-			elm$core$Task$andThen,
-			function (a) {
-				return elm$core$Task$succeed(
-					func(a));
-			},
-			taskA);
-	});
-var elm$core$Task$spawnCmd = F2(
-	function (router, _n0) {
-		var task = _n0.a;
-		return _Scheduler_spawn(
-			A2(
-				elm$core$Task$andThen,
-				elm$core$Platform$sendToApp(router),
-				task));
-	});
-var elm$core$Task$onEffects = F3(
-	function (router, commands, state) {
-		return A2(
-			elm$core$Task$map,
-			function (_n0) {
-				return _Utils_Tuple0;
-			},
-			elm$core$Task$sequence(
-				A2(
-					elm$core$List$map,
-					elm$core$Task$spawnCmd(router),
-					commands)));
-	});
-var elm$core$Task$onSelfMsg = F3(
-	function (_n0, _n1, _n2) {
-		return elm$core$Task$succeed(_Utils_Tuple0);
-	});
-var elm$core$Task$cmdMap = F2(
-	function (tagger, _n0) {
-		var task = _n0.a;
-		return elm$core$Task$Perform(
-			A2(elm$core$Task$map, tagger, task));
-	});
-_Platform_effectManagers['Task'] = _Platform_createManager(elm$core$Task$init, elm$core$Task$onEffects, elm$core$Task$onSelfMsg, elm$core$Task$cmdMap);
-var elm$core$Task$command = _Platform_leaf('Task');
-var elm$core$Task$perform = F2(
-	function (toMessage, task) {
-		return elm$core$Task$command(
-			elm$core$Task$Perform(
-				A2(elm$core$Task$map, toMessage, task)));
-	});
-var elm$url$Url$Http = {$: 'Http'};
-var elm$url$Url$Https = {$: 'Https'};
-var elm$core$String$indexes = _String_indexes;
-var elm$core$String$left = F2(
-	function (n, string) {
-		return (n < 1) ? '' : A3(elm$core$String$slice, 0, n, string);
-	});
-var elm$core$String$contains = _String_contains;
-var elm$core$String$toInt = _String_toInt;
-var elm$url$Url$Url = F6(
-	function (protocol, host, port_, path, query, fragment) {
-		return {fragment: fragment, host: host, path: path, port_: port_, protocol: protocol, query: query};
-	});
-var elm$url$Url$chompBeforePath = F5(
-	function (protocol, path, params, frag, str) {
-		if (elm$core$String$isEmpty(str) || A2(elm$core$String$contains, '@', str)) {
-			return elm$core$Maybe$Nothing;
-		} else {
-			var _n0 = A2(elm$core$String$indexes, ':', str);
-			if (!_n0.b) {
-				return elm$core$Maybe$Just(
-					A6(elm$url$Url$Url, protocol, str, elm$core$Maybe$Nothing, path, params, frag));
-			} else {
-				if (!_n0.b.b) {
-					var i = _n0.a;
-					var _n1 = elm$core$String$toInt(
-						A2(elm$core$String$dropLeft, i + 1, str));
-					if (_n1.$ === 'Nothing') {
-						return elm$core$Maybe$Nothing;
-					} else {
-						var port_ = _n1;
-						return elm$core$Maybe$Just(
-							A6(
-								elm$url$Url$Url,
-								protocol,
-								A2(elm$core$String$left, i, str),
-								port_,
-								path,
-								params,
-								frag));
-					}
-				} else {
-					return elm$core$Maybe$Nothing;
-				}
-			}
-		}
-	});
-var elm$url$Url$chompBeforeQuery = F4(
-	function (protocol, params, frag, str) {
-		if (elm$core$String$isEmpty(str)) {
-			return elm$core$Maybe$Nothing;
-		} else {
-			var _n0 = A2(elm$core$String$indexes, '/', str);
-			if (!_n0.b) {
-				return A5(elm$url$Url$chompBeforePath, protocol, '/', params, frag, str);
-			} else {
-				var i = _n0.a;
-				return A5(
-					elm$url$Url$chompBeforePath,
-					protocol,
-					A2(elm$core$String$dropLeft, i, str),
-					params,
-					frag,
-					A2(elm$core$String$left, i, str));
-			}
-		}
-	});
-var elm$url$Url$chompBeforeFragment = F3(
-	function (protocol, frag, str) {
-		if (elm$core$String$isEmpty(str)) {
-			return elm$core$Maybe$Nothing;
-		} else {
-			var _n0 = A2(elm$core$String$indexes, '?', str);
-			if (!_n0.b) {
-				return A4(elm$url$Url$chompBeforeQuery, protocol, elm$core$Maybe$Nothing, frag, str);
-			} else {
-				var i = _n0.a;
-				return A4(
-					elm$url$Url$chompBeforeQuery,
-					protocol,
-					elm$core$Maybe$Just(
-						A2(elm$core$String$dropLeft, i + 1, str)),
-					frag,
-					A2(elm$core$String$left, i, str));
-			}
-		}
-	});
-var elm$url$Url$chompAfterProtocol = F2(
-	function (protocol, str) {
-		if (elm$core$String$isEmpty(str)) {
-			return elm$core$Maybe$Nothing;
-		} else {
-			var _n0 = A2(elm$core$String$indexes, '#', str);
-			if (!_n0.b) {
-				return A3(elm$url$Url$chompBeforeFragment, protocol, elm$core$Maybe$Nothing, str);
-			} else {
-				var i = _n0.a;
-				return A3(
-					elm$url$Url$chompBeforeFragment,
-					protocol,
-					elm$core$Maybe$Just(
-						A2(elm$core$String$dropLeft, i + 1, str)),
-					A2(elm$core$String$left, i, str));
-			}
-		}
-	});
-var elm$url$Url$fromString = function (str) {
-	return A2(elm$core$String$startsWith, 'http://', str) ? A2(
-		elm$url$Url$chompAfterProtocol,
-		elm$url$Url$Http,
-		A2(elm$core$String$dropLeft, 7, str)) : (A2(elm$core$String$startsWith, 'https://', str) ? A2(
-		elm$url$Url$chompAfterProtocol,
-		elm$url$Url$Https,
-		A2(elm$core$String$dropLeft, 8, str)) : elm$core$Maybe$Nothing);
-};
-var elm$browser$Browser$element = _Browser_element;
-var author$project$Main$main = elm$browser$Browser$element(
-	{init: author$project$Main$init, subscriptions: author$project$Main$subscriptions, update: author$project$Main$update, view: author$project$Main$view});
-_Platform_export({'Main':{'init':author$project$Main$main(elm$json$Json$Decode$string)(0)}});}(this));
+var elm$browser$Browser$application = _Browser_application;
+var elm$json$Json$Decode$andThen = _Json_andThen;
+var author$project$Main$main = elm$browser$Browser$application(
+	{init: author$project$Main$init, onUrlChange: author$project$Main$OnUrlChange, onUrlRequest: author$project$Main$OnUrlRequest, subscriptions: author$project$Main$subscriptions, update: author$project$Main$update, view: author$project$Main$view});
+_Platform_export({'Main':{'init':author$project$Main$main(
+	A2(
+		elm$json$Json$Decode$andThen,
+		function (api) {
+			return elm$json$Json$Decode$succeed(
+				{api: api});
+		},
+		A2(elm$json$Json$Decode$field, 'api', elm$json$Json$Decode$string)))(0)}});}(this));
