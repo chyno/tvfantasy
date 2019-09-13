@@ -10,8 +10,8 @@ import Shared exposing (..)
 import Json.Decode as D
 import Json.Encode as E
 
-type Msg
-    = OnFetchShows (Result Http.Error (List ShowInfo))
+type Msg =  OnFetchShows (Result Http.Error (List ShowInfo))
+    
 
 init : Flags -> ( Model, Cmd Msg )
 init flags =
@@ -47,6 +47,8 @@ update msg model =
             ( { model | showInfos = Loaded shows }, Cmd.none )
         OnFetchShows (Err err) ->
             ( { model | showInfos = Failure }, Cmd.none )
+       
+
 
         
 -- Subscriptions
@@ -61,10 +63,10 @@ view model =
         content =
             case model.showInfos of
                 NotAsked ->
-                    text ""
+                    text "not asked"
 
                 Loading ->
-                    text "Loading ..."
+                    text "Page is Loading "
 
                 Loaded players ->
                     viewWithData players
