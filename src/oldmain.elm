@@ -46,8 +46,7 @@ subscriptions model =
                     Shows shows ->
                         Sub.map GotShowMsg (Show.subscriptions shows)
     in
-        Sub.batch[hedgeHogloginResult DoneLogin, childSub]
-   
+        
 
 
 

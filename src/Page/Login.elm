@@ -1,11 +1,13 @@
-port module Page.Login exposing (subscriptions, LoginResultInfo, Model, Msg(..), view, init, update)
+port module Page.Login exposing (subscriptions, LoginResultInfo, Model, Msg(..), view, init, update, initdata)
 
 import Browser
+import Browser.Navigation as Nav
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (onClick, onInput)
 import Http exposing (..)
 import Shared exposing (..)
+import Routes exposing (showsPath)
 import Json.Encode as E
 import Loading
     exposing
@@ -129,7 +131,7 @@ type Msg
     | UpdateNewConfirmPassword String
     | StartLoginOrCancel
     | RegisterUser
-
+    | DoneLogin LoginResultInfo
 
 
 -- Model
@@ -162,7 +164,7 @@ type ActiveLoginTab
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
-    Sub.none
+    hedgeHogloginResult DoneLogin
 
 
 
@@ -255,6 +257,13 @@ update msg model =
 
         RegisterUser ->
             ( model, registerUser model.userInfo )
+        DoneLogin data ->
+            case data.isLoggedIn of
+                True ->
+                    (model, Nav.load Routes.showsPath
+                    )  
+                False ->
+                    ( model , Cmd.none ) 
 
 
 loginView : Model -> Html Msg

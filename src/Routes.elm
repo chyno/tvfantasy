@@ -14,7 +14,7 @@ type Route
 matchers : Parser (Route -> a) a
 matchers =
     oneOf
-        [ map ShowsRoute top
+        [ map LoginRoute top
         , map ShowRoute (s "shows" </> string)
         , map LoginRoute (s "login")
         ]
@@ -38,7 +38,7 @@ pathFor route =
         LoginRoute ->
             "/login"
         ShowRoute id ->
-            "/Show/" ++ id
+            "/show/" ++ id
 
         NotFoundRoute ->
             "/"

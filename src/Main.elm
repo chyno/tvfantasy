@@ -39,11 +39,10 @@ init flags url navKey =
             { flags = flags
             , navKey = navKey
             , route = Routes.parseUrl url
-            , page = PageNone
+            , page = PageLogin Login.initdata
             }
     in
-    ( model, Cmd.none )
-        |> loadCurrentPage
+       loadCurrentPage  ( model, Cmd.none )
 
 
 loadCurrentPage : ( Model, Cmd Msg ) -> ( Model, Cmd Msg )
@@ -86,7 +85,6 @@ subscriptions model =
         PageNone ->
             Sub.none
 
-
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case ( msg, model.page ) of
@@ -125,22 +123,6 @@ update msg model =
         (LoginMsg _, PageShow _ )  ->
             (model, Cmd.none)
 
-
-
--- ( ListMsg subMsg, _ ) ->
---     ( model, Cmd.none )
--- ( EditMsg subMsg, PageEdit pageModel ) ->
---     let
---         ( newPageModel, newCmd ) =
---             Edit.update model.flags subMsg pageModel
---     in
---     ( { model | page = PageEdit newPageModel }
---     , Cmd.map EditMsg newCmd
---     )
--- ( EditMsg subMsg, _ ) ->
---     ( model, Cmd.none )
-
-
 main : Program Flags Model Msg
 main =
     Browser.application
@@ -152,11 +134,7 @@ main =
         , onUrlChange = OnUrlChange
         }
 
-
-
 -- VIEWS
-
-
 view : Model -> Browser.Document Msg
 view model =
     { title = "App"
@@ -180,10 +158,8 @@ currentPage model =
                 PageNone ->
                     notFoundView
     in
-    section []
-        [ nav model
-        , page
-        ]
+    div []
+        [ page]
 
 
 nav : Model -> Html Msg
