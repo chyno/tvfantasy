@@ -260,7 +260,7 @@ update msg model =
         DoneLogin data ->
             case data.isLoggedIn of
                 True ->
-                    (model, Nav.load Routes.showsPath
+                    (model, Cmd.none
                     )  
                 False ->
                     ( model , Cmd.none ) 
@@ -324,6 +324,7 @@ view model =
             -- LoadingState
             ]
         , div [] [ text model.loginResult.message ]
+        , a [ href Routes.showsPath, class "text-white" ] [ text "Tv Shows" ]
         ]
 
 

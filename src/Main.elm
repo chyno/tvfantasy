@@ -39,7 +39,7 @@ init flags url navKey =
             { flags = flags
             , navKey = navKey
             , route = Routes.parseUrl url
-            , page = PageLogin Login.initdata
+            , page =   PageLogin Login.initdata
             }
     in
        loadCurrentPage  ( model, Cmd.none )
@@ -191,6 +191,6 @@ nav model =
 notFoundView : Html msg
 notFoundView =
     div []
-        [ text "Not found"
+        [ text "Not found..."
         ]
 

@@ -15,7 +15,8 @@ matchers : Parser (Route -> a) a
 matchers =
     oneOf
         [ map LoginRoute top
-        , map ShowRoute (s "shows" </> string)
+       , map ShowsRoute (s "shows")
+        , map ShowRoute (s "show" </> string)
         , map LoginRoute (s "login")
         ]
 

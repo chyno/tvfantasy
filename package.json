@@ -5,7 +5,7 @@
   "main": "server.js",
   "scripts": {
     "build": "elm make ./src/Main.elm --output dist/app.js",
-    "client": "parcel -p 8080 src/app.html",
+    "client": "parcel -p 8080 src/index.html",
     "start": "nf start",
     "zzdev": "nodemon --watch src --ext *  server.js ",
     "test": "mocha",
