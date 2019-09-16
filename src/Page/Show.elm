@@ -34,6 +34,7 @@ type alias ShowInfo =
 
 fetchShows : Flags -> Cmd Msg
 fetchShows flags =
+    Debug.log "http get .."
     Http.get
         { url = flags.api
         , expect = Http.expectJson OnFetchShows listOfShowsDecoder
@@ -44,8 +45,10 @@ update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
         OnFetchShows (Ok shows) ->
+            Debug.log "ok shows .."
             ( { model | showInfos = Loaded shows }, Cmd.none )
         OnFetchShows (Err err) ->
+            Debug.log "error .."
             ( { model | showInfos = Failure }, Cmd.none )
        
 

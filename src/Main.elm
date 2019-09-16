@@ -107,21 +107,24 @@ update msg model =
             in
             ( { model | route = newRoute }, Cmd.none )
                 |> loadCurrentPage
-
         ( LoginMsg subMsg, PageLogin pageModel ) ->
             let
                 ( newPageModel, newCmd ) =
-                    Login.update subMsg pageModel
+                    Login.update  subMsg pageModel
             in
             ( { model | page = PageLogin newPageModel }
             , Cmd.map LoginMsg newCmd
             )
-        (ShowMsg _, _ ) ->
-            (model, Cmd.none)
-        (LoginMsg _, PageNone )  ->
-            (model, Cmd.none)
-        (LoginMsg _, PageShow _ )  ->
-            (model, Cmd.none)
+        (ShowMsg subMsg, PageShow pageModel ) ->
+            let
+                ( newPageModel, newCmd ) =
+                    Show.update  subMsg pageModel
+            in
+            ( { model | page = PageShow newPageModel }
+            , Cmd.map ShowMsg newCmd
+            )
+        (_,_ )  ->
+           Debug.todo "loginmsg pageshow"
 
 main : Program Flags Model Msg
 main =
