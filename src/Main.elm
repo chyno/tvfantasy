@@ -30,7 +30,7 @@ type Msg
     | OnUrlRequest UrlRequest
     | LoginMsg Login.Msg
     | ShowMsg Show.Msg
-
+    | Logout String
 
 init : Flags -> Url -> Key -> ( Model, Cmd Msg )
 init flags url navKey =
@@ -75,15 +75,19 @@ loadCurrentPage ( model, cmd ) =
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
-    case model.page of
-        PageLogin pageModel ->
-            Sub.map LoginMsg (Login.subscriptions pageModel)
+    let
+        pageSubs = 
+            case model.page of
+                PageLogin pageModel ->
+                    Sub.map LoginMsg (Login.subscriptions pageModel)
 
-        PageShow pageModel ->
-            Sub.map ShowMsg (Show.subscriptions pageModel)
-
-        PageNone ->
-            Sub.none
+                PageShow pageModel ->
+                    Sub.map ShowMsg (Show.subscriptions pageModel)
+                PageNone ->
+                    Sub.none
+    in
+        Sub.batch[pageSubs]
+        
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
@@ -123,6 +127,8 @@ update msg model =
             ( { model | page = PageShow newPageModel }
             , Cmd.map ShowMsg newCmd
             )
+        (Logout logoutmessage, _) ->
+                 ({ model | page =   PageLogin Login.initdata}, (Nav.load  Routes.loginPath) )
         (_,_ )  ->
            Debug.todo "loginmsg pageshow"
 

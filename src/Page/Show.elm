@@ -125,5 +125,6 @@ listOfShowsDecoder : D.Decoder (List ShowInfo)
 listOfShowsDecoder =
     D.field "results" (D.list showDecoder)
 
+-- port logoutUser : String -> Cmd msg
 -- , onClick  Logout
 -- , onClick StartLogout

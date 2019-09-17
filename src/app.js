@@ -1,5 +1,5 @@
 import { Elm } from "./Main.elm";
-import { hedgehog } from "./js/hedgehog.js";
+const lib = require('./lib');
 
 var flags = {
   api:
@@ -15,24 +15,41 @@ let app = Elm.Main.init({
   //node: document.getElementById("elm")
 });
 
+const logInService = new lib.LoginService();
+const hedgehog = logInService.hedgehog;
+
+
 // Subscriptions
 app.ports.loginUser.subscribe(function(data) {
   // For testing
   console.log("... User logging in");
-  // fakeLogin();
-  appLoginSendResults(data);
-});
+  //fakeLogin();
+  //appLoginSendResults(data);
+ 
+  hedgehog
+  .login(data.userName, data.password)
+  .then(appLoginSendResults)
+  .catch(() => {
+    app.ports.hedgeHogloginResult.send({
+      address: '',
+      isLoggedIn: false,
+      message: 'can not log in'
+     
+    });
 
-app.ports.logoutUser.subscribe(function() {
-  hedgehog.logout();
-  console.log("user logged out");
-  app.ports.loginResult.send({
-    address: "",
-    isLoggedIn: false,
-    message: "User Logged out",
-    showInfos: []
   });
 });
+
+// app.ports.logoutUser.subscribe(function() {
+//   hedgehog.logout();
+//   console.log("user logged out");
+//   app.ports.hedgeHogloginResult.send({
+//     address: "",
+//     isLoggedIn: false,
+//     message: "User Logged out",
+//     showInfos: []
+//   });
+// });
 
 app.ports.registerUser.subscribe(function(data) {
   hedgehog.logout();
@@ -41,42 +58,31 @@ app.ports.registerUser.subscribe(function(data) {
     .signUp(data.userName, data.password)
     .then(
       () => {
-        app.ports.loginResult.send({
+        app.ports.hedgeHogloginResult.send({
           address: "",
           isLoggedIn: false,
-          message: "User Created",
-          showInfos: []
+          message: "User Created"
         });
       },
       e => {
-        app.ports.loginResult.send({
+        app.ports.hedgeHogloginResult.send({
           address: "",
           isLoggedIn: false,
-          message: e.message,
-          showInfos: []
+          message: e.message
         });
       }
     )
     .catch(err =>
-      app.ports.loginResult.send({
+      app.ports.hedgeHogloginResult.send({
         address: "",
         isLoggedIn: false,
-        message: err.message,
-        showInfos: []
+        message: err.message
       })
     );
 });
 
 // Local Functions
-function isLoggedIn() {
-  if (hedgehog.isLoggedIn()) {
-    return true;
-  } else {
-    return (
-      hedgehog && hedgehog.walletExistsLocally && hedgehog.walletExistsLocally()
-    );
-  }
-}
+
 
 function fakeLogin() {
   app.ports.hedgeHogloginResult.send({
@@ -85,23 +91,37 @@ function fakeLogin() {
     message: "Success 2"
   });
 }
+ 
 
-function appLoginSendResults(data) {
-  return hedgehog.login(data.userName, data.password).then(
-    () => {
-      app.ports.loginResult.send({
-        address: hedgehog.getWallet().getAddressString(),
-        isLoggedIn: isLoggedIn(),
-        message: "Success"
+function appLoginSendResults(res) {
+  console.log(res);
+  let isLoggedIn = false;
+  if (hedgehog.isLoggedIn()) {
+    isLoggedIn =  true;
+  } else {
+    isLoggedIn = hedgehoge.walletExistsLocally && hedgehoge.walletExistsLocally()
+  }
+
+  let message= '';
+  if (!isLoggedIn) {
+    message = 'Login failed.';
+  }
+  app.ports.hedgeHogloginResult.send({
+        address: isLoggedIn ? hedgehog.getWallet().getAddressString() : '',
+        isLoggedIn: isLoggedIn,
+        message: message
        
       });
-    },
-    e => {
-      app.ports.loginResult.send({
-        address: "",
-        isLoggedIn: false,
-        message: e.message
-      });
-    }
-  );
+    
+  
+}
+
+function isLoggedIn () {
+  if (hedgehog.isLoggedIn()) {
+    return true;
+  } else {
+    return (
+      hh.walletExistsLocally && hh.walletExistsLocally()
+    );
+  }
 }

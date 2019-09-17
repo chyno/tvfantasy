@@ -18,8 +18,6 @@ import Loading
         )
 
 
-
-
 initdata : Model
 initdata =
     { loginResult =
@@ -48,12 +46,42 @@ tabClassString model tab =
     else
         "tab"
 
-
+-- Model
 type alias LoginResultInfo =
     { isLoggedIn : Bool
     , address : String
     , message : String
     }
+
+type alias Model =
+    { userInfo : UserInfo
+    , loginResult : LoginResultInfo
+    , activeTab : ActiveLoginTab
+    , loadState : LoadingState
+    }
+type alias UserInfo =
+    { userName : String
+    , password : String
+    , passwordConfimation : String
+    }
+
+type ActiveLoginTab
+    = CreateAccountTab
+    | LoggingInTab
+
+
+
+-- Message
+type Msg
+    = TabNavigate ActiveLoginTab
+    | UpdateUserName String
+    | UpdatePassword String
+    | UpdateNewPassword String
+    | UpdateNewConfirmPassword String
+    | StartLoginOrCancel
+    | RegisterUser
+    | DoneLogin LoginResultInfo
+    
 
 
 updateTab : ActiveLoginTab -> Model -> ( Model, Cmd Msg )
@@ -84,88 +112,13 @@ updateTab msg model =
             )
 
 
-headersView : Model -> Html Msg
-headersView model =
-    div [ id "root" ]
-        [ div [ class "app" ]
-            [ div [ class "tabs" ]
-                [ div [ class "headers" ]
-                    [ div
-                        [ class
-                            (tabClassString model CreateAccountTab)
-                        , onClick (TabNavigate CreateAccountTab)
-                        ]
-                        [ text "Create Account" ]
-                    , div
-                        [ class (tabClassString model LoggingInTab)
-                        , onClick (TabNavigate LoggingInTab)
-                        ]
-                        [ text "Log In" ]
-                    ]
-                , case model.activeTab of
-                    CreateAccountTab ->
-                        createAccountView model
-
-                    LoggingInTab ->
-                        loginView model
-                ]
-            , div [ class "message unauthenticated" ]
-                [ div [ class "pill red" ]
-                    [ text "unauthenticated" ]
-                , h1 []
-                    [ text "You're Not Signed In" ]
-                , p []
-                    [ text "You are currently unauthenticated / signed out." ]
-                , p []
-                    [ text "Go ahead and create an account just like you would a centralized service." ]
-                ]
-            ]
-        ]
-
-
-type Msg
-    = TabNavigate ActiveLoginTab
-    | UpdateUserName String
-    | UpdatePassword String
-    | UpdateNewPassword String
-    | UpdateNewConfirmPassword String
-    | StartLoginOrCancel
-    | RegisterUser
-    | DoneLogin LoginResultInfo
-
-
--- Model
--- Auth Model
-
-
-type alias Model =
-    { userInfo : UserInfo
-    , loginResult : LoginResultInfo
-    , activeTab : ActiveLoginTab
-    , loadState : LoadingState
-    }
-
-
-type alias UserInfo =
-    { userName : String
-    , password : String
-    , passwordConfimation : String
-    }
-
-
-type ActiveLoginTab
-    = CreateAccountTab
-    | LoggingInTab
 
 
 
 -- Subscriptions
-
-
 subscriptions : Model -> Sub Msg
 subscriptions model =
-    hedgeHogloginResult DoneLogin
-
+    Sub.batch [hedgeHogloginResult DoneLogin]
 
 
 -- toMsgNoParams: LoginMsg -> Msg
@@ -260,10 +213,20 @@ update msg model =
         DoneLogin data ->
             case data.isLoggedIn of
                 True ->
+                    Debug.log "Success  .."
                     (model, (Nav.load  Routes.showsPath) )
                       
                 False ->
-                    ( model , Cmd.none ) 
+                    Debug.log "Fail  .."
+                    ( { model
+                    | loginResult =
+                        { isLoggedIn = False
+                        , address = "-"
+                        , message = data.message
+                        }
+                    , loadState = Loading.Off
+                  } , Cmd.none ) 
+            
 
 
 loginView : Model -> Html Msg
@@ -300,6 +263,7 @@ loginView model =
         ]
 
 
+-- View
 view : Model -> Html Msg
 view model =
     let
@@ -328,12 +292,49 @@ view model =
         ]
 
 
+headersView : Model -> Html Msg
+headersView model =
+    div [ id "root" ]
+        [ div [ class "app" ]
+            [ div [ class "tabs" ]
+                [ div [ class "headers" ]
+                    [ div
+                        [ class
+                            (tabClassString model CreateAccountTab)
+                        , onClick (TabNavigate CreateAccountTab)
+                        ]
+                        [ text "Create Account" ]
+                    , div
+                        [ class (tabClassString model LoggingInTab)
+                        , onClick (TabNavigate LoggingInTab)
+                        ]
+                        [ text "Log In" ]
+                    ]
+                , case model.activeTab of
+                    CreateAccountTab ->
+                        createAccountView model
+
+                    LoggingInTab ->
+                        loginView model
+                ]
+            , div [ class "message unauthenticated" ]
+                [ div [ class "pill red" ]
+                    [ text "unauthenticated" ]
+                , h1 []
+                    [ text "You're Not Signed In" ]
+                , p []
+                    [ text "You are currently unauthenticated / signed out." ]
+                , p []
+                    [ text "Go ahead and create an account just like you would a centralized service." ]
+                ]
+            ]
+        ]
+
+
 port registerUser : UserInfo -> Cmd msg
 port loginUser : UserInfo -> Cmd msg
 
-
-
 -- Incoming Ports
 -- Outgoing ports
-port logoutUser : String -> Cmd msg
+
 port hedgeHogloginResult : (LoginResultInfo -> msg) -> Sub msg
