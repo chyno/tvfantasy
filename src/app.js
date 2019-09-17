@@ -1,40 +1,38 @@
 import { Elm } from "./Main.elm";
-//import { hedgehog } from "./js/hedgehog.js";
-
+import { hedgehog } from "./js/hedgehog.js";
 
 var flags = {
-  api: 'https://api.themoviedb.org/3/discover/tv?api_key=6aec6123c85be51886e8f69cd9a3a226&first_air_date.gte=2019-01-01&page=1'
+  api:
+    "https://api.themoviedb.org/3/discover/tv?api_key=6aec6123c85be51886e8f69cd9a3a226&first_air_date.gte=2019-01-01&page=1"
 };
 
 Elm.Main.init({
-     flags: flags
+  flags: flags
 });
 
 let app = Elm.Main.init({
-  flags: flags,
-   //node: document.getElementById("elm")
+  flags: flags
+  //node: document.getElementById("elm")
 });
 
-
-// Subscriptions 
+// Subscriptions
 app.ports.loginUser.subscribe(function(data) {
   // For testing
   console.log("... User logging in");
-  fakeLogin();
-  // appLoginSendResults(data);
+  // fakeLogin();
+  appLoginSendResults(data);
 });
- 
 
-// app.ports.logoutUser.subscribe(function() {
-//   hedgehog.logout();
-//   console.log("user logged out");
-//   app.ports.loginResult.send({
-//     address: "",
-//     isLoggedIn: false,
-//     message: "User Logged out",
-//     showInfos: []
-//   });
-// });
+app.ports.logoutUser.subscribe(function() {
+  hedgehog.logout();
+  console.log("user logged out");
+  app.ports.loginResult.send({
+    address: "",
+    isLoggedIn: false,
+    message: "User Logged out",
+    showInfos: []
+  });
+});
 
 app.ports.registerUser.subscribe(function(data) {
   hedgehog.logout();
@@ -69,7 +67,6 @@ app.ports.registerUser.subscribe(function(data) {
     );
 });
 
-
 // Local Functions
 function isLoggedIn() {
   if (hedgehog.isLoggedIn()) {
@@ -81,13 +78,30 @@ function isLoggedIn() {
   }
 }
 
-function fakeLogin () {
+function fakeLogin() {
   app.ports.hedgeHogloginResult.send({
-         address: '1234',
-         isLoggedIn: true,
-         message: "Success 2",
-        
-       });
+    address: "1234",
+    isLoggedIn: true,
+    message: "Success 2"
+  });
 }
 
-
+function appLoginSendResults(data) {
+  return hedgehog.login(data.userName, data.password).then(
+    () => {
+      app.ports.loginResult.send({
+        address: hedgehog.getWallet().getAddressString(),
+        isLoggedIn: isLoggedIn(),
+        message: "Success"
+       
+      });
+    },
+    e => {
+      app.ports.loginResult.send({
+        address: "",
+        isLoggedIn: false,
+        message: e.message
+      });
+    }
+  );
+}

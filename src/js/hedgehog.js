@@ -1,6 +1,6 @@
 import { faunaService } from "./faunadb.js";
 
-//var faunaService = require("./fauna.js");
+ 
 
 const AUTH_COL = "authentications";
 const USER_COL = "users";
