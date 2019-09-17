@@ -260,8 +260,8 @@ update msg model =
         DoneLogin data ->
             case data.isLoggedIn of
                 True ->
-                    (model, Cmd.none
-                    )  
+                    (model, (Nav.load  Routes.showsPath) )
+                      
                 False ->
                     ( model , Cmd.none ) 
 

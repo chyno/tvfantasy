@@ -10,7 +10,6 @@ Elm.Main.init({
      flags: flags
 });
 
-
 let app = Elm.Main.init({
   flags: flags,
    //node: document.getElementById("elm")
