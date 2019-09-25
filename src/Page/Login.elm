@@ -7,7 +7,7 @@ import Html.Attributes exposing (..)
 import Html.Events exposing (onClick, onInput)
 import Http exposing (..)
 import Shared exposing (..)
-import Routes exposing (showsPath)
+import Routes exposing (gamePath)
 import Json.Encode as E
 import Loading
     exposing
@@ -214,7 +214,7 @@ update msg model =
             case data.isLoggedIn of
                 True ->
                     Debug.log "Success  .."
-                    (model, (Nav.load  Routes.showsPath) )
+                    (model, (Nav.load  Routes.gamePath) )
                       
                 False ->
                     Debug.log "Fail  .."
@@ -235,7 +235,6 @@ loginView model =
         buttonText =
             if model.loadState == Loading.Off then
                 "Login"
-
             else
                 "Cancel"
     in
@@ -288,7 +287,7 @@ view model =
             -- LoadingState
             ]
         , div [] [ text model.loginResult.message ]
-        , a [ href Routes.showsPath, class "text-white" ] [ text "Tv Shows" ]
+        
         ]
 
 

@@ -6,6 +6,7 @@ import Html exposing (Html, a, div, section, text)
 import Html.Attributes exposing (class, href)
 import Page.Login as Login
 import Page.Show as Show
+import Page.Game as Game
 import Routes exposing (Route)
 import Shared exposing (..)
 import Url exposing (Url)
@@ -23,6 +24,7 @@ type Page
     = PageNone
     | PageLogin Login.Model
     | PageShow Show.Model
+    | PageGame Game.Model
 
 
 type Msg
@@ -30,7 +32,8 @@ type Msg
     | OnUrlRequest UrlRequest
     | LoginMsg Login.Msg
     | ShowMsg Show.Msg
-    | Logout String
+    | GameMsg Game.Msg
+   
 
 init : Flags -> Url -> Key -> ( Model, Cmd Msg )
 init flags url navKey =
@@ -64,6 +67,13 @@ loadCurrentPage ( model, cmd ) =
                     in
                     ( PageLogin pageModel, Cmd.map LoginMsg pageCmd )
 
+                Routes.GameRoute ->
+                    let
+                        ( pageModel, pageCmd ) =
+                            Game.init
+                    in
+                        ( PageGame pageModel, Cmd.map GameMsg pageCmd )
+    
                 Routes.ShowRoute showId ->
                     ( PageNone, Cmd.none )
 
@@ -83,6 +93,9 @@ subscriptions model =
 
                 PageShow pageModel ->
                     Sub.map ShowMsg (Show.subscriptions pageModel)
+                PageGame pageModel ->
+                    Sub.map GameMsg (Game.subscriptions pageModel)
+
                 PageNone ->
                     Sub.none
     in
@@ -127,8 +140,14 @@ update msg model =
             ( { model | page = PageShow newPageModel }
             , Cmd.map ShowMsg newCmd
             )
-        (Logout logoutmessage, _) ->
-                 ({ model | page =   PageLogin Login.initdata}, (Nav.load  Routes.loginPath) )
+        (GameMsg subMsg, PageGame pageModel ) ->
+            let
+                ( newPageModel, newCmd ) =
+                    Game.update  subMsg pageModel
+            in
+            ( { model | page = PageGame newPageModel }
+            , Cmd.map GameMsg newCmd
+            )
         (_,_ )  ->
            Debug.todo "loginmsg pageshow"
 
@@ -163,38 +182,15 @@ currentPage model =
                 PageShow pageModel ->
                     Show.view pageModel
                         |> Html.map ShowMsg
-
+                PageGame pageModel ->
+                    Game.view pageModel
+                        |> Html.map GameMsg
                 PageNone ->
                     notFoundView
     in
     div []
         [ page]
 
-
-nav : Model -> Html Msg
-nav model =
-    let
-        links =
-            case model.route of
-                Routes.ShowsRoute ->
-                    [ a [ href Routes.showsPath, class "text-white" ] [ text "Shows" ] ]
-
-                Routes.LoginRoute ->
-                    [ linkToLogin ]
-
-                Routes.ShowRoute _ ->
-                    [ linkToLogin ]
-
-                -- Todo need show page
-                Routes.NotFoundRoute ->
-                    [ linkToLogin ]
-
-        linkToLogin =
-            a [ href Routes.loginPath, class "text-white" ] [ text "Login" ]
-    in
-    div
-        [ class "mb-2 text-white bg-black p-4" ]
-        links
 
 
 notFoundView : Html msg

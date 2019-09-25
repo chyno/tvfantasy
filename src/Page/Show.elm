@@ -1,16 +1,19 @@
 module Page.Show exposing (Model, view, Msg(..), update, subscriptions, init, ShowInfo)
 
 import Browser
+import Browser.Navigation as Nav
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (onClick, onInput)
 import Http exposing (..)
 import Loading exposing (LoadingState)
 import Shared exposing (..)
+import Routes exposing (gamePath)
 import Json.Decode as D
 import Json.Encode as E
 
 type Msg =  OnFetchShows (Result Http.Error (List ShowInfo))
+            | NavigateGame
     
 
 init : Flags -> ( Model, Cmd Msg )
@@ -18,8 +21,6 @@ init flags =
     ( { showInfos = Loading }, fetchShows flags )
 
 -- Model
-
-
 type alias Model =
     { showInfos : RemoteData (List ShowInfo)
     }
@@ -40,7 +41,7 @@ fetchShows flags =
         , expect = Http.expectJson OnFetchShows listOfShowsDecoder
         }
 
-
+-- Update
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
@@ -50,16 +51,17 @@ update msg model =
         OnFetchShows (Err err) ->
             Debug.log "error .."
             ( { model | showInfos = Failure }, Cmd.none )
+        NavigateGame ->
+            (model, (Nav.load  Routes.gamePath) )
        
 
-
-        
+       
 -- Subscriptions
 subscriptions : Model -> Sub Msg
 subscriptions model =
     Sub.none
 
-
+-- Views
 view : Model -> Html Msg
 view model =
     let
@@ -107,9 +109,11 @@ viewWithData shows =
                 ]
                 :: List.map showDetails shows
             )
-        , div [ class "button" ] [ text "Log Out" ]
+        , div [ class "button",  onClick  NavigateGame ] [ text "Back to Your Tv Game" ]
         ]
 
+
+-- Decoders
 showDecoder : D.Decoder ShowInfo
 showDecoder =
     D.map4
