@@ -11,15 +11,14 @@ import Shared exposing (..)
 
 init : ( Model, Cmd Msg )
 init  =
-    ( {adderess = "Hello", game = "game", currentAvail = 1}, Cmd.none )
+    ( { networks = ["ABC", "NBC", "CBS", "ESPN"]}, Cmd.none )
 
 --Model
 
 
 type alias Model =
-    { adderess: String
-    , game: String
-    , currentAvail: Int
+    { 
+     networks: List String
     }
 
 -- Msg
@@ -43,23 +42,14 @@ update msg model =
 view : Model -> Html Msg
 view model =
     div[][
-        h3[][text "hello from Game"]
-        , div[][
-            h3[][text "Your Network"]
-            , div[class "control"][
-                div[class "select"]
-                    [
-                        select[][
-                            option[][text "NBC"]
-                            , option[][text "ABC"]
+        h3[][text "Manage Your Network"]
+        , div   [ class "field" ]
+                [ label [ class "label" ] [ text "Available Networks" ]
+                , div   [ class "control" ]
+                        [ div [ class "select" ]
+                            [ select []  (List.map (\x ->  option [] [ text x ]) model.networks)
+                            ]
                         ]
-                    ]
-            , div[class "control"][
-            --    <button class="button is-primary">Submit</button>
-                button[class "button is-primary"][text "Choose"]
-            ]
-            ]
-        ] 
-        , div [ class "button",  onClick  NavigateShows ] [ text "Choose your Shows" ]
+                ]   
     ]
     
