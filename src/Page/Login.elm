@@ -230,35 +230,86 @@ update msg model =
 
 loginView : Model -> Html Msg
 loginView model =
-    let
-        buttonText =
-            if model.loadState == Loading.Off then
-                "Login"
-            else
-                "Cancel"
-    in
-    div [ class "content" ]
-        [ div [ class "form" ]
-            [ div [ class "fields" ]
-                [ input [ placeholder "Username", onInput UpdateUserName, value model.userInfo.userName ]
+    div []
+    [ 
+         div [ class "field" ]
+        [ label [ class "label" ]
+            [ text "Username" ]
+        , div [ class "control has-icons-left has-icons-right" ]
+            [ input [ class "input is-success", placeholder "Text input", type_ "text", onInput UpdateUserName, value model.userInfo.userName ]
+                []
+            , span [ class "icon is-small is-left" ]
+                [ i [ class "fas fa-user" ]
                     []
-                , div []
-                    [ input [ placeholder "Password", type_ "password", onInput UpdatePassword, value model.userInfo.password ]
-                        []
-                    , p [ class "error" ]
-                        []
-                    ]
                 ]
-            , div [ class "buttons" ]
-                [ button [ onClick StartLoginOrCancel ]
-                    [ text buttonText ]
-                , button [ class "link", onClick (TabNavigate CreateAccountTab) ]
-                    [ span []
-                        [ text "Create Account" ]
-                    ]
+            , span [ class "icon is-small is-right" ]
+                [ i [ class "fas fa-check" ]
+                    []
                 ]
             ]
+        , p [ class "help is-success" ]
+            [ text "This username is available" ]
         ]
+    , div [ class "field" ]
+        [ label [ class "label" ]
+            [ text "Password" ]
+        , div [ class "control has-icons-left has-icons-right" ]
+            [ input [ class "input is-danger", placeholder "Password input", type_ "password", onInput UpdatePassword, value model.userInfo.password ]
+                []
+            , span [ class "icon is-small is-left" ]
+                [ i [ class "fas fa-envelope" ]
+                    []
+                ]
+            , span [ class "icon is-small is-right" ]
+                [ i [ class "fas fa-exclamation-triangle" ]
+                    []
+                ]
+            ]
+        , p [ class "help is-danger" ]
+            [ text "This password is invalid" ]
+        ]
+    , div [ class "field is-grouped" ]
+        [ div [ class "control" ]
+            [ button [ class "button is-link", onClick StartLoginOrCancel ]
+                [ text "Log in " ]
+            ]
+        , div [ class "control" ]
+            [ button [ class "button is-text" ]
+                [ text "Cancel" ]
+            ]
+        ]
+    ]
+
+    
+    -- let
+    --     buttonText =
+    --         if model.loadState == Loading.Off then
+    --             "Login"
+    --         else
+    --             "Cancel"
+    -- in
+    -- div [ class "content" ]
+    --     [ div [ class "form" ]
+    --         [ div [ class "fields" ]
+    --             [ input [ placeholder "Username", onInput UpdateUserName, value model.userInfo.userName ]
+    --                 []
+    --             , div []
+    --                 [ input [ placeholder "Password", type_ "password", onInput UpdatePassword, value model.userInfo.password ]
+    --                     []
+    --                 , p [ class "error" ]
+    --                     []
+    --                 ]
+    --             ]
+    --         , div [ class "buttons" ]
+    --             [ button [ onClick StartLoginOrCancel ]
+    --                 [ text buttonText ]
+    --             , button [ class "link", onClick (TabNavigate CreateAccountTab) ]
+    --                 [ span []
+    --                     [ text "Create Account" ]
+    --                 ]
+    --             ]
+    --         ]
+    --     ]
 
 
 -- View
@@ -285,14 +336,14 @@ contentView : Model -> Html Msg
 contentView model =
     div [class "columns"]
         [
-            div [class "column is-3"] [ 
+            div [class "column is-2"] [ 
                 case model.activeTab of
                     CreateAccountTab ->
                         div[][text "create account dec"]
                     LoggingInTab ->
                         div[][text "logging in desc"]
             ]
-            , div [class "column is-9"][
+            , div [class "column is-10"][
                div [ class "tabs" ]
     [ ul []
         [ li [class (tabClassString model LoggingInTab) ]
