@@ -38,13 +38,12 @@ init :  ( Model, Cmd Msg )
 init  =
     ( initdata, Cmd.none) 
 
-tabClassString : Model -> ActiveLoginTab -> String
+tabClassString : Model -> ActiveLoginTab ->  String
 tabClassString model tab =
     if model.activeTab == tab then
-        "tab active"
-
+        "is-active"
     else
-        "tab"
+        ""
 
 -- Model
 type alias LoginResultInfo =
@@ -251,9 +250,9 @@ loginView model =
                     ]
                 ]
             , div [ class "buttons" ]
-                [ div [ class "button fullWidth", onClick StartLoginOrCancel ]
+                [ button [ onClick StartLoginOrCancel ]
                     [ text buttonText ]
-                , div [ class "link", onClick (TabNavigate CreateAccountTab) ]
+                , button [ class "link", onClick (TabNavigate CreateAccountTab) ]
                     [ span []
                         [ text "Create Account" ]
                     ]
@@ -265,17 +264,8 @@ loginView model =
 -- View
 view : Model -> Html Msg
 view model =
-    let
-        vw =
-            case model.activeTab of
-                CreateAccountTab ->
-                    headersView model
-
-                LoggingInTab ->
-                    headersView model
-    in
-    div []
-        [ vw
+   div []
+        [ (contentView model)
         , div []
             [ Loading.render
                 Spinner
@@ -291,49 +281,78 @@ view model =
         ]
 
 
-headersView : Model -> Html Msg
-headersView model =
-    div [ id "root" ]
-        [ div [ class "app" ]
-            [ div [ class "tabs" ]
-                [ div [ class "headers" ]
-                    [ div
-                        [ class
-                            (tabClassString model CreateAccountTab)
-                        , onClick (TabNavigate CreateAccountTab)
-                        ]
-                        [ text "Create Account" ]
-                    , div
-                        [ class (tabClassString model LoggingInTab)
-                        , onClick (TabNavigate LoggingInTab)
-                        ]
-                        [ text "Log In" ]
-                    ]
-                , case model.activeTab of
+contentView : Model -> Html Msg
+contentView model =
+    div [class "columns"]
+        [
+            div [class "column is-3"] [ 
+                case model.activeTab of
                     CreateAccountTab ->
-                        createAccountView model
-
+                        div[][text "create account dec"]
                     LoggingInTab ->
-                        loginView model
-                ]
-            , div [ class "message unauthenticated" ]
-                [ div [ class "pill red" ]
-                    [ text "unauthenticated" ]
-                , h1 []
-                    [ text "You're Not Signed In" ]
-                , p []
-                    [ text "You are currently unauthenticated / signed out." ]
-                , p []
-                    [ text "Go ahead and create an account just like you would a centralized service." ]
-                ]
+                        div[][text "logging in desc"]
+            ]
+            , div [class "column is-9"][
+               div [ class "tabs" ]
+    [ ul []
+        [ li [class (tabClassString model LoggingInTab) ]
+            [ a[ onClick(TabNavigate LoggingInTab), href "#"]
+                [ text "Login" ]
+            ]
+        , li [ class (tabClassString model CreateAccountTab)]
+            [ a [onClick (TabNavigate CreateAccountTab), href "#"]
+                [ text "Create An Account" ]
+            ]  
+        ]
+    ]
+    , div [class "content"] [
+        case model.activeTab of
+            CreateAccountTab ->
+                createAccountView model
+            LoggingInTab ->
+                loginView model
+    ] 
             ]
         ]
+   
+
+    -- div [ id "root" ]
+    --     [ div [ class "app" ]
+    --         [ div [ class "tabs" ]
+    --             [ ul [ class "headers" ]
+    --                 [ li
+    --                     [ class
+    --                         (tabClassString model CreateAccountTab)
+    --                     , onClick (TabNavigate CreateAccountTab)
+    --                     ]
+    --                     [ text "Create Account" ]
+    --                 , li
+    --                     [ class (tabClassString model LoggingInTab)
+    --                     , onClick (TabNavigate LoggingInTab)
+    --                     ]
+    --                     [ text "Log In" ]
+    --                 ]
+    --             , case model.activeTab of
+    --                 CreateAccountTab ->
+    --                     createAccountView model
+
+    --                 LoggingInTab ->
+    --                     loginView model
+    --             ]
+    --         , div [ class "message unauthenticated" ]
+    --             [ div [ class "pill red" ]
+    --                 [ text "unauthenticated" ]
+    --             , h1 []
+    --                 [ text "You're Not Signed In" ]
+    --             , p []
+    --                 [ text "You are currently unauthenticated / signed out." ]
+    --             , p []
+    --                 [ text "Go ahead and create an account just like you would a centralized service." ]
+    --             ]
+    --         ]
+    --     ]
 
 
 port registerUser : UserInfo -> Cmd msg
 port loginUser : UserInfo -> Cmd msg
-
--- Incoming Ports
--- Outgoing ports
-
 port hedgeHogloginResult : (LoginResultInfo -> msg) -> Sub msg

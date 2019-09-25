@@ -44,9 +44,22 @@ view : Model -> Html Msg
 view model =
     div[][
         h3[][text "hello from Game"]
-        , 
-        div [ class "button",  onClick  NavigateShows ] [ text "Choose your Shows" ]
-        
-
+        , div[][
+            h3[][text "Your Network"]
+            , div[class "control"][
+                div[class "select"]
+                    [
+                        select[][
+                            option[][text "NBC"]
+                            , option[][text "ABC"]
+                        ]
+                    ]
+            , div[class "control"][
+            --    <button class="button is-primary">Submit</button>
+                button[class "button is-primary"][text "Choose"]
+            ]
+            ]
+        ] 
+        , div [ class "button",  onClick  NavigateShows ] [ text "Choose your Shows" ]
     ]
     

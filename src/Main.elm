@@ -2,8 +2,8 @@ module Main exposing (init, main, subscriptions)
 
 import Browser exposing (UrlRequest)
 import Browser.Navigation as Nav exposing (Key)
-import Html exposing (Html, a, div, section, text)
-import Html.Attributes exposing (class, href)
+import Html exposing (..)
+import Html.Attributes exposing (..)
 import Page.Login as Login
 import Page.Show as Show
 import Page.Game as Game
@@ -95,7 +95,6 @@ subscriptions model =
                     Sub.map ShowMsg (Show.subscriptions pageModel)
                 PageGame pageModel ->
                     Sub.map GameMsg (Game.subscriptions pageModel)
-
                 PageNone ->
                     Sub.none
     in
@@ -165,8 +164,24 @@ main =
 -- VIEWS
 view : Model -> Browser.Document Msg
 view model =
+    let
+        hdrVw =  case model.page of
+                        PageLogin _ ->
+                            loginHeaderView
+                        _ ->
+                            headerView
+
+    in
+    
     { title = "App"
-    , body = [ currentPage model ]
+    , body = [ 
+        div[][
+            hdrVw
+            , currentPage model 
+            , div[][text "John Chynoweth"]
+        ]
+        
+    ]
     }
 
 
@@ -188,7 +203,7 @@ currentPage model =
                 PageNone ->
                     notFoundView
     in
-    div []
+    div [class "container"]
         [ page]
 
 
@@ -198,4 +213,56 @@ notFoundView =
     div []
         [ text "Not found..."
         ]
+
+loginHeaderView: Html msg
+loginHeaderView =
+    nav [ class "navbar is-white" ]
+    [ div [ class "container" ]
+        [ div [ class "navbar-brand" ]
+            [ a [ class "navbar-item brand-text", href "../" ]
+                [ text "Tv Fantasy Network        " ]
+            , div [ class "navbar-burger burger", attribute "data-target" "navMenu" ]
+                [ span []
+                    []
+                , span []
+                    []
+                , span []
+                    []
+                ]
+            ]
+        , div [   id "navMenu" ]
+            [ ]
+        ]
+    ]
+
+headerView: Html msg
+headerView = 
+    nav [ class "navbar is-white" ]
+    [ div [ class "container" ]
+        [ div [ class "navbar-brand" ]
+            [ a [ class "navbar-item brand-text", href "../" ]
+                [ text "Tv Fantasy Network        " ]
+            , div [ class "navbar-burger burger", attribute "data-target" "navMenu" ]
+                [ span []
+                    []
+                , span []
+                    []
+                , span []
+                    []
+                ]
+            ]
+        , div [ class "navbar-menu", id "navMenu" ]
+            [ div [ class "navbar-start" ]
+                [ a [ class "navbar-item", href "game" ]
+                    [ text "Home          " ]
+                , a [ class "navbar-item", href "shows" ]
+                    [ text "Shows          " ]
+                , a [ class "navbar-item", href "#" ]
+                    [ text "Status          " ]
+                , a [ class "navbar-item", href "#" ]
+                    [ text "Past Games          " ]
+                ]
+            ]
+        ]
+    ]
 
