@@ -12,43 +12,44 @@ import Shared exposing (..)
 
 
 --Model
-type GameStages
-    =  CurrentGame InGameModel
-    | SelectGame SelectGameModel
+type Model
+    =  CurrentGame CurrentGameModel
+    | ChooseGame ChooseGameModel
    
 
-type alias InGameModel =
+type alias CurrentGameModel =
     {
-        selectedNetwork:  String
+        network:  String
         ,  currentShows: List String
 
     }
 
-type alias SelectGameModel =
+type alias ChooseGameModel =
     {
-        possibleNetworks: List String
+        selectedNetwork : Maybe String
+        , possibleNetworks: List String
     }
 
-type alias Model =
-    { 
-        address : String
-        , userName : String
-        , stage : GameStages
-    }
+-- type alias Model =
+--     { 
+--          stage : GameStages
+--     }
 
-initPage: SelectGameModel
+initPage: ChooseGameModel
 initPage = {
-        possibleNetworks = ["ABC", "NBC", "CBS", "ESPN"]
+        possibleNetworks = ["ABC", "NBC", "CBS", "ESPN"], selectedNetwork = Nothing
     }
+
+
 
 init : ( Model, Cmd Msg )
 init  =
-    ( { stage = (SelectGame initPage), userName = "chyno", address = "aa1234" }, Cmd.none )
+    ( (ChooseGame initPage), Cmd.none )
 
 -- Msg
-type Msg =  NavigateShows
-            -- | SelectNetwork String
-
+type Msg =     NavigateShows 
+                | SelectNetwork
+                | NetworkChange String
 --Subcriptions
 -- Subscriptions
 subscriptions : Model -> Sub Msg
@@ -56,74 +57,80 @@ subscriptions model =
     Sub.none
 
 --Update
+
+
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
-    case model.stage of
-        CurrentGame mdl ->
-            (model, Cmd.none)
-        SelectGame mdl ->
+    case  model of 
+        CurrentGame cmdl ->
             case msg of 
-                NavigateShows ->      
+                NavigateShows ->
                     (model, (Nav.load  Routes.showsPath) )
-                -- _ ->
-                --     (model, Cmd.none)
-               
-
+                _ ->
+                    Debug.todo "should not execute"
+                    (model, Cmd.none)
+        ChooseGame mdl ->
+           case msg of 
+                SelectNetwork  -> 
+                    let
+                        possibleNewModel = case mdl.selectedNetwork of
+                                    Just val ->
+                                      CurrentGame { network = val ,  currentShows = ["some show", "Another show"] }  
+                                    _ ->
+                                        model
+                    in
+                        (possibleNewModel, Cmd.none)
+                NetworkChange netwrk -> 
+                    (ChooseGame {mdl | selectedNetwork = Just netwrk }, Cmd.none) 
+                _ ->
+                    Debug.todo "should not execute"
+                    (model, Cmd.none)
 
 view : Model -> Html Msg
 view model =
     let
         vw =
-             case model.stage of
-                SelectGame mdl ->
+             case model of
+                ChooseGame mdl ->
                     viewSelectGame mdl
                 CurrentGame mdl ->
                     viewCurrentGame mdl
     in
         div [] 
-        [
-            h3 [] [text model.userName]
-            , h3 [] [text model.address]
-            , vw
-        ]
+        [vw]
 
    
 
 -- View
-viewSelectGame : SelectGameModel -> Html Msg
+viewSelectGame : ChooseGameModel -> Html Msg
 viewSelectGame model =
     div[][
-        h3[][text "Manage Your Network"]
-        -- , div   [ class "field" ]
-        --         [ label [ class "label" ] [ text "Available Networks" ]
-        --         , div   [ class "control" ]
-        --                 [ div [ class "select" ]
-        --                     [ select []  (List.map (\x ->  option [] [ text x ]) model.possibleNetworks)
-        --                     ]
-        --                 ]
-        --         ] 
-        --   , div   [ class "field" ]
-        --         [ div   [ class "control" ]
-        --                 [ button [class "button is-link", onClick SelectNetwork][text "Select Network"]
-        --                 ]
-        --         ] 
+       div   [ class "field" ]
+                [ label [ class "label" ] [ text "Available Networks" ]
+                , div   [ class "control" ]
+                        [ div [ class "select" ]
+                            [ select [onInput NetworkChange]  (List.map (\x ->  option [] [ text x ]) model.possibleNetworks)
+                            ]
+                        ]
+                ] 
+          , div   [ class "field" ]
+                [ div   [ class "control" ]
+                        [ button [class "button is-link", onClick SelectNetwork][text "Select Network"]
+                        ]
+                ] 
     ]
     
-viewCurrentGame : InGameModel -> Html Msg
+viewCurrentGame : CurrentGameModel -> Html Msg
 viewCurrentGame model =
  div[][
-        h3[][text "Manage Your Network"]
-        -- , div   [ class "field" ]
-        --         [ label [ class "label" ] [ text "Available Networks" ]
-        --         , div   [ class "control" ]
-        --                 [ div [ class "select" ]
-        --                     [ select []  (List.map (\x ->  option [] [ text x ]) model.currentShows)
-        --                     ]
-        --                 ]
-        --         ] 
-        --   , div   [ class "field" ]
-        --         [ div   [ class "control" ]
-        --                 [ button [class "button is-link", onClick SelectNetwork][text "Select Network"]
-        --                 ]
-        --         ] 
+        h3[][text model.network]
+        , div   [ class "field" ]
+                [ label [ class "label" ] [ text "Your Shows" ]
+                  ,  ul[](List.map (\x ->  li [] [ text x ]) model.currentShows) 
+                ] 
+          , div   [ class "field" ]
+                [ div   [ class "control" ]
+                        [ button [class "button is-link", onClick NavigateShows][text "See Available Shows"]
+                        ]
+                ] 
     ]
