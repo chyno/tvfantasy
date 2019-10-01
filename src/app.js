@@ -23,21 +23,21 @@ const hedgehog = logInService.hedgehog;
 app.ports.loginUser.subscribe(function(data) {
   // For testing
   console.log("... User logging in");
-  //fakeLogin();
+  fakeLogin();
   //appLoginSendResults(data);
  
-  hedgehog
-  .login(data.userName, data.password)
-  .then(appLoginSendResults)
-  .catch(() => {
-    app.ports.hedgeHogloginResult.send({
-      address: '',
-      isLoggedIn: false,
-      message: 'can not log in'
+  // hedgehog
+  // .login(data.userName, data.password)
+  // .then(appLoginSendResults)
+  // .catch(() => {
+  //   app.ports.hedgeHogloginResult.send({
+  //     address: '',
+  //     isLoggedIn: false,
+  //     message: 'can not log in'
      
-    });
+  //   });
 
-  });
+  //});
 });
 
 // app.ports.logoutUser.subscribe(function() {

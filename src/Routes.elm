@@ -44,7 +44,7 @@ pathFor route =
             let
               rtPth = case un of
                   Just val ->
-                      "/game/" ++ val
+                      "/game?" ++ val
                   option2 ->
                         "/game"
             in

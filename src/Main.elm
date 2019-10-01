@@ -54,37 +54,43 @@ init flags url navKey =
 
 loadCurrentPage : ( Model, Cmd Msg ) -> ( Model, Cmd Msg )
 loadCurrentPage ( model, cmd ) =
-    let
-        ( page, newCmd ) =
-            case model.route of
-                Routes.ShowsRoute ->
-                    let
-                        ( pageModel, pageCmd ) =
-                            Show.init model.flags
-                    in
-                    ( PageShow pageModel, Cmd.map ShowMsg pageCmd )
+    case model.route of
+        Routes.ShowsRoute ->
+            let
+                ( pageModel, pageCmd ) = Show.init model.flags
+            in
+             ( { model | page = PageShow pageModel }, Cmd.batch [ cmd, (Cmd.map ShowMsg pageCmd) ] )
+                    -- ( PageShow pageModel, Cmd.map ShowMsg pageCmd )
 
-                Routes.LoginRoute ->
-                    let
-                        ( pageModel, pageCmd ) =
-                            Login.init model.navKey
-                    in
-                    ( PageLogin pageModel, Cmd.map LoginMsg pageCmd )
+        Routes.LoginRoute ->
+            let
+                ( pageModel, pageCmd ) = Login.init model.navKey
+            in
+                ( { model | page = PageLogin pageModel }, Cmd.batch [ cmd,  (Cmd.map LoginMsg pageCmd) ] )
+                    -- ( PageLogin pageModel, Cmd.map LoginMsg pageCmd )
 
-                Routes.GameRoute  val->
-                    let
-                        ( pageModel, pageCmd ) =
-                            Game.init
-                    in
-                        ( PageGame pageModel, Cmd.map GameMsg pageCmd )
+        Routes.GameRoute  maybeVal->
+            let
+                mdl = case maybeVal of
+                        Just val ->
+                            {model | userName = val}
+                        Nothing  ->
+                            model 
+
+                (pageModel, pageCmd ) = Game.init
+            in
+                ( { mdl | page = PageGame pageModel }, Cmd.batch [ cmd,  (Cmd.map GameMsg pageCmd) ] )
+                        -- ( PageGame pageModel, Cmd.map GameMsg pageCmd )
     
-                Routes.ShowRoute showId ->
-                    ( PageNone, Cmd.none )
+        Routes.ShowRoute showId ->
+            ( { model | page = PageNone }, Cmd.none )
+                    -- ( PageNone, Cmd.none )
 
-                Routes.NotFoundRoute ->
-                    ( PageNone, Cmd.none )
-    in
-    ( { model | page = page }, Cmd.batch [ cmd, newCmd ] )
+        Routes.NotFoundRoute ->
+            ( { model | page = PageNone }, Cmd.none )
+                    -- ( PageNone, Cmd.none )
+    -- in
+    -- ( { model | page = page }, Cmd.batch [ cmd, newCmd ] )
 
 
 subscriptions : Model -> Sub Msg
@@ -124,9 +130,9 @@ update msg model =
             let
                 newRoute =
                     Routes.parseUrl url
-                userName = "Hard coded"
+                
             in
-            ( { model | route = newRoute, userName = userName }, Cmd.none )
+            ( { model | route = newRoute}, Cmd.none )
                 |> loadCurrentPage
         ( LoginMsg subMsg, PageLogin pageModel ) ->
             let
