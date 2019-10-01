@@ -1,10 +1,11 @@
-port module Page.Login exposing (subscriptions, LoginResultInfo, Model, Msg(..), view, init, update, initdata)
+port module Page.Login exposing (subscriptions, LoginResultInfo, Model, Msg(..), view, init, update)
 
 import Browser
 import Browser.Navigation as Nav
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (onClick, onInput)
+import Browser.Navigation as Nav exposing (Key)
 import Http exposing (..)
 import Shared exposing (..)
 import Routes exposing (gamePath)
@@ -18,9 +19,12 @@ import Loading
         )
 
 
-initdata : Model
-initdata =
-    { loginResult =
+
+
+init : Key ->  ( Model, Cmd Msg )
+init key  =
+    ( { navKey = key
+        ,loginResult =
         { isLoggedIn = False
         , address = "-"
         , message = ""
@@ -32,11 +36,7 @@ initdata =
         }
     , activeTab = LoggingInTab
     , loadState = Loading.Off
-    }
-
-init :  ( Model, Cmd Msg )
-init  =
-    ( initdata, Cmd.none) 
+    }, Cmd.none) 
 
 tabClassString : Model -> ActiveLoginTab ->  String
 tabClassString model tab =
@@ -57,6 +57,7 @@ type alias Model =
     , loginResult : LoginResultInfo
     , activeTab : ActiveLoginTab
     , loadState : LoadingState
+    , navKey : Key
     }
 type alias UserInfo =
     { userName : String
@@ -213,7 +214,7 @@ update msg model =
             case data.isLoggedIn of
                 True ->
                     Debug.log "Success  .."
-                    (model, (Nav.load  Routes.gamePath) )
+                    (model, (Nav.pushUrl model.navKey  Routes.gamePath) )
                       
                 False ->
                     Debug.log "Fail  .."

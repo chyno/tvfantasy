@@ -17,6 +17,7 @@ type alias Model =
     , navKey : Key
     , route : Route
     , page : Page
+    , userName : String
     }
 
 
@@ -29,7 +30,7 @@ type Page
 
 type Msg
     = OnUrlChange Url
-    | OnUrlRequest UrlRequest
+    | LinkClicked UrlRequest
     | LoginMsg Login.Msg
     | ShowMsg Show.Msg
     | GameMsg Game.Msg
@@ -38,11 +39,14 @@ type Msg
 init : Flags -> Url -> Key -> ( Model, Cmd Msg )
 init flags url navKey =
     let
+        ( lgModel, lgCmd ) =  Login.init navKey
+
         model =
             { flags = flags
             , navKey = navKey
             , route = Routes.parseUrl url
-            , page =   PageLogin Login.initdata
+            , page =   PageLogin lgModel
+            , userName = ""
             }
     in
        loadCurrentPage  ( model, Cmd.none )
@@ -63,7 +67,7 @@ loadCurrentPage ( model, cmd ) =
                 Routes.LoginRoute ->
                     let
                         ( pageModel, pageCmd ) =
-                            Login.init
+                            Login.init model.navKey
                     in
                     ( PageLogin pageModel, Cmd.map LoginMsg pageCmd )
 
@@ -104,7 +108,7 @@ subscriptions model =
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case ( msg, model.page ) of
-        ( OnUrlRequest urlRequest, _ ) ->
+        ( LinkClicked urlRequest, _ ) ->
             case urlRequest of
                 Browser.Internal url ->
                     ( model
@@ -120,8 +124,9 @@ update msg model =
             let
                 newRoute =
                     Routes.parseUrl url
+                userName = "Hard coded"
             in
-            ( { model | route = newRoute }, Cmd.none )
+            ( { model | route = newRoute, userName = userName }, Cmd.none )
                 |> loadCurrentPage
         ( LoginMsg subMsg, PageLogin pageModel ) ->
             let
@@ -157,7 +162,7 @@ main =
         , view = view
         , update = update
         , subscriptions = subscriptions
-        , onUrlRequest = OnUrlRequest
+        , onUrlRequest = LinkClicked
         , onUrlChange = OnUrlChange
         }
 
@@ -169,7 +174,7 @@ view model =
                         PageLogin _ ->
                             loginHeaderView
                         _ ->
-                            headerView
+                            (headerView model)
 
     in
     
@@ -235,8 +240,8 @@ loginHeaderView =
         ]
     ]
 
-headerView: Html msg
-headerView = 
+headerView: Model ->  Html msg
+headerView model = 
     nav [ class "navbar is-white" ]
     [ div [ class "container" ]
         [ div [ class "navbar-brand" ]
@@ -263,6 +268,7 @@ headerView =
                     [ text "Past Games          " ]
                 ]
             ]
+        , span [][text model.userName]
         ]
     ]
 
