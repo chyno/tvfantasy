@@ -71,7 +71,7 @@ loadCurrentPage ( model, cmd ) =
                     in
                     ( PageLogin pageModel, Cmd.map LoginMsg pageCmd )
 
-                Routes.GameRoute ->
+                Routes.GameRoute  val->
                     let
                         ( pageModel, pageCmd ) =
                             Game.init

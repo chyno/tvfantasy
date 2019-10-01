@@ -214,7 +214,7 @@ update msg model =
             case data.isLoggedIn of
                 True ->
                     Debug.log "Success  .."
-                    (model, (Nav.pushUrl model.navKey  Routes.gamePath) )
+                    (model, (Nav.pushUrl model.navKey  (Routes.gamePathLogin model.userInfo.userName)) )
                       
                 False ->
                     Debug.log "Fail  .."
