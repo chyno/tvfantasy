@@ -1,0 +1,7 @@
+type Game {
+  username: String!
+  network: String
+  amount: String
+  shows: [String]
+}
+
