@@ -11,7 +11,9 @@ import Page.Game as Game
 import Routes exposing (Route)
 import Shared exposing (..)
 import Url exposing (Url)
-
+import Material
+import Material.Button as Button
+import Material.Options as Options
 
 type alias Model =
     { flags : Flags
@@ -19,6 +21,7 @@ type alias Model =
     , route : Route
     , page : Page
     , userName : String
+    , mdc : Material.Model Msg
     }
 
 
@@ -36,6 +39,7 @@ type Msg
     | ShowMsg Show.Msg
     | GameMsg Game.Msg
     | Logout
+    | Mdc (Material.Msg Msg)
 
 
 
@@ -50,9 +54,10 @@ init flags url navKey =
             , route = Routes.parseUrl url
             , page =   PageLogin lgModel
             , userName = ""
+            , mdc = Material.defaultModel
             }
     in
-       loadCurrentPage  ( model, Cmd.none )
+       loadCurrentPage  ( model, Material.init Mdc )
 
 
 loadCurrentPage : ( Model, Cmd Msg ) -> ( Model, Cmd Msg )
@@ -111,63 +116,66 @@ subscriptions model =
                 PageNone ->
                     Sub.none
     in
-        Sub.batch[pageSubs]
+        Sub.batch[pageSubs, Material.subscriptions Mdc model]
         
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
-    case ( msg, model.page ) of
-        ( LinkClicked urlRequest, _ ) ->
-            case urlRequest of
-                Browser.Internal url ->
-                    ( model
-                    , Nav.pushUrl model.navKey (Url.toString url)
-                    )
+    case msg of
+        Mdc msg_ ->
+            Material.update Mdc msg_ model
+        _ ->
+            case ( msg, model.page ) of
+                ( LinkClicked urlRequest, _ ) ->
+                    case urlRequest of
+                        Browser.Internal url ->
+                            ( model
+                            , Nav.pushUrl model.navKey (Url.toString url)
+                            )
 
-                Browser.External url ->
-                    ( model
-                    , Nav.load url
+                        Browser.External url ->
+                            ( model
+                            , Nav.load url
+                            )
+                ( OnUrlChange url, _ ) ->
+                    let
+                        newRoute =
+                            Routes.parseUrl url
+                        
+                    in
+                    ( { model | route = newRoute}, Cmd.none )
+                        |> loadCurrentPage
+                ( LoginMsg subMsg, PageLogin pageModel ) ->
+                    let
+                        ( newPageModel, newCmd ) =
+                            Login.update  subMsg pageModel
+                    in
+                    ( { model | page = PageLogin newPageModel }
+                    , Cmd.map LoginMsg newCmd
                     )
-
-        ( OnUrlChange url, _ ) ->
-            let
-                newRoute =
-                    Routes.parseUrl url
-                
-            in
-            ( { model | route = newRoute}, Cmd.none )
-                |> loadCurrentPage
-        ( LoginMsg subMsg, PageLogin pageModel ) ->
-            let
-                ( newPageModel, newCmd ) =
-                    Login.update  subMsg pageModel
-            in
-            ( { model | page = PageLogin newPageModel }
-            , Cmd.map LoginMsg newCmd
-            )
-        (ShowMsg subMsg, PageShow pageModel ) ->
-            let
-                ( newPageModel, newCmd ) =
-                    Show.update  subMsg pageModel
-            in
-            ( { model | page = PageShow newPageModel }
-            , Cmd.map ShowMsg newCmd
-            )
-        (GameMsg subMsg, PageGame pageModel ) ->
-            let
-                ( newPageModel, newCmd ) =
-                    Game.update  subMsg pageModel
-            in
-            ( { model | page = PageGame newPageModel }
-            , Cmd.map GameMsg newCmd
-            )
-        (Logout, _) ->
-            let
-                 ( lgModel, lgCmd ) =  Login.init model.navKey
-            in
-                ({model | page = PageLogin lgModel, userName = ""}, logoutUser  "Logout")
-        (_,_ )  ->
-           Debug.todo "loginmsg pageshow"
+                (ShowMsg subMsg, PageShow pageModel ) ->
+                    let
+                        ( newPageModel, newCmd ) =
+                            Show.update  subMsg pageModel
+                    in
+                    ( { model | page = PageShow newPageModel }
+                    , Cmd.map ShowMsg newCmd
+                    )
+                (GameMsg subMsg, PageGame pageModel ) ->
+                    let
+                        ( newPageModel, newCmd ) =
+                            Game.update  subMsg pageModel
+                    in
+                    ( { model | page = PageGame newPageModel }
+                    , Cmd.map GameMsg newCmd
+                    )
+                (Logout, _) ->
+                    let
+                        ( lgModel, lgCmd ) =  Login.init model.navKey
+                    in
+                        ({model | page = PageLogin lgModel, userName = ""}, logoutUser  "Logout")
+                (_,_ )  ->
+                    Debug.todo "loginmsg pageshow"
 
 main : Program Flags Model Msg
 main =
@@ -194,10 +202,11 @@ view model =
     
     { title = "App"
     , body = [ 
-        div[][
-            hdrVw
-            , currentPage model 
-            , footerView
+        div[ class "wrapper" ][
+             div[class "box header"] [hdrVw]
+            , div [class "box sidebar"][text "Sidebar"]
+            , div [class "box content"] [currentPage model]
+            , div [class "box footer"] [footerView]
         ]
         
     ]
@@ -206,24 +215,19 @@ view model =
 
 currentPage : Model -> Html Msg
 currentPage model =
-    let
-        page =
-            case model.page of
-                PageLogin pageModel ->
-                    Login.view pageModel
-                        |> Html.map LoginMsg
-
-                PageShow pageModel ->
-                    Show.view pageModel
-                        |> Html.map ShowMsg
-                PageGame pageModel ->
-                    Game.view pageModel
-                        |> Html.map GameMsg
-                PageNone ->
-                    notFoundView
-    in
-    div [class "container"]
-        [ page]
+    case model.page of
+        PageLogin pageModel ->
+            Login.view pageModel
+                |> Html.map LoginMsg
+        PageShow pageModel ->
+            Show.view pageModel
+                |> Html.map ShowMsg
+        PageGame pageModel ->
+            Game.view pageModel
+                |> Html.map GameMsg
+        PageNone ->
+            notFoundView
+    
 
 
 
@@ -283,7 +287,11 @@ headerView model =
                 ]
             ]
         , span [][text model.userName]
-        , button [onClick Logout][text "Logout"]
+        ,  Button.view Mdc "my-button" model.mdc
+              [ Button.ripple
+              , Options.onClick Logout
+              ]
+              [ text "Logout" ]
         ]
     ]
 
