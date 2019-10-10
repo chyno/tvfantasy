@@ -1,9 +1,10 @@
-module Main exposing (init, main, subscriptions)
+port module Main exposing (init, main, subscriptions)
 
 import Browser exposing (UrlRequest)
 import Browser.Navigation as Nav exposing (Key)
 import Html exposing (..)
 import Html.Attributes exposing (..)
+import Html.Events exposing (onClick, onInput)
 import Page.Login as Login
 import Page.Show as Show
 import Page.Game as Game
@@ -34,7 +35,9 @@ type Msg
     | LoginMsg Login.Msg
     | ShowMsg Show.Msg
     | GameMsg Game.Msg
-   
+    | Logout
+
+
 
 init : Flags -> Url -> Key -> ( Model, Cmd Msg )
 init flags url navKey =
@@ -158,6 +161,11 @@ update msg model =
             ( { model | page = PageGame newPageModel }
             , Cmd.map GameMsg newCmd
             )
+        (Logout, _) ->
+            let
+                 ( lgModel, lgCmd ) =  Login.init model.navKey
+            in
+                ({model | page = PageLogin lgModel, userName = ""}, logoutUser  "Logout")
         (_,_ )  ->
            Debug.todo "loginmsg pageshow"
 
@@ -246,7 +254,7 @@ loginHeaderView =
         ]
     ]
 
-headerView: Model ->  Html msg
+headerView: Model ->  Html Msg
 headerView model = 
     nav [ class "navbar is-white" ]
     [ div [ class "container" ]
@@ -275,6 +283,7 @@ headerView model =
                 ]
             ]
         , span [][text model.userName]
+        , button [onClick Logout][text "Logout"]
         ]
     ]
 
@@ -298,3 +307,5 @@ footerView =
             ]
         ]
     ]
+
+port logoutUser :   String -> Cmd msg

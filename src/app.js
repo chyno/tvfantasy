@@ -40,16 +40,16 @@ app.ports.loginUser.subscribe(function(data) {
   });
 });
 
-// app.ports.logoutUser.subscribe(function() {
-//   hedgehog.logout();
-//   console.log("user logged out");
-//   app.ports.hedgeHogloginResult.send({
-//     address: "",
-//     isLoggedIn: false,
-//     message: "User Logged out",
-//     showInfos: []
-//   });
-// });
+app.ports.logoutUser.subscribe(function() {
+  hedgehog.logout();
+  console.log("user logged out");
+  app.ports.hedgeHogloginResult.send({
+    address: "",
+    isLoggedIn: false,
+    message: "User Logged out",
+    showInfos: []
+  });
+});
 
 app.ports.registerUser.subscribe(function(data) {
   hedgehog.logout();

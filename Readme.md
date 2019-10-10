@@ -10,33 +10,6 @@
 ### Css framework https://bulma.io/documentation/
 ### https://bulmatemplates.github.io/bulma-templates/templates/admin.html
 ### https://github.com/BulmaTemplates/bulma-templates/blob/master/css/admin.css
-### graph ql https://graphql.fauna.com/graphql
+### graph ql https://github.com/dillonkearns/elm-graphql
 
-mutation createGame  {
-  createGame(data: {
-       username: "chyno2"
-    shows : ["show1", "show2"]
-  } ),
-  { username
-    _id}
-}
 
-### Querries
-query	 {
-  findGameByID(id: 245316277651898900) {
-    username
-    shows
-  }
-}
-
-{
-  "data": {
-    "findGameByID": {
-      "username": "chyno2",
-      "shows": [
-        "show1",
-        "show2"
-      ]
-    }
-  }
-}

@@ -7,15 +7,12 @@
     "build": "elm make ./src/Main.elm --output dist/app.js",
     "client": "parcel -p 8080 src/index.html",
     "start": "nf start",
-    "zzdev": "nodemon --watch src --ext *  server.js ",
-    "test": "mocha",
-    "zzstart": "node server.js",
-    "zzprod": "node server.js",
-    "zzbuild": "node build.js"
+    "api": "elm-graphql https://graphql.fauna.com/graphql --header 'Authorization: Bearer:fnADZ5A7mvACDa-DLm5VxzbIcDezgOhIvJYXfRco'"
   },
   "author": "John Chynoweth",
   "license": "ISC",
   "devDependencies": {
+    "@dillonkearns/elm-graphql": "^3.6.2",
     "babel-core": "^6.26.3",
     "babel-plugin-transform-runtime": "^6.23.0",
     "babel-runtime": "^6.26.0",
