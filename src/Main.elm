@@ -191,26 +191,24 @@ main =
 -- VIEWS
 view : Model -> Browser.Document Msg
 view model =
-    let
-        hdrVw =  case model.page of
-                        PageLogin _ ->
-                            loginHeaderView
-                        _ ->
-                            (headerView model)
-
+    let 
+        page =
+            case model.page of
+                PageLogin _ ->
+                    div[ class "login-wrapper" ][
+                       div [class "box content"] [currentPage model]
+                    , div [class "box footer"] [footerView]
+                    ]
+                _ ->
+                    div[ class "noside-wrapper" ][
+                        div[class "box header"] [ (headerView model)]
+                        , div [class "box content"] [currentPage model]
+                        , div [class "box footer"] [footerView]
+                    ]
     in
-    
-    { title = "App"
-    , body = [ 
-        div[ class "wrapper" ][
-             div[class "box header"] [hdrVw]
-            , div [class "box sidebar"][text "Sidebar"]
-            , div [class "box content"] [currentPage model]
-            , div [class "box footer"] [footerView]
-        ]
-        
-    ]
-    }
+        {   title = "App"
+            , body = [page]
+        }
 
 
 currentPage : Model -> Html Msg
@@ -237,63 +235,78 @@ notFoundView =
         [ text "Not found..."
         ]
 
-loginHeaderView: Html msg
-loginHeaderView =
-    nav [ class "navbar is-white" ]
-    [ div [ class "container" ]
-        [ div [ class "navbar-brand" ]
-            [ a [ class "navbar-item brand-text", href "../" ]
-                [ text "Tv Fantasy Network        " ]
-            , div [ class "navbar-burger burger", attribute "data-target" "navMenu" ]
-                [ span []
-                    []
-                , span []
-                    []
-                , span []
-                    []
-                ]
-            ]
-        , div [   id "navMenu" ]
-            [ ]
-        ]
-    ]
+-- loginHeaderView: Html msg
+-- loginHeaderView =
+--     nav [ class "navbar is-white" ]
+--     [  div [ class "navbar-brand" ]
+--             [ a [ class "navbar-item brand-text", href "../" ]
+--                 [ text "Tv Fantasy Network        " ]
+--             , div [ class "navbar-burger burger", attribute "data-target" "navMenu" ]
+--                 [ span []
+--                     []
+--                 , span []
+--                     []
+--                 , span []
+--                     []
+--                 ]
+--             ]
+--         , div [   id "navMenu" ]
+--             [ ]
+        
+--     ]
 
 headerView: Model ->  Html Msg
 headerView model = 
-    nav [ class "navbar is-white" ]
-    [ div [ class "container" ]
-        [ div [ class "navbar-brand" ]
-            [ a [ class "navbar-item brand-text", href "../" ]
-                [ text "Tv Fantasy Network        " ]
-            , div [ class "navbar-burger burger", attribute "data-target" "navMenu" ]
-                [ span []
-                    []
-                , span []
-                    []
-                , span []
-                    []
+    div [class "header-wrapper"][
+       i [ style "flex-basis" "10px",  class "brand-lockup__logo brand-lockup__logo--animate"] []
+        , span[style "text-align" "left",  class " brand-lockup__title brand-lockup__title--animate"][text "TV Fantasy"] 
+        ,div [style "text-align" "right"] [
+            span [][text model.userName]
+            ,  Button.view Mdc "my-button" model.mdc
+                [ Button.ripple
+                , Options.onClick Logout
                 ]
+                [ text "Logout" ]
             ]
-        , div [ class "navbar-menu", id "navMenu" ]
-            [ div [ class "navbar-start" ]
-                [ a [ class "navbar-item", href "game" ]
-                    [ text "Home          " ]
-                , a [ class "navbar-item", href "shows" ]
-                    [ text "Shows          " ]
-                , a [ class "navbar-item", href "#" ]
-                    [ text "Status          " ]
-                , a [ class "navbar-item", href "#" ]
-                    [ text "Past Games          " ]
-                ]
-            ]
-        , span [][text model.userName]
-        ,  Button.view Mdc "my-button" model.mdc
-              [ Button.ripple
-              , Options.onClick Logout
-              ]
-              [ text "Logout" ]
-        ]
     ]
+
+
+
+
+    -- nav [ class "navbar is-white" ]
+    -- [ div [ class "container" ]
+    --     [ div [ class "navbar-brand" ]
+    --         [ a [ class "navbar-item brand-text", href "../" ]
+    --             [ text "Tv Fantasy Network        " ]
+    --         , div [ class "navbar-burger burger", attribute "data-target" "navMenu" ]
+    --             [ span []
+    --                 []
+    --             , span []
+    --                 []
+    --             , span []
+    --                 []
+    --             ]
+    --         ]
+    --     , div [ class "navbar-menu", id "navMenu" ]
+    --         [ div [ class "navbar-start" ]
+    --             [ a [ class "navbar-item", href "game" ]
+    --                 [ text "Home          " ]
+    --             , a [ class "navbar-item", href "shows" ]
+    --                 [ text "Shows          " ]
+    --             , a [ class "navbar-item", href "#" ]
+    --                 [ text "Status          " ]
+    --             , a [ class "navbar-item", href "#" ]
+    --                 [ text "Past Games          " ]
+    --             ]
+    --         ]
+    --     , span [][text model.userName]
+    --     ,  Button.view Mdc "my-button" model.mdc
+    --           [ Button.ripple
+    --           , Options.onClick Logout
+    --           ]
+    --           [ text "Logout" ]
+    --     ]
+    -- ]
 
 footerView : Html msg
 footerView =
