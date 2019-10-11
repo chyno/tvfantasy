@@ -233,52 +233,39 @@ loginView : Model -> Html Msg
 loginView model =
     div []
     [ 
-        div [ class "field" ]
-        [ label [ class "label" ]
-            [ text "Username" ]
-        , div [ class "control has-icons-left has-icons-right" ]
-            [ input [ class "input is-success", placeholder "User Name", type_ "text", onInput UpdateUserName, value model.userInfo.userName ]
-                []
-            , span [ class "icon is-small is-left" ]
-                [ i [ class "fas fa-user" ]
-                    []
+        div   [ class "row mdc-text-field username" ]
+                [ input [ class "mdc-text-field__input"
+                          , id "username-input" 
+                          , attribute "minlength" "8" 
+                          , name "username"
+                          , attribute "required" "" 
+                          , type_ "text"
+                          , onInput UpdateUserName, value model.userInfo.userName ]
+                        []
+                , label [ class "mdc-floating-label", for "username-input" ] [ text "User Name" ]
+                , div [ class "mdc-line-ripple" ][]
                 ]
-            , span [ class "icon is-small is-right" ]
-                [ i [ class "fas fa-check" ]
-                    []
+       
+        , div   [ class "row mdc-text-field password" ]
+                [ input [ class "mdc-text-field__input"
+                          , id "password-input" 
+                          , attribute "minlength" "8" 
+                          , name "password"
+                          , attribute "required" "" 
+                          , type_ "password"
+                          , onInput UpdatePassword
+                          , value model.userInfo.password ]
+                        []
+                , label [ class "mdc-floating-label", for "password-input" ] [ text "Password" ]
+                , div [ class "mdc-line-ripple" ][]
                 ]
+    
+   
+    , div   [ class "button-container" ]
+            [   button [ class "mdc-button mdc-button--raised next", onClick StartLoginOrCancel ] [ span [ class "mdc-button__label" ] [ text "Login        " ]]
+                , button [ class "mdc-button cancel", type_ "button" ] [ span [ class "mdc-button__label" ] [ text "Cancel        " ] ]
+                
             ]
-        -- , p [ class "help is-success" ]
-        --     [ text "This username is available" ]
-        ]
-    , div [ class "field" ]
-        [ label [ class "label" ]
-            [ text "Password" ]
-        , div [ class "control has-icons-left has-icons-right" ]
-            [ input [ class "input", placeholder "Password input", type_ "password", onInput UpdatePassword, value model.userInfo.password ]
-                []
-            , span [ class "icon is-small is-left" ]
-                [ i [ class "fas fa-envelope" ]
-                    []
-                ]
-            , span [ class "icon is-small is-right" ]
-                [ i [ class "fas fa-exclamation-triangle" ]
-                    []
-                ]
-            ]
-        -- , p [ class "help is-danger" ]
-        --     [ text "This password is invalid" ]
-        ]
-    , div [ class "field is-grouped" ]
-        [ div [ class "control" ]
-            [ button [ class "button is-link", onClick StartLoginOrCancel ]
-                [ text "Log in " ]
-            ]
-        , div [ class "control" ]
-            [ button [ class "button is-text" ]
-                [ text "Cancel" ]
-            ]
-        ]
     ]
 
     
