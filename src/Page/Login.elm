@@ -21,6 +21,8 @@ import Loading
 import Material.TabBar as TabBar
 import Material
 import Material.Options as Options
+import Material.TextField as TextField
+import Material.FormField as FormField
 
 
 init : Key ->  ( Model, Cmd Msg )
@@ -77,81 +79,51 @@ type Msg
     | DoneLogin LoginResultInfo
     | Mdc (Material.Msg Msg)
 
-
--- updateTab : ActiveLoginTab -> Model -> ( Model, Cmd Msg )
--- updateTab msg model =
---     case msg of
---         LoggingInTab ->
---             ( { model
---                 | activeTab = LoggingInTab
---                 , userInfo =
---                     { userName = ""
---                     , password = ""
---                     , passwordConfimation = ""
---                     }
---               }
---             , Cmd.none
---             )
-
---         CreateAccountTab ->
---             ( { model
---                 | activeTab = CreateAccountTab
---                 , userInfo =
---                     { userName = ""
---                     , password = ""
---                     , passwordConfimation = ""
---                     }
---               }
---             , Cmd.none
---             )
-
-
-
-
-
 -- Subscriptions
 subscriptions : Model -> Sub Msg
 subscriptions model =
     Sub.batch [hedgeHogloginResult DoneLogin]
 
-
--- toMsgNoParams: LoginMsg -> Msg
--- toMsgNoParams subMsg   =
---   GotLoginMsg subMsg
-
-
 createAccountView : Model -> Html Msg
 createAccountView model =
-    div [ class "content" ]
-        [ div [ class "form" ]
-            [ div [ class "fields" ]
-                [ input [ placeholder "Username", onInput UpdateUserName, value model.userInfo.userName ]
-                    []
-                , input [ placeholder "Password", type_ "password", onInput UpdateNewPassword, value model.userInfo.password ]
-                    []
-                , div []
-                    [ input [ placeholder "Confirm Password", type_ "password", onInput UpdateNewConfirmPassword, value model.userInfo.passwordConfimation ]
-                        []
-                    , p [ class "error" ]
-                        []
-                    ]
+     div []
+    [ 
+        h3[][text "Enter Login"]
+        , div [class "conent-wrapper"][
+            FormField.view []
+            [ 
+                TextField.view Mdc "username-field" model.mdc
+                [ TextField.label "User Name"
+                , Options.onChange UpdateUserName
+                , TextField.value model.userInfo.userName
                 ]
-            , div [ class "buttons", onClick RegisterUser ]
-                [ div [ class "button fullWidth" ]
-                    [ text "Create My Account" ]
-                , div [ class "link", onClick (TabNavigate 0) ]
-                    [ span []
-                        [ text "I already have an account." ]
-                    ]
+                []
+                ,  TextField.view Mdc "password-field" model.mdc
+                [ TextField.label "Password"
+                , Options.onChange UpdateNewPassword
+                , TextField.type_ "password"
+                , TextField.value model.userInfo.password
                 ]
+                []
+                , TextField.view Mdc "passwordconfirm-field" model.mdc
+                [ TextField.label "Password"
+                , Options.onChange UpdateNewConfirmPassword
+                , TextField.type_ "password"
+                , TextField.value model.userInfo.passwordConfimation
+                ]
+                []
+
             ]
+            , div   [ class "button-container" ]
+                    [   button [ class "mdc-button mdc-button--raised next", onClick  RegisterUser ] [ span [ class "mdc-button__label" ] [ text "Create My Account      " ]]
+                        , button [ class "mdc-button cancel", type_ "button", onClick (TabNavigate 0) ] [ span [ class "mdc-button__label" ] [ text "I already have an account." ] ]
+                    ]
         ]
+    ]
 
 
 
 -- Update
-
-
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
@@ -229,39 +201,34 @@ loginView : Model -> Html Msg
 loginView model =
     div []
     [ 
-        div   [ class "row mdc-text-field username" ]
-                [ input [ class "mdc-text-field__input"
-                          , id "username-input" 
-                          , attribute "minlength" "8" 
-                          , name "username"
-                          , attribute "required" "" 
-                          , type_ "text"
-                          , onInput UpdateUserName, value model.userInfo.userName ]
-                        []
-                , label [ class "mdc-floating-label", for "username-input" ] [ text "User Name" ]
-                , div [ class "mdc-line-ripple" ][]
+        h3[][text "Enter Login"]
+        , div [class "conent-wrapper"][
+            FormField.view []
+            [ 
+                TextField.view Mdc "username-field" model.mdc
+                [ TextField.label "User Name"
+                , Options.onChange UpdateUserName
+                , TextField.value model.userInfo.userName
                 ]
-       
-        , div   [ class "row mdc-text-field password" ]
-                [ input [ class "mdc-text-field__input"
-                          , id "password-input" 
-                          , attribute "minlength" "8" 
-                          , name "password"
-                          , attribute "required" "" 
-                          , type_ "password"
-                          , onInput UpdatePassword
-                          , value model.userInfo.password ]
-                        []
-                , label [ class "mdc-floating-label", for "password-input" ] [ text "Password" ]
-                , div [ class "mdc-line-ripple" ][]
-                ]
-    
-   
-    , div   [ class "button-container" ]
-            [   button [ class "mdc-button mdc-button--raised next", onClick StartLoginOrCancel ] [ span [ class "mdc-button__label" ] [ text "Login        " ]]
-                , button [ class "mdc-button cancel", type_ "button" ] [ span [ class "mdc-button__label" ] [ text "Cancel        " ] ]
-                
+                []
+
             ]
+            , FormField.view []
+            [ 
+                TextField.view Mdc "password-field" model.mdc
+                [ TextField.label "Password"
+                , Options.onChange UpdatePassword
+                , TextField.type_ "password"
+                , TextField.value model.userInfo.password
+                ]
+                []
+
+            ] 
+            , div   [ class "button-container" ]
+                    [   button [ class "mdc-button mdc-button--raised next", onClick StartLoginOrCancel ] [ span [ class "mdc-button__label" ] [ text "Login        " ]]
+                        , button [ class "mdc-button cancel", type_ "button" ] [ span [ class "mdc-button__label" ] [ text "Cancel        " ] ]
+                    ]
+        ]
     ]
 
     

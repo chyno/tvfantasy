@@ -8,7 +8,10 @@ import Html.Events exposing (onClick, onInput)
 import Http exposing (..)
 import Routes exposing (showsPath)
 import Shared exposing (..)
-
+import Material.Button as Button
+import Material.Menu as Menu
+import Material.Options exposing (styled, cs, css)
+import Material
 
 
 --Model
@@ -21,7 +24,7 @@ type alias CurrentGameModel =
     {
         network:  String
         ,  currentShows: List String
-
+        , mdc : Material.Model Msg
     }
 
 type alias ChooseGameModel =
@@ -50,6 +53,7 @@ init  =
 type Msg =     NavigateShows 
                 | SelectNetwork
                 | NetworkChange String
+                | Mdc (Material.Msg Msg)
 --Subcriptions
 -- Subscriptions
 subscriptions : Model -> Sub Msg
@@ -75,11 +79,11 @@ update msg model =
                     let
                         possibleNewModel = case mdl.selectedNetwork of
                                     Just val ->
-                                      CurrentGame { network = val ,  currentShows = ["some show", "Another show"] }  
+                                      CurrentGame { network = val ,  currentShows = ["some show", "Another show"], mdc = Material.defaultModel }  
                                     _ ->
                                         model
                     in
-                        (possibleNewModel, Cmd.none)
+                        (possibleNewModel, Material.init Mdc)
                 NetworkChange netwrk -> 
                     (ChooseGame {mdl | selectedNetwork = Just netwrk }, Cmd.none) 
                 _ ->
@@ -97,7 +101,8 @@ view model =
                     viewCurrentGame mdl
     in
         div [] 
-        [vw]
+        [ vw ]
+        
 
    
 
