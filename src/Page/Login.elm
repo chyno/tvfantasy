@@ -18,11 +18,7 @@ import Loading
         , render
         )
 
-import Material.TabBar as TabBar
-import Material
-import Material.Options as Options
-import Material.TextField as TextField
-import Material.FormField as FormField
+
 
 
 init : Key ->  ( Model, Cmd Msg )
@@ -40,8 +36,7 @@ init key  =
         }
     , activeTab = 0
     , loadState = Loading.Off
-    ,  mdc = Material.defaultModel
-    }, Material.init Mdc) 
+    }, Cmd.none) 
 
 
 
@@ -58,7 +53,7 @@ type alias Model =
     , activeTab : Int
     , loadState : LoadingState
     , navKey : Key
-    , mdc : Material.Model Msg
+   
     }
 type alias UserInfo =
     { userName : String
@@ -77,7 +72,7 @@ type Msg
     | StartLoginOrCancel
     | RegisterUser
     | DoneLogin LoginResultInfo
-    | Mdc (Material.Msg Msg)
+  
 
 -- Subscriptions
 subscriptions : Model -> Sub Msg
@@ -86,40 +81,30 @@ subscriptions model =
 
 createAccountView : Model -> Html Msg
 createAccountView model =
-     div []
-    [ 
-        h3[][text "Enter Login"]
-        , div [class "conent-wrapper"][
-            FormField.view []
-            [ 
-                TextField.view Mdc "username-field" model.mdc
-                [ TextField.label "User Name"
-                , Options.onChange UpdateUserName
-                , TextField.value model.userInfo.userName
-                ]
-                []
-                ,  TextField.view Mdc "password-field" model.mdc
-                [ TextField.label "Password"
-                , Options.onChange UpdateNewPassword
-                , TextField.type_ "password"
-                , TextField.value model.userInfo.password
-                ]
-                []
-                , TextField.view Mdc "passwordconfirm-field" model.mdc
-                [ TextField.label "Password"
-                , Options.onChange UpdateNewConfirmPassword
-                , TextField.type_ "password"
-                , TextField.value model.userInfo.passwordConfimation
-                ]
-                []
-
-            ]
-            , div   [ class "button-container" ]
-                    [   button [ class "mdc-button mdc-button--raised next", onClick  RegisterUser ] [ span [ class "mdc-button__label" ] [ text "Create My Account      " ]]
-                        , button [ class "mdc-button cancel", type_ "button", onClick (TabNavigate 0) ] [ span [ class "mdc-button__label" ] [ text "I already have an account." ] ]
+     div [ class "content" ]
+        [ div [ class "form" ]
+            [ div [ class "fields" ]
+                [ input [ placeholder "Username", onInput UpdateUserName, value model.userInfo.userName ]
+                    []
+                , input [ placeholder "Password", type_ "password", onInput UpdateNewPassword, value model.userInfo.password ]
+                    []
+                , div []
+                    [ input [ placeholder "Confirm Password", type_ "password", onInput UpdateNewConfirmPassword, value model.userInfo.passwordConfimation ]
+                        []
+                    , p [ class "error" ]
+                        []
                     ]
+                ]
+            , div [ class "buttons", onClick RegisterUser ]
+                [ div [ class "button fullWidth" ]
+                    [ text "Create My Account" ]
+                , div [ class "link", onClick (TabNavigate 0) ]
+                    [ span []
+                        [ text "I already have an account." ]
+                    ]
+                ]
+            ]
         ]
-    ]
 
 
 
@@ -127,8 +112,6 @@ createAccountView model =
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
-        Mdc msg_ ->
-            Material.update Mdc msg_ model
         TabNavigate tabIndex ->
              ( { model | activeTab = tabIndex }, Cmd.none )
 
@@ -201,33 +184,51 @@ loginView : Model -> Html Msg
 loginView model =
     div []
     [ 
-        h3[][text "Enter Login"]
-        , div [class "conent-wrapper"][
-            FormField.view []
-            [ 
-                TextField.view Mdc "username-field" model.mdc
-                [ TextField.label "User Name"
-                , Options.onChange UpdateUserName
-                , TextField.value model.userInfo.userName
-                ]
+        div [ class "field" ]
+        [ label [ class "label" ]
+            [ text "Username" ]
+        , div [ class "control has-icons-left has-icons-right" ]
+            [ input [ class "input is-success", placeholder "User Name", type_ "text", onInput UpdateUserName, value model.userInfo.userName ]
                 []
-
+            , span [ class "icon is-small is-left" ]
+                [ i [ class "fas fa-user" ]
+                    []
+                ]
+            , span [ class "icon is-small is-right" ]
+                [ i [ class "fas fa-check" ]
+                    []
+                ]
             ]
-            , FormField.view []
-            [ 
-                TextField.view Mdc "password-field" model.mdc
-                [ TextField.label "Password"
-                , Options.onChange UpdatePassword
-                , TextField.type_ "password"
-                , TextField.value model.userInfo.password
-                ]
+        -- , p [ class "help is-success" ]
+        --     [ text "This username is available" ]
+        ]
+    , div [ class "field" ]
+        [ label [ class "label" ]
+            [ text "Password" ]
+        , div [ class "control has-icons-left has-icons-right" ]
+            [ input [ class "input", placeholder "Password input", type_ "password", onInput UpdatePassword, value model.userInfo.password ]
                 []
-
-            ] 
-            , div   [ class "button-container" ]
-                    [   button [ class "mdc-button mdc-button--raised next", onClick StartLoginOrCancel ] [ span [ class "mdc-button__label" ] [ text "Login        " ]]
-                        , button [ class "mdc-button cancel", type_ "button" ] [ span [ class "mdc-button__label" ] [ text "Cancel        " ] ]
-                    ]
+            , span [ class "icon is-small is-left" ]
+                [ i [ class "fas fa-envelope" ]
+                    []
+                ]
+            , span [ class "icon is-small is-right" ]
+                [ i [ class "fas fa-exclamation-triangle" ]
+                    []
+                ]
+            ]
+        -- , p [ class "help is-danger" ]
+        --     [ text "This password is invalid" ]
+        ]
+    , div [ class "field is-grouped" ]
+        [ div [ class "control" ]
+            [ button [ class "button is-link", onClick StartLoginOrCancel ]
+                [ text "Log in " ]
+            ]
+        , div [ class "control" ]
+            [ button [ class "button is-text" ]
+                [ text "Cancel" ]
+            ]
         ]
     ]
 
@@ -249,12 +250,7 @@ view model =
 
     div []
     [
-        TabBar.view Mdc "my-tab-bar" model.mdc
-            [ TabBar.activeTab model.activeTab]
-            [ TabBar.tab [Options.onClick (TabNavigate 0)] [ text "Login" ]
-            , TabBar.tab [Options.onClick (TabNavigate 1)] [ text "Create an Account" ]
-            ]
-        , contentView
+         contentView
         , div []
             [ Loading.render
                 Spinner

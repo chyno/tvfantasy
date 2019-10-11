@@ -11,9 +11,7 @@ import Page.Game as Game
 import Routes exposing (Route)
 import Shared exposing (..)
 import Url exposing (Url)
-import Material
-import Material.Button as Button
-import Material.Options as Options
+
 
 type alias Model =
     { flags : Flags
@@ -21,7 +19,6 @@ type alias Model =
     , route : Route
     , page : Page
     , userName : String
-    , mdc : Material.Model Msg
     }
 
 
@@ -39,7 +36,7 @@ type Msg
     | ShowMsg Show.Msg
     | GameMsg Game.Msg
     | Logout
-    | Mdc (Material.Msg Msg)
+ 
 
 
 
@@ -54,10 +51,10 @@ init flags url navKey =
             , route = Routes.parseUrl url
             , page =   PageLogin lgModel
             , userName = ""
-            , mdc = Material.defaultModel
+           
             }
     in
-       loadCurrentPage  ( model, Material.init Mdc )
+       loadCurrentPage  ( model, Cmd.none )
 
 
 loadCurrentPage : ( Model, Cmd Msg ) -> ( Model, Cmd Msg )
@@ -116,66 +113,55 @@ subscriptions model =
                 PageNone ->
                     Sub.none
     in
-        Sub.batch[pageSubs, Material.subscriptions Mdc model]
+        Sub.batch[pageSubs]
         
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
-    case msg of
-        Mdc msg_ ->
-            Material.update Mdc msg_ model
-        _ ->
-            case ( msg, model.page ) of
-                ( LinkClicked urlRequest, _ ) ->
-                    case urlRequest of
-                        Browser.Internal url ->
-                            ( model
-                            , Nav.pushUrl model.navKey (Url.toString url)
-                            )
-
-                        Browser.External url ->
-                            ( model
-                            , Nav.load url
-                            )
-                ( OnUrlChange url, _ ) ->
-                    let
-                        newRoute =
-                            Routes.parseUrl url
+    case ( msg, model.page ) of
+        ( LinkClicked urlRequest, _ ) ->
+            case urlRequest of
+                Browser.Internal url ->
+                    ( model , Nav.pushUrl model.navKey (Url.toString url))
+                Browser.External url ->
+                    ( model, Nav.load url )
+        ( OnUrlChange url, _ ) ->
+            let
+                newRoute = Routes.parseUrl url
                         
-                    in
-                    ( { model | route = newRoute}, Cmd.none )
+            in
+                ( { model | route = newRoute}, Cmd.none )
                         |> loadCurrentPage
-                ( LoginMsg subMsg, PageLogin pageModel ) ->
-                    let
-                        ( newPageModel, newCmd ) =
+        ( LoginMsg subMsg, PageLogin pageModel ) ->
+            let
+                ( newPageModel, newCmd ) =
                             Login.update  subMsg pageModel
-                    in
+                in
                     ( { model | page = PageLogin newPageModel }
                     , Cmd.map LoginMsg newCmd
                     )
-                (ShowMsg subMsg, PageShow pageModel ) ->
-                    let
-                        ( newPageModel, newCmd ) =
+        (ShowMsg subMsg, PageShow pageModel ) ->
+            let
+                 ( newPageModel, newCmd ) =
                             Show.update  subMsg pageModel
-                    in
-                    ( { model | page = PageShow newPageModel }
-                    , Cmd.map ShowMsg newCmd
-                    )
-                (GameMsg subMsg, PageGame pageModel ) ->
-                    let
-                        ( newPageModel, newCmd ) =
-                            Game.update  subMsg pageModel
-                    in
-                    ( { model | page = PageGame newPageModel }
+            in
+                ( { model | page = PageShow newPageModel }
+                    , Cmd.map ShowMsg newCmd)
+        (GameMsg subMsg, PageGame pageModel ) ->
+            let
+                ( newPageModel, newCmd ) =
+                    Game.update  subMsg pageModel
+            in
+                ( { model | page = PageGame newPageModel }
                     , Cmd.map GameMsg newCmd
                     )
-                (Logout, _) ->
-                    let
-                        ( lgModel, lgCmd ) =  Login.init model.navKey
-                    in
-                        ({model | page = PageLogin lgModel, userName = ""}, logoutUser  "Logout")
-                (_,_ )  ->
-                    Debug.todo "loginmsg pageshow"
+        (Logout, _) ->
+            let
+                ( lgModel, lgCmd ) =  Login.init model.navKey
+            in
+                ({model | page = PageLogin lgModel, userName = ""}, logoutUser  "Logout")
+        (_,_ )  ->
+            Debug.todo "loginmsg pageshow"
 
 main : Program Flags Model Msg
 main =
@@ -257,17 +243,23 @@ notFoundView =
 
 headerView: Model ->  Html Msg
 headerView model = 
-    div [class "header-wrapper"][
-       i [ style "flex-basis" "10px",  class "brand-lockup__logo brand-lockup__logo--animate"] []
-        , span[style "text-align" "left",  class " brand-lockup__title brand-lockup__title--animate"][text "TV Fantasy"] 
-        ,div [style "text-align" "right"] [
-            span [][text model.userName]
-            ,  Button.view Mdc "my-button" model.mdc
-                [ Button.ripple
-                , Options.onClick Logout
+    nav [ class "navbar is-white" ]
+    [ div [ class "container" ]
+        [ div [ class "navbar-brand" ]
+            [ a [ class "navbar-item brand-text", href "../" ]
+                [ text "Tv Fantasy Network        " ]
+            , div [ class "navbar-burger burger", attribute "data-target" "navMenu" ]
+                [ span []
+                    []
+                , span []
+                    []
+                , span []
+                    []
                 ]
-                [ text "Logout" ]
             ]
+        , div [   id "navMenu" ]
+            [ ]
+        ]
     ]
 
 
