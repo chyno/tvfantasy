@@ -18,7 +18,9 @@ import Loading
         , render
         )
 
-
+import Material.TabBar as TabBar
+import Material
+import Material.Options as Options
 
 
 init : Key ->  ( Model, Cmd Msg )
@@ -34,16 +36,12 @@ init key  =
         , password = ""
         , passwordConfimation = ""
         }
-    , activeTab = LoggingInTab
+    , activeTab = 0
     , loadState = Loading.Off
-    }, Cmd.none) 
+    ,  mdc = Material.defaultModel
+    }, Material.init Mdc) 
 
-tabClassString : Model -> ActiveLoginTab ->  String
-tabClassString model tab =
-    if model.activeTab == tab then
-        "is-active"
-    else
-        ""
+
 
 -- Model
 type alias LoginResultInfo =
@@ -55,9 +53,10 @@ type alias LoginResultInfo =
 type alias Model =
     { userInfo : UserInfo
     , loginResult : LoginResultInfo
-    , activeTab : ActiveLoginTab
+    , activeTab : Int
     , loadState : LoadingState
     , navKey : Key
+    , mdc : Material.Model Msg
     }
 type alias UserInfo =
     { userName : String
@@ -65,15 +64,10 @@ type alias UserInfo =
     , passwordConfimation : String
     }
 
-type ActiveLoginTab
-    = CreateAccountTab
-    | LoggingInTab
-
-
 
 -- Message
 type Msg
-    = TabNavigate ActiveLoginTab
+    = TabNavigate Int
     | UpdateUserName String
     | UpdatePassword String
     | UpdateNewPassword String
@@ -81,35 +75,35 @@ type Msg
     | StartLoginOrCancel
     | RegisterUser
     | DoneLogin LoginResultInfo
-    
+    | Mdc (Material.Msg Msg)
 
 
-updateTab : ActiveLoginTab -> Model -> ( Model, Cmd Msg )
-updateTab msg model =
-    case msg of
-        LoggingInTab ->
-            ( { model
-                | activeTab = LoggingInTab
-                , userInfo =
-                    { userName = ""
-                    , password = ""
-                    , passwordConfimation = ""
-                    }
-              }
-            , Cmd.none
-            )
+-- updateTab : ActiveLoginTab -> Model -> ( Model, Cmd Msg )
+-- updateTab msg model =
+--     case msg of
+--         LoggingInTab ->
+--             ( { model
+--                 | activeTab = LoggingInTab
+--                 , userInfo =
+--                     { userName = ""
+--                     , password = ""
+--                     , passwordConfimation = ""
+--                     }
+--               }
+--             , Cmd.none
+--             )
 
-        CreateAccountTab ->
-            ( { model
-                | activeTab = CreateAccountTab
-                , userInfo =
-                    { userName = ""
-                    , password = ""
-                    , passwordConfimation = ""
-                    }
-              }
-            , Cmd.none
-            )
+--         CreateAccountTab ->
+--             ( { model
+--                 | activeTab = CreateAccountTab
+--                 , userInfo =
+--                     { userName = ""
+--                     , password = ""
+--                     , passwordConfimation = ""
+--                     }
+--               }
+--             , Cmd.none
+--             )
 
 
 
@@ -145,7 +139,7 @@ createAccountView model =
             , div [ class "buttons", onClick RegisterUser ]
                 [ div [ class "button fullWidth" ]
                     [ text "Create My Account" ]
-                , div [ class "link", onClick (TabNavigate LoggingInTab) ]
+                , div [ class "link", onClick (TabNavigate 0) ]
                     [ span []
                         [ text "I already have an account." ]
                     ]
@@ -161,8 +155,10 @@ createAccountView model =
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
-        TabNavigate tab ->
-            updateTab tab model
+        Mdc msg_ ->
+            Material.update Mdc msg_ model
+        TabNavigate tabIndex ->
+             ( { model | activeTab = tabIndex }, Cmd.none )
 
         UpdateNewConfirmPassword pswd ->
             let
@@ -269,42 +265,29 @@ loginView model =
     ]
 
     
-    -- let
-    --     buttonText =
-    --         if model.loadState == Loading.Off then
-    --             "Login"
-    --         else
-    --             "Cancel"
-    -- in
-    -- div [ class "content" ]
-    --     [ div [ class "form" ]
-    --         [ div [ class "fields" ]
-    --             [ input [ placeholder "Username", onInput UpdateUserName, value model.userInfo.userName ]
-    --                 []
-    --             , div []
-    --                 [ input [ placeholder "Password", type_ "password", onInput UpdatePassword, value model.userInfo.password ]
-    --                     []
-    --                 , p [ class "error" ]
-    --                     []
-    --                 ]
-    --             ]
-    --         , div [ class "buttons" ]
-    --             [ button [ onClick StartLoginOrCancel ]
-    --                 [ text buttonText ]
-    --             , button [ class "link", onClick (TabNavigate CreateAccountTab) ]
-    --                 [ span []
-    --                     [ text "Create Account" ]
-    --                 ]
-    --             ]
-    --         ]
-    --     ]
-
-
+  
 -- View
 view : Model -> Html Msg
 view model =
-   div []
-        [ (contentView model)
+    let
+        contentView =
+            case model.activeTab of
+                0 ->
+                    loginView model
+                1 ->
+                    createAccountView model
+                _ ->
+                    loginView model
+    in
+
+    div []
+    [
+        TabBar.view Mdc "my-tab-bar" model.mdc
+            [ TabBar.activeTab model.activeTab]
+            [ TabBar.tab [Options.onClick (TabNavigate 0)] [ text "Login" ]
+            , TabBar.tab [Options.onClick (TabNavigate 1)] [ text "Create an Account" ]
+            ]
+        , contentView
         , div []
             [ Loading.render
                 Spinner
@@ -317,79 +300,7 @@ view model =
             ]
         , div [] [ text model.loginResult.message ]
         
-        ]
-
-
-contentView : Model -> Html Msg
-contentView model =
-    div [class "columns"]
-        [
-            div [class "column is-2"] [ 
-                case model.activeTab of
-                    CreateAccountTab ->
-                        div[][text "create account dec"]
-                    LoggingInTab ->
-                        div[][text "logging in desc"]
-            ]
-            , div [class "column is-10"][
-               div [ class "tabs" ]
-    [ ul []
-        [ li [class (tabClassString model LoggingInTab) ]
-            [ a[ onClick(TabNavigate LoggingInTab), href "#"]
-                [ text "Login" ]
-            ]
-        , li [ class (tabClassString model CreateAccountTab)]
-            [ a [onClick (TabNavigate CreateAccountTab), href "#"]
-                [ text "Create An Account" ]
-            ]  
-        ]
     ]
-    , div [class "content"] [
-        case model.activeTab of
-            CreateAccountTab ->
-                createAccountView model
-            LoggingInTab ->
-                loginView model
-    ] 
-            ]
-        ]
-   
-
-    -- div [ id "root" ]
-    --     [ div [ class "app" ]
-    --         [ div [ class "tabs" ]
-    --             [ ul [ class "headers" ]
-    --                 [ li
-    --                     [ class
-    --                         (tabClassString model CreateAccountTab)
-    --                     , onClick (TabNavigate CreateAccountTab)
-    --                     ]
-    --                     [ text "Create Account" ]
-    --                 , li
-    --                     [ class (tabClassString model LoggingInTab)
-    --                     , onClick (TabNavigate LoggingInTab)
-    --                     ]
-    --                     [ text "Log In" ]
-    --                 ]
-    --             , case model.activeTab of
-    --                 CreateAccountTab ->
-    --                     createAccountView model
-
-    --                 LoggingInTab ->
-    --                     loginView model
-    --             ]
-    --         , div [ class "message unauthenticated" ]
-    --             [ div [ class "pill red" ]
-    --                 [ text "unauthenticated" ]
-    --             , h1 []
-    --                 [ text "You're Not Signed In" ]
-    --             , p []
-    --                 [ text "You are currently unauthenticated / signed out." ]
-    --             , p []
-    --                 [ text "Go ahead and create an account just like you would a centralized service." ]
-    --             ]
-    --         ]
-    --     ]
 
 
 port registerUser : UserInfo -> Cmd msg
