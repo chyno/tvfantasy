@@ -9,6 +9,15 @@ import Http exposing (..)
 import Routes exposing (showsPath)
 import Shared exposing (..)
 
+import Bootstrap.Form as Form
+import Bootstrap.Form.Input as Input
+import Bootstrap.Form.Select as Select
+import Bootstrap.Form.Checkbox as Checkbox
+import Bootstrap.Form.Radio as Radio
+import Bootstrap.Form.Textarea as Textarea
+import Bootstrap.Form.Fieldset as Fieldset
+import Bootstrap.Button as Button
+import Bootstrap.ListGroup as ListGroup
 
 
 --Model
@@ -107,32 +116,30 @@ view model =
 viewSelectGame : ChooseGameModel -> Html Msg
 viewSelectGame model =
     div[][
-       div   [ class "field" ]
-                [ label [ class "label" ] [ text "Available Networks" ]
-                , div   [ class "control" ]
-                        [ div [ class "select" ]
-                            [ select [onInput NetworkChange]  (List.map (\x ->  option [] [ text x ]) model.possibleNetworks)
-                            ]
-                        ]
-                ] 
-          , div   [ class "field" ]
-                [ div   [ class "control" ]
-                        [ button [class "button is-link", onClick SelectNetwork][text "Select Network"]
-                        ]
-                ] 
+         Form.form []
+        [   
+            Form.group []
+            [ Form.label [ for "mynetworks" ] [ text "My Networks" ]
+            , Select.select [ Select.id "mynetworks", Select.onChange NetworkChange ]
+                (List.map (\x ->  Select.item [] [ text x ]) model.possibleNetworks) 
+                           
+            ]
+        ]
+        ,    
+            
+            div[][
+                    Button.button [ Button.primary,  Button.onClick SelectNetwork ] [ text "Select Network" ]
+                ]
     ]
     
 viewCurrentGame : CurrentGameModel -> Html Msg
 viewCurrentGame model =
  div[][
         h3[][text model.network]
-        , div   [ class "field" ]
-                [ label [ class "label" ] [ text "Your Shows" ]
-                  ,  ul[](List.map (\x ->  li [] [ text x ]) model.currentShows) 
-                ] 
-          , div   [ class "field" ]
-                [ div   [ class "control" ]
-                        [ button [class "button is-link", onClick NavigateShows][text "See Available Shows"]
-                        ]
-                ] 
+        
+        , ListGroup.ul
+            (List.map (\x ->  ListGroup.li [] [ text x ]) model.currentShows)
+        , Button.button [ Button.primary,  Button.onClick NavigateShows ] [ text "View Available Shows" ]
+    
+       
     ]
