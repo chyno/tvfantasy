@@ -11,7 +11,7 @@ import Page.Game as Game
 import Routes exposing (Route)
 import Shared exposing (..)
 import Url exposing (Url)
-
+import Bootstrap.Button as Button
 
 type alias Model =
     { flags : Flags
@@ -241,10 +241,12 @@ notFoundView =
         
 --     ]
 
+
 headerView: Model ->  Html Msg
 headerView model = 
     nav [ class "navbar is-white" ]
-    [ div [ class "container" ]
+    [
+        div [ class "container" ]
         [ div [ class "navbar-brand" ]
             [ a [ class "navbar-item brand-text", href "../" ]
                 [ text "Tv Fantasy Network        " ]
@@ -303,7 +305,8 @@ headerView model =
 footerView : Html msg
 footerView =
     footer [ class "footer" ]
-    [ div [ class "content has-text-centered" ]
+    [ 
+        div [ class "content has-text-centered" ]
         [ p []
             [ strong []
                 [ text "TV Fantasy  " ]

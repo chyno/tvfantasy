@@ -18,7 +18,14 @@ import Loading
         , render
         )
 
-
+import Bootstrap.Form as Form
+import Bootstrap.Form.Input as Input
+import Bootstrap.Form.Select as Select
+import Bootstrap.Form.Checkbox as Checkbox
+import Bootstrap.Form.Radio as Radio
+import Bootstrap.Form.Textarea as Textarea
+import Bootstrap.Form.Fieldset as Fieldset
+import Bootstrap.Button as Button
 
 
 init : Key ->  ( Model, Cmd Msg )
@@ -182,54 +189,73 @@ update msg model =
 
 loginView : Model -> Html Msg
 loginView model =
-    div []
+   div []
     [ 
-        div [ class "field" ]
-        [ label [ class "label" ]
-            [ text "Username" ]
-        , div [ class "control has-icons-left has-icons-right" ]
-            [ input [ class "input is-success", placeholder "User Name", type_ "text", onInput UpdateUserName, value model.userInfo.userName ]
-                []
-            , span [ class "icon is-small is-left" ]
-                [ i [ class "fas fa-user" ]
-                    []
+        Form.form []
+        [   Form.group []
+                [ Form.label [for "myusername"] [ text "Username"]
+                , Input.text [ Input.id "myusername", Input.onInput UpdateUserName, Input.value model.userInfo.userName ]
+                , Form.help [] [ text "Enter User Name" ]
                 ]
-            , span [ class "icon is-small is-right" ]
-                [ i [ class "fas fa-check" ]
-                    []
+            
+            , Form.group []
+                [ Form.label [for "mypwd"] [ text "Password"]
+                , Input.password [ Input.id "mypwd", Input.onInput UpdatePassword, Input.value model.userInfo.password ]
                 ]
-            ]
-        -- , p [ class "help is-success" ]
-        --     [ text "This username is available" ]
-        ]
-    , div [ class "field" ]
-        [ label [ class "label" ]
-            [ text "Password" ]
-        , div [ class "control has-icons-left has-icons-right" ]
-            [ input [ class "input", placeholder "Password input", type_ "password", onInput UpdatePassword, value model.userInfo.password ]
-                []
-            , span [ class "icon is-small is-left" ]
-                [ i [ class "fas fa-envelope" ]
-                    []
-                ]
-            , span [ class "icon is-small is-right" ]
-                [ i [ class "fas fa-exclamation-triangle" ]
-                    []
-                ]
-            ]
-        -- , p [ class "help is-danger" ]
-        --     [ text "This password is invalid" ]
-        ]
-    , div [ class "field is-grouped" ]
-        [ div [ class "control" ]
-            [ button [ class "button is-link", onClick StartLoginOrCancel ]
-                [ text "Log in " ]
-            ]
-        , div [ class "control" ]
-            [ button [ class "button is-text" ]
-                [ text "Cancel" ]
+            , div[][
+                Button.button [ Button.primary,  Button.onClick StartLoginOrCancel ] [ text "Login" ]
+                , Button.button [ Button.secondary ] [ text "Cancel" ]
             ]
         ]
+    -- div [ class "field" ]
+    --     [ label [ class "label" ]
+    --         [ text "Username" ]
+    --     , div [ class "control has-icons-left has-icons-right" ]
+    --         [ input [ class "input is-success", placeholder "User Name", type_ "text", onInput UpdateUserName, value model.userInfo.userName ]
+    --             []
+    --         , span [ class "icon is-small is-left" ]
+    --             [ i [ class "fas fa-user" ]
+    --                 []
+    --             ]
+    --         , span [ class "icon is-small is-right" ]
+    --             [ i [ class "fas fa-check" ]
+    --                 []
+    --             ]
+    --         ]
+    --     -- , p [ class "help is-success" ]
+    --     --     [ text "This username is available" ]
+    --     ]
+    -- , div [ class "field" ]
+    --     [ label [ class "label" ]
+    --         [ text "Password" ]
+    --     , div [ class "control has-icons-left has-icons-right" ]
+    --         [ input [ class "input", placeholder "Password input", type_ "password", onInput UpdatePassword, value model.userInfo.password ]
+    --             []
+    --         , span [ class "icon is-small is-left" ]
+    --             [ i [ class "fas fa-envelope" ]
+    --                 []
+    --             ]
+    --         , span [ class "icon is-small is-right" ]
+    --             [ i [ class "fas fa-exclamation-triangle" ]
+    --                 []
+    --             ]
+    --         ]
+    --     -- , p [ class "help is-danger" ]
+    --     --     [ text "This password is invalid" ]
+    --     ]
+
+
+
+        -- , div [ class "field is-grouped" ]
+        --     [ div [ class "control" ]
+        --     [ button [ class "button is-link", onClick StartLoginOrCancel ]
+        --         [ text "Log in " ]
+        --     ]
+        -- , div [ class "control" ]
+        --     [ button [ class "button is-text" ]
+        --         [ text "Cancel" ]
+        --     ]
+        -- ]
     ]
 
     
