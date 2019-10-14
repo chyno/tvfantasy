@@ -93,30 +93,30 @@ subscriptions model =
 
 createAccountView : Model -> Html Msg
 createAccountView model =
-     div [ class "content" ]
-        [ div [ class "form" ]
-            [ div [ class "fields" ]
-                [ input [ placeholder "Username", onInput UpdateUserName, value model.userInfo.userName ]
-                    []
-                , input [ placeholder "Password", type_ "password", onInput UpdateNewPassword, value model.userInfo.password ]
-                    []
-                , div []
-                    [ input [ placeholder "Confirm Password", type_ "password", onInput UpdateNewConfirmPassword, value model.userInfo.passwordConfimation ]
-                        []
-                    , p [ class "error" ]
-                        []
-                    ]
+     div []
+    [ 
+        Form.form []
+        [   Form.group []
+                [ Form.label [for "myusername"] [ text "Username"]
+                , Input.text [ Input.id "myusername", Input.onInput UpdateUserName, Input.value model.userInfo.userName ]
+                , Form.help [] [ text "Enter User Name" ]
                 ]
-            , div [ class "buttons", onClick RegisterUser ]
-                [ div [ class "button fullWidth" ]
-                    [ text "Create My Account" ]
-                , div [ class "link", onClick (TabNavigate 0) ]
-                    [ span []
-                        [ text "I already have an account." ]
-                    ]
+            
+            , Form.group []
+                [ Form.label [for "mypwd"] [ text "Password"]
+                , Input.password [ Input.id "mypwd", Input.onInput UpdateNewPassword, Input.value model.userInfo.password ]
                 ]
-            ]
+            , Form.group []
+                [ Form.label [for "mypwdconfirm"] [ text "Confirm Password"]
+                , Input.password [ Input.id "mypwdconfirm", Input.onInput UpdateNewConfirmPassword, Input.value model.userInfo.passwordConfimation ]
+                ]
+            
         ]
+        , div[class "button-group"][
+                Button.button [ Button.primary,  Button.onClick RegisterUser ] [ text "Create my Account" ]
+                , Button.button [ Button.secondary, Button.onClick (TabNavigate 0) ] [ text "Cancel" ]
+            ]
+    ]
 
 
 
@@ -211,7 +211,7 @@ loginView model =
                 ]
             
         ]
-        , div[][
+        , div[class "button-group"][
                 Button.button [ Button.primary,  Button.onClick StartLoginOrCancel ] [ text "Login" ]
                 , Button.button [ Button.secondary ] [ text "Cancel" ]
             ]
@@ -237,7 +237,7 @@ view model =
     [
         Navbar.config NavbarMsg
         |> Navbar.withAnimation
-        |> Navbar.brand [ href "#" ] [ text "Admin" ]
+        |> Navbar.light 
         |> Navbar.items
             [ Navbar.itemLink [ href "#",  onClick (TabNavigate 0)  ] [ text "Login" ]
             , Navbar.itemLink [ href "#",  onClick (TabNavigate 1) ] [ text "Create Account" ]
