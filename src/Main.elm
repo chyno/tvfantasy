@@ -183,17 +183,17 @@ view model =
                 PageLogin _ ->
                     div[ class "login-wrapper" ][
                        div [class "box content"] [currentPage model]
-                    , div [class "box footer"] [footerView]
+                    
                     ]
                 _ ->
                     div[ class "noside-wrapper" ][
                         div[class "box header"] [ (headerView model)]
                         , div [class "box content"] [currentPage model]
-                        , div [class "box footer"] [footerView]
+                        
                     ]
     in
         {   title = "App"
-            , body = [page]
+            , body = [page,  div [class "site-footer"] [footerView]]
         }
 
 
@@ -212,8 +212,6 @@ currentPage model =
         PageNone ->
             notFoundView
     
-
-
 
 notFoundView : Html msg
 notFoundView =
