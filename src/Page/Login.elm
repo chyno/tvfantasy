@@ -26,24 +26,29 @@ import Bootstrap.Form.Radio as Radio
 import Bootstrap.Form.Textarea as Textarea
 import Bootstrap.Form.Fieldset as Fieldset
 import Bootstrap.Button as Button
-
+import Bootstrap.Navbar as Navbar
 
 init : Key ->  ( Model, Cmd Msg )
 init key  =
-    ( { navKey = key
-        ,loginResult =
-        { isLoggedIn = False
-        , address = "-"
-        , message = ""
-        }
-    , userInfo =
-        { userName = ""
-        , password = ""
-        , passwordConfimation = ""
-        }
-    , activeTab = 0
-    , loadState = Loading.Off
-    }, Cmd.none) 
+    let
+        ( navbarState, navbarCmd ) = Navbar.initialState NavbarMsg
+    in
+    
+        ( { navKey = key
+            ,loginResult =
+            { isLoggedIn = False
+            , address = "-"
+            , message = ""
+            }
+        , userInfo =
+            { userName = ""
+            , password = ""
+            , passwordConfimation = ""
+            }
+        , activeTab = 0
+        , loadState = Loading.Off
+        , navbarState = navbarState
+        }, navbarCmd) 
 
 
 
@@ -60,7 +65,7 @@ type alias Model =
     , activeTab : Int
     , loadState : LoadingState
     , navKey : Key
-   
+    , navbarState : Navbar.State
     }
 type alias UserInfo =
     { userName : String
@@ -79,12 +84,12 @@ type Msg
     | StartLoginOrCancel
     | RegisterUser
     | DoneLogin LoginResultInfo
-  
+    | NavbarMsg Navbar.State
 
 -- Subscriptions
 subscriptions : Model -> Sub Msg
 subscriptions model =
-    Sub.batch [hedgeHogloginResult DoneLogin]
+    Sub.batch [hedgeHogloginResult DoneLogin, Navbar.subscriptions model.navbarState NavbarMsg]
 
 createAccountView : Model -> Html Msg
 createAccountView model =
@@ -119,6 +124,8 @@ createAccountView model =
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
+        NavbarMsg state ->
+            ( { model | navbarState = state }, Cmd.none )
         TabNavigate tabIndex ->
              ( { model | activeTab = tabIndex }, Cmd.none )
 
@@ -228,7 +235,16 @@ view model =
 
     div []
     [
-         contentView
+        Navbar.config NavbarMsg
+        |> Navbar.withAnimation
+        |> Navbar.brand [ href "#" ] [ text "Admin" ]
+        |> Navbar.items
+            [ Navbar.itemLink [ href "#",  onClick (TabNavigate 0)  ] [ text "Login" ]
+            , Navbar.itemLink [ href "#",  onClick (TabNavigate 1) ] [ text "Create Account" ]
+            ]
+        |> Navbar.view model.navbarState
+        
+        , contentView
         , div []
             [ Loading.render
                 Spinner
