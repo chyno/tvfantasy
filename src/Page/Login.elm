@@ -239,7 +239,7 @@ view model =
         |> Navbar.withAnimation
         |> Navbar.light 
         |> Navbar.items
-            [ Navbar.itemLink [ href "#",  onClick (TabNavigate 0)  ] [ text "Login" ]
+            [ Navbar.itemLinkActive [ href "#",  onClick (TabNavigate 0)  ] [ text "Login" ]
             , Navbar.itemLink [ href "#",  onClick (TabNavigate 1) ] [ text "Create Account" ]
             ]
         |> Navbar.view model.navbarState

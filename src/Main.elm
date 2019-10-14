@@ -156,10 +156,8 @@ update msg model =
                     , Cmd.map GameMsg newCmd
                     )
         (Logout, _) ->
-            let
-                ( lgModel, lgCmd ) =  Login.init model.navKey
-            in
-                ({model | page = PageLogin lgModel, userName = ""}, logoutUser  "Logout")
+            (model , Cmd.batch [(logoutUser  "Logout"),  Nav.load  Routes.loginPath ])
+               
         (_,_ )  ->
             Debug.todo "loginmsg pageshow"
 
@@ -227,7 +225,7 @@ headerView model =
        i [ style "flex-basis" "10px",  class "brand-lockup__logo brand-lockup__logo--animate"] []
         , span[style "text-align" "left",  class " brand-lockup__title brand-lockup__title--animate"][text "TV Fantasy"] 
         ,div [style "text-align" "right"] [
-            span [][text model.userName]
+            span [][text ("Welcome " ++ model.userName)]
             ,  Button.linkButton [  Button.onClick Logout ] [ text "Log Out" ]  
          ]
     ]
