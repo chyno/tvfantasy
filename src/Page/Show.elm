@@ -32,6 +32,8 @@ type alias ShowInfo =
     , voteAverage : Float
     }
 
+
+
 fetchShows : Flags -> Cmd Msg
 fetchShows flags =
     Http.get
@@ -95,7 +97,7 @@ viewWithData shows =
                     ]
     in
     div [ class "message" ]
-        [ h1 [] [ text "These are your shows:" ]
+        [ h1 [] [ text "These are available shows:" ]
         , table []
             (tr []
                 [ th [] [ text "Name" ]
