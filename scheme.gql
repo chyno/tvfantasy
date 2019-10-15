@@ -1,7 +1,25 @@
+type User {
+  username: ID!
+  address: String
+  networks: [String]
+  games: [Game!] @relation
+
+}
+
+
 type Game {
-  username: String!
+  user: User
   network: String
-  amount: String
-  shows: [String]
+  amount: Int
+  start: Date
+  end: Date
+  shows: [Show!] @relation
+}
+
+type Show {
+  game : Game!
+  name: String!
+  rating: Int
+  description: String
 }
 
