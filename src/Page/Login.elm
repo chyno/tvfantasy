@@ -105,10 +105,12 @@ createAccountView model =
             , Form.group []
                 [ Form.label [for "mypwd"] [ text "Password"]
                 , Input.password [ Input.id "mypwd", Input.onInput UpdateNewPassword, Input.value model.userInfo.password ]
+                , Form.help [] [ text "Enter Password" ]
                 ]
             , Form.group []
                 [ Form.label [for "mypwdconfirm"] [ text "Confirm Password"]
                 , Input.password [ Input.id "mypwdconfirm", Input.onInput UpdateNewConfirmPassword, Input.value model.userInfo.passwordConfimation ]
+                , Form.help [] [ text "Enter Password again" ]
                 ]
             
         ]
@@ -208,6 +210,7 @@ loginView model =
             , Form.group []
                 [ Form.label [for "mypwd"] [ text "Password"]
                 , Input.password [ Input.id "mypwd", Input.onInput UpdatePassword, Input.value model.userInfo.password ]
+                , Form.help [] [ text "Enter Password" ]
                 ]
             
         ]
@@ -218,7 +221,7 @@ loginView model =
     ]
 
     
-  
+ -- Todo : http://elm-bootstrap.info/tab 
 -- View
 view : Model -> Html Msg
 view model =

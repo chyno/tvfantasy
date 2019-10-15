@@ -35,7 +35,7 @@ type alias CurrentGameModel =
 
 type alias ChooseGameModel =
     {
-        selectedNetwork : Maybe String
+        selectedNetwork :  String
         , possibleNetworks: List String
     }
 
@@ -46,7 +46,7 @@ type alias ChooseGameModel =
 
 initPage: ChooseGameModel
 initPage = {
-        possibleNetworks = ["ABC", "NBC", "CBS", "ESPN"], selectedNetwork = Nothing
+        possibleNetworks = ["ABC", "NBC", "CBS", "ESPN"], selectedNetwork = ""
     }
 
 
@@ -82,16 +82,9 @@ update msg model =
         ChooseGame mdl ->
            case msg of 
                 SelectNetwork  -> 
-                    let
-                        possibleNewModel = case mdl.selectedNetwork of
-                                    Just val ->
-                                      CurrentGame { network = val ,  currentShows = ["some show", "Another show"] }  
-                                    _ ->
-                                        model
-                    in
-                        (possibleNewModel, Cmd.none)
+                    (CurrentGame { network = mdl.selectedNetwork ,  currentShows = ["some show", "Another show"] }, Cmd.none)
                 NetworkChange netwrk -> 
-                    (ChooseGame {mdl | selectedNetwork = Just netwrk }, Cmd.none) 
+                    (ChooseGame {mdl | selectedNetwork =  netwrk }, Cmd.none) 
                 _ ->
                     Debug.todo "should not execute"
                     (model, Cmd.none)
@@ -127,9 +120,7 @@ viewSelectGame model =
         ]
         ,    
             
-            div[][
-                    Button.button [ Button.primary,  Button.onClick SelectNetwork ] [ text "Select Network" ]
-                ]
+         div[][  Button.button [ Button.primary,  Button.onClick SelectNetwork ] [ text "Select Network" ]]
     ]
     
 viewCurrentGame : CurrentGameModel -> Html Msg

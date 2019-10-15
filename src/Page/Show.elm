@@ -27,15 +27,13 @@ type alias Model =
 
 type alias ShowInfo =
     { name : String
-    , --   country: String,
-      overview : String
+    , overview : String
     , firstAirDate : String
     , voteAverage : Float
     }
 
 fetchShows : Flags -> Cmd Msg
 fetchShows flags =
-    Debug.log "http get .."
     Http.get
         { url = flags.api
         , expect = Http.expectJson OnFetchShows listOfShowsDecoder
