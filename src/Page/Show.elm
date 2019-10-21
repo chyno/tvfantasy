@@ -22,7 +22,7 @@ init flags =
 
 -- Model
 type alias Model =
-    { showInfos : RemoteData (List ShowInfo)
+    { showInfos : RemoteDataMsg (List ShowInfo)
     }
 
 type alias ShowInfo =

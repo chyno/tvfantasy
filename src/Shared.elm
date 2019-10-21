@@ -1,4 +1,4 @@
-module Shared exposing (Flags, RemoteData(..), mapRemoteData)
+module Shared exposing (Flags, RemoteDataMsg(..), mapRemoteData)
 
 
 type alias Flags =
@@ -6,14 +6,14 @@ type alias Flags =
     }
 
 
-type RemoteData a
+type RemoteDataMsg a
     = NotAsked
     | Loading
     | Loaded a
     | Failure
 
 
-mapRemoteData : (a -> b) -> RemoteData a -> RemoteData b
+mapRemoteData : (a -> b) -> RemoteDataMsg a -> RemoteDataMsg b
 mapRemoteData fn remoteData =
     case remoteData of
         NotAsked ->

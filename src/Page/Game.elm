@@ -8,7 +8,7 @@ import Html.Events exposing (onClick, onInput)
 import Http exposing (..)
 import Routes exposing (showsPath)
 import Shared exposing (..)
-
+import Graphql.Http
 import Bootstrap.Form as Form
 import Bootstrap.Form.Input as Input
 import Bootstrap.Form.Select as Select
@@ -19,46 +19,75 @@ import Bootstrap.Form.Fieldset as Fieldset
 import Bootstrap.Button as Button
 import Bootstrap.ListGroup as ListGroup
 
-
+import Graphql.Document as Document
+import Graphql.Http
+import Graphql.Operation exposing (RootQuery)
+import Graphql.SelectionSet as SelectionSet exposing (SelectionSet)
+-- import Api.Object.User as User
+import RemoteData exposing (RemoteData)
+import Api.Object
+import Api.Object.User as User
+import Api.Query as Query
+import Api.Scalar
+import Api.Scalar exposing (Id(..))
 --Model
-type Model
-    =  CurrentGame CurrentGameModel
-    | ChooseGame ChooseGameModel
-   
+-- https://github.com/dillonkearns/elm-graphql/blob/master/examples/src/Example01BasicQuery.elm
+query : SelectionSet (Maybe UserInfo) RootQuery
+query =
+    Query.findUserByID { id = Id "246306499099361812" } userSelection
+
+type alias UserInfo =
+    { address : Maybe String }
+
+userSelection : SelectionSet UserInfo Api.Object.User
+userSelection =
+    SelectionSet.map UserInfo
+        User.address
+
+
+makeRequest : Cmd Msg
+makeRequest =
+    query
+        |> Graphql.Http.queryRequest "https://graphql.fauna.com/graphql"
+        |> Graphql.Http.send (RemoteData.fromResult >> GotResponse)
+
+
+
 
 type alias CurrentGameModel =
     {
         network:  String
         ,  currentShows: List String
+        
        
     }
 
-type alias ChooseGameModel =
+type alias Model =
     {
-        selectedNetwork :  String
+        address: String
+        , selectedNetwork :  String
         , possibleNetworks: List String
+        , currentGame : Maybe CurrentGameModel
     }
 
--- type alias Model =
---     { 
---          stage : GameStages
---     }
 
-initPage: ChooseGameModel
+
+initPage: Model
 initPage = {
-        possibleNetworks = ["ABC", "NBC", "CBS", "ESPN"], selectedNetwork = ""
+     address = "not set",   possibleNetworks = ["ABC", "NBC", "CBS", "ESPN"], selectedNetwork = "", currentGame = Nothing
     }
 
 
 
 init : ( Model, Cmd Msg )
 init  =
-    ( (ChooseGame initPage), Cmd.none )
+    ( initPage, makeRequest )
 
 -- Msg
 type Msg =     NavigateShows 
                 | SelectNetwork
                 | NetworkChange String
+                | GotResponse (RemoteData (Graphql.Http.Error (Maybe UserInfo)) (Maybe UserInfo))
                 
 --Subcriptions
 -- Subscriptions
@@ -67,37 +96,53 @@ subscriptions model =
     Sub.none
 
 --Update
-
+valOrEmpty: Maybe String -> String
+valOrEmpty maybeVal =
+    case maybeVal of
+        Just val ->
+            val
+    
+        Nothing ->
+            ""
+            
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
-    case  model of 
-        CurrentGame cmdl ->
-            case msg of 
-                NavigateShows ->
-                    (model, (Nav.load  Routes.showsPath) )
-                _ ->
-                    Debug.todo "should not execute"
-                    (model, Cmd.none)
-        ChooseGame mdl ->
-           case msg of 
-                SelectNetwork  -> 
-                    (CurrentGame { network = mdl.selectedNetwork ,  currentShows = ["some show", "Another show"] }, Cmd.none)
-                NetworkChange netwrk -> 
-                    (ChooseGame {mdl | selectedNetwork =  netwrk }, Cmd.none) 
-                _ ->
-                    Debug.todo "should not execute"
-                    (model, Cmd.none)
-
+   case msg of 
+        NavigateShows ->
+            (model, (Nav.load  Routes.showsPath) )
+        SelectNetwork  ->
+            let
+                slcGame = { network = model.selectedNetwork ,  currentShows = ["some show", "Another show"] }
+            in
+              ({model | currentGame = Just slcGame }, Cmd.none)
+        NetworkChange netwrk -> 
+            ( {model | selectedNetwork =  netwrk }, Cmd.none) 
+        GotResponse response ->
+            case response of
+                RemoteData.Loading ->
+                    ({ model | address = "loading..." }, Cmd.none)
+                RemoteData.Success maybeData ->
+                    case maybeData of
+                        Just data ->
+                            ({ model | address = (valOrEmpty data.address) }, Cmd.none)
+                        Nothing ->
+                            ({ model | address = "no address" }, Cmd.none)
+                RemoteData.Failure err ->
+                    ({ model | address = "err" }, Cmd.none)
+                RemoteData.NotAsked ->
+                    ({ model | address = "Not Asked" }, Cmd.none)
+      
 view : Model -> Html Msg
 view model =
     let
         vw =
-             case model of
-                ChooseGame mdl ->
-                    viewSelectGame mdl
-                CurrentGame mdl ->
+             case model.currentGame of
+                Just mdl ->
                     viewCurrentGame mdl
+                Nothing ->
+                    viewSelectGame model
+                    
     in
         div [] 
         [ vw ]
@@ -106,10 +151,11 @@ view model =
    
 
 -- View
-viewSelectGame : ChooseGameModel -> Html Msg
+viewSelectGame : Model -> Html Msg
 viewSelectGame model =
     div[][
-         Form.form []
+        div [][text ("address : "  ++ model.address)]
+        , Form.form []
         [   
             Form.group []
             [ Form.label [ for "mynetworks" ] [ text "My Networks" ]
