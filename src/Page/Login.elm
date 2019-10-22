@@ -27,14 +27,12 @@ import Bootstrap.Form.Textarea as Textarea
 import Bootstrap.Form.Fieldset as Fieldset
 import Bootstrap.Button as Button
 import Bootstrap.Navbar as Navbar
+import Bootstrap.Tab as Tab
+import Bootstrap.Utilities.Spacing as Spacing
 
 init : Key ->  ( Model, Cmd Msg )
 init key  =
-    let
-        ( navbarState, navbarCmd ) = Navbar.initialState NavbarMsg
-    in
-    
-        ( { navKey = key
+    (   { navKey = key
             ,loginResult =
             { isLoggedIn = False
             , address = "-"
@@ -47,8 +45,9 @@ init key  =
             }
         , activeTab = 0
         , loadState = Loading.Off
-        , navbarState = navbarState
-        }, navbarCmd) 
+        , tabState = Tab.initialState
+        }, Cmd.none
+    ) 
 
 
 
@@ -65,7 +64,7 @@ type alias Model =
     , activeTab : Int
     , loadState : LoadingState
     , navKey : Key
-    , navbarState : Navbar.State
+    , tabState : Tab.State
     }
 type alias UserInfo =
     { userName : String
@@ -84,12 +83,12 @@ type Msg
     | StartLoginOrCancel
     | RegisterUser
     | DoneLogin LoginResultInfo
-    | NavbarMsg Navbar.State
+    | TabMsg Tab.State
 
 -- Subscriptions
 subscriptions : Model -> Sub Msg
 subscriptions model =
-    Sub.batch [hedgeHogloginResult DoneLogin, Navbar.subscriptions model.navbarState NavbarMsg]
+    Sub.batch [hedgeHogloginResult DoneLogin]
 
 createAccountView : Model -> Html Msg
 createAccountView model =
@@ -126,8 +125,10 @@ createAccountView model =
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
-        NavbarMsg state ->
-            ( { model | navbarState = state }, Cmd.none )
+        TabMsg state ->
+            ( { model | tabState = state }
+            , Cmd.none
+            )
         TabNavigate tabIndex ->
              ( { model | activeTab = tabIndex }, Cmd.none )
 
@@ -225,29 +226,26 @@ loginView model =
 -- View
 view : Model -> Html Msg
 view model =
-    let
-        contentView =
-            case model.activeTab of
-                0 ->
-                    loginView model
-                1 ->
-                    createAccountView model
-                _ ->
-                    loginView model
-    in
-
     div []
     [
-        Navbar.config NavbarMsg
-        |> Navbar.withAnimation
-        |> Navbar.light 
-        |> Navbar.items
-            [ Navbar.itemLinkActive [ href "#",  onClick (TabNavigate 0)  ] [ text "Login" ]
-            , Navbar.itemLink [ href "#",  onClick (TabNavigate 1) ] [ text "Create Account" ]
-            ]
-        |> Navbar.view model.navbarState
-        
-        , contentView
+        Tab.config TabMsg
+            |> Tab.items
+                [ Tab.item
+                    { id = "tabLogin"
+                    , link = Tab.link [] [ text "Log In" ]
+                    , pane =
+                        Tab.pane [ Spacing.mt3 ]
+                            [  loginView model]
+                    }
+                , Tab.item
+                    { id = "tabCreateUser"
+                    , link = Tab.link [] [ text "Create User" ]
+                    , pane =
+                        Tab.pane [ Spacing.mt3 ]
+                            [ createAccountView model]
+                    }
+                ]
+            |> Tab.view model.tabState
         , div []
             [ Loading.render
                 Spinner

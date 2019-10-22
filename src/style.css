@@ -54,7 +54,7 @@ html, body {
   }
   .login-wrapper {
     min-height: 100%;
-  /* equal to footer height */
+  
     margin-bottom: -42px;
 
 		display: grid;
@@ -74,7 +74,7 @@ html, body {
 
   .noside-wrapper {
     min-height: 100%;
-  /* equal to footer height */
+  
     margin-bottom: -42px;
 
 		display: grid;
@@ -111,29 +111,7 @@ html, body {
   flex: 1;
 }
 
-/* .topleft {
-  position: absolute;
-  top: 0;
-  left: 0;
-}
 
-.topright {
-  position: absolute;
-  top: 0;
-  right: 0;
-}
-
-.bottomleft {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-}
-
-.bottomright {
-  position: absolute;
-  bottom: 0;
-  right: 0;
-} */
 .header-wrapper {
   display: grid;
   grid-template-columns: 60px auto auto;
@@ -142,8 +120,8 @@ html, body {
 .brand-lockup__logo {
   background: url(./pngfind.com-sprite-png-202401.png) 10% 50%/auto 100% no-repeat;
   display: block;
-  /* height: 32px; */
-  /* margin-right: 16px; */
+   height: 32px; 
+  margin-right: 16px; 
   
 }
 
