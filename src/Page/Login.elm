@@ -50,7 +50,6 @@ init key  =
     ) 
 
 
-
 -- Model
 type alias LoginResultInfo =
     { isLoggedIn : Bool

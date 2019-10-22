@@ -19,3 +19,37 @@
 ### https://github.com/gdotdesign/elm-ui/blob/development/source/Ui/DropdownMenu.elm
 
 ## elm-graphql https://graphql.fauna.com/graphql --header "Authorization:Bearer fnADbMd3RLACEpjT90hoJSn6SXhN281PIgIZg375"
+
+## Add Networks
+### "_id": "246935131080622610",
+ mutation  createCurrentNetworks {
+createCurrentNetworks(data: {
+  NetworkNames : ["Galaxy Network", 
+    "US Fantasy", 
+    "Sports Now", "CHYNO Network"]
+})
+  {
+    _id,
+    NetworkNames
+  }
+}
+
+ 
+
+
+
+ ## **********************************************************
+ ## Create User
+ ###  "_id": "246935414112256530",
+ mutation  createUser {
+createUser(data : {
+  username : "testchyno"
+  walletAddress : ""
+ 
+  
+})
+  {
+    _id
+    username
+  }
+}

@@ -38,7 +38,7 @@ const createIfNotExists = async (client, query,collection, obj) => {
 
 const client = new faunadb.Client({ secret: faunaKey });
 const q = faunadb.query;
-const setAuthFn = async obj =>
+const setAuthFn = async o\bj =>
     createIfNotExists(client, q, AUTH_COL, obj);
 const setUserFn = async obj =>
     createIfNotExists(client, q, USER_COL, obj);

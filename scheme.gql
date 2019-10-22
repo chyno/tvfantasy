@@ -25,3 +25,6 @@ type Show {
   description: String!
 }
 
+type CurrentNetworks {
+  NetworkNames: [String!]
+}
