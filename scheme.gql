@@ -1,25 +1,27 @@
+
+
 type User {
-  username: ID!
-  address: String
-  networks: [String]
+  id: ID
+  username: String!
+  walletAddress: String!
   games: [Game!] @relation
 
 }
 
 
 type Game {
-  user: User
-  network: String
-  amount: Int
-  start: Date
-  end: Date
+  user: User!
+  network: String!
+  amount: Int!
+  start: Date!
+  end: Date!
   shows: [Show!] @relation
 }
 
 type Show {
   game : Game!
   name: String!
-  rating: Int
-  description: String
+  rating: Int!
+  description: String!
 }
 

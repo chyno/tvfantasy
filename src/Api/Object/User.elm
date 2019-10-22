@@ -19,14 +19,9 @@ import Graphql.SelectionSet exposing (SelectionSet)
 import Json.Decode as Decode
 
 
-networks : SelectionSet (Maybe (List (Maybe String))) Api.Object.User
-networks =
-    Object.selectionForField "(Maybe (List (Maybe String)))" "networks" [] (Decode.string |> Decode.nullable |> Decode.list |> Decode.nullable)
-
-
-username : SelectionSet Api.ScalarCodecs.Id Api.Object.User
+username : SelectionSet String Api.Object.User
 username =
-    Object.selectionForField "ScalarCodecs.Id" "username" [] (Api.ScalarCodecs.codecs |> Api.Scalar.unwrapCodecs |> .codecId |> .decoder)
+    Object.selectionForField "String" "username" [] Decode.string
 
 
 {-| The document's ID.
@@ -36,9 +31,14 @@ id_ =
     Object.selectionForField "ScalarCodecs.Id" "_id" [] (Api.ScalarCodecs.codecs |> Api.Scalar.unwrapCodecs |> .codecId |> .decoder)
 
 
-address : SelectionSet (Maybe String) Api.Object.User
-address =
-    Object.selectionForField "(Maybe String)" "address" [] (Decode.string |> Decode.nullable)
+walletAddress : SelectionSet String Api.Object.User
+walletAddress =
+    Object.selectionForField "String" "walletAddress" [] Decode.string
+
+
+id : SelectionSet (Maybe Api.ScalarCodecs.Id) Api.Object.User
+id =
+    Object.selectionForField "(Maybe ScalarCodecs.Id)" "id" [] (Api.ScalarCodecs.codecs |> Api.Scalar.unwrapCodecs |> .codecId |> .decoder |> Decode.nullable)
 
 
 type alias GamesOptionalArguments =

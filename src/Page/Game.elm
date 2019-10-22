@@ -37,29 +37,27 @@ query =
     Query.findUserByID { id = Id "246306499099361812" } userSelection
 
 type alias UserInfo =
-    { address : Maybe String }
+    { address :  String }
 
 userSelection : SelectionSet UserInfo Api.Object.User
 userSelection =
     SelectionSet.map UserInfo
-        User.address
+        User.walletAddress
 
 
 makeRequest : Cmd Msg
 makeRequest =
     query
         |> Graphql.Http.queryRequest "https://graphql.fauna.com/graphql"
+        |> Graphql.Http.withHeader "Authorization" ("Bearer fnADbMd3RLACEpjT90hoJSn6SXhN281PIgIZg375" )
         |> Graphql.Http.send (RemoteData.fromResult >> GotResponse)
-
-
 
 
 type alias CurrentGameModel =
     {
         network:  String
         ,  currentShows: List String
-        
-       
+            
     }
 
 type alias Model =
@@ -126,7 +124,7 @@ update msg model =
                 RemoteData.Success maybeData ->
                     case maybeData of
                         Just data ->
-                            ({ model | address = (valOrEmpty data.address) }, Cmd.none)
+                            ({ model | address =  data.address }, Cmd.none)
                         Nothing ->
                             ({ model | address = "no address" }, Cmd.none)
                 RemoteData.Failure err ->

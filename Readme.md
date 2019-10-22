@@ -17,3 +17,5 @@
 ### Material https://github.com/aforemny/elm-mdc/blob/master/demo/Demo.elm
 ### https://css-tricks.com/snippets/css/complete-guide-grid/
 ### https://github.com/gdotdesign/elm-ui/blob/development/source/Ui/DropdownMenu.elm
+
+## elm-graphql https://graphql.fauna.com/graphql --header "Authorization:Bearer fnADbMd3RLACEpjT90hoJSn6SXhN281PIgIZg375"

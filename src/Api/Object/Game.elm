@@ -19,9 +19,9 @@ import Graphql.SelectionSet exposing (SelectionSet)
 import Json.Decode as Decode
 
 
-network : SelectionSet (Maybe String) Api.Object.Game
+network : SelectionSet String Api.Object.Game
 network =
-    Object.selectionForField "(Maybe String)" "network" [] (Decode.string |> Decode.nullable)
+    Object.selectionForField "String" "network" [] Decode.string
 
 
 {-| The document's ID.
@@ -31,14 +31,14 @@ id_ =
     Object.selectionForField "ScalarCodecs.Id" "_id" [] (Api.ScalarCodecs.codecs |> Api.Scalar.unwrapCodecs |> .codecId |> .decoder)
 
 
-amount : SelectionSet (Maybe Int) Api.Object.Game
+amount : SelectionSet Int Api.Object.Game
 amount =
-    Object.selectionForField "(Maybe Int)" "amount" [] (Decode.int |> Decode.nullable)
+    Object.selectionForField "Int" "amount" [] Decode.int
 
 
-end : SelectionSet (Maybe Api.ScalarCodecs.Date) Api.Object.Game
+end : SelectionSet Api.ScalarCodecs.Date Api.Object.Game
 end =
-    Object.selectionForField "(Maybe ScalarCodecs.Date)" "end" [] (Api.ScalarCodecs.codecs |> Api.Scalar.unwrapCodecs |> .codecDate |> .decoder |> Decode.nullable)
+    Object.selectionForField "ScalarCodecs.Date" "end" [] (Api.ScalarCodecs.codecs |> Api.Scalar.unwrapCodecs |> .codecDate |> .decoder)
 
 
 type alias ShowsOptionalArguments =
@@ -66,14 +66,14 @@ shows fillInOptionals object_ =
     Object.selectionForCompositeField "shows" optionalArgs object_ identity
 
 
-start : SelectionSet (Maybe Api.ScalarCodecs.Date) Api.Object.Game
+start : SelectionSet Api.ScalarCodecs.Date Api.Object.Game
 start =
-    Object.selectionForField "(Maybe ScalarCodecs.Date)" "start" [] (Api.ScalarCodecs.codecs |> Api.Scalar.unwrapCodecs |> .codecDate |> .decoder |> Decode.nullable)
+    Object.selectionForField "ScalarCodecs.Date" "start" [] (Api.ScalarCodecs.codecs |> Api.Scalar.unwrapCodecs |> .codecDate |> .decoder)
 
 
-user : SelectionSet decodesTo Api.Object.User -> SelectionSet (Maybe decodesTo) Api.Object.Game
+user : SelectionSet decodesTo Api.Object.User -> SelectionSet decodesTo Api.Object.Game
 user object_ =
-    Object.selectionForCompositeField "user" [] object_ (identity >> Decode.nullable)
+    Object.selectionForCompositeField "user" [] object_ identity
 
 
 {-| The document's timestamp.

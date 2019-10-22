@@ -24,9 +24,9 @@ name =
     Object.selectionForField "String" "name" [] Decode.string
 
 
-description : SelectionSet (Maybe String) Api.Object.Show
+description : SelectionSet String Api.Object.Show
 description =
-    Object.selectionForField "(Maybe String)" "description" [] (Decode.string |> Decode.nullable)
+    Object.selectionForField "String" "description" [] Decode.string
 
 
 {-| The document's ID.
@@ -36,9 +36,9 @@ id_ =
     Object.selectionForField "ScalarCodecs.Id" "_id" [] (Api.ScalarCodecs.codecs |> Api.Scalar.unwrapCodecs |> .codecId |> .decoder)
 
 
-rating : SelectionSet (Maybe Int) Api.Object.Show
+rating : SelectionSet Int Api.Object.Show
 rating =
-    Object.selectionForField "(Maybe Int)" "rating" [] (Decode.int |> Decode.nullable)
+    Object.selectionForField "Int" "rating" [] Decode.int
 
 
 game : SelectionSet decodesTo Api.Object.Game -> SelectionSet decodesTo Api.Object.Show

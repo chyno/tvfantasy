@@ -17,22 +17,26 @@ import Graphql.SelectionSet exposing (SelectionSet)
 import Json.Decode as Decode
 
 
-buildGameInput : (GameInputOptionalFields -> GameInputOptionalFields) -> GameInput
-buildGameInput fillOptionals =
+buildGameInput : GameInputRequiredFields -> (GameInputOptionalFields -> GameInputOptionalFields) -> GameInput
+buildGameInput required fillOptionals =
     let
         optionals =
             fillOptionals
-                { user = Absent, network = Absent, amount = Absent, start = Absent, end = Absent, shows = Absent }
+                { user = Absent, shows = Absent }
     in
-    GameInput { user = optionals.user, network = optionals.network, amount = optionals.amount, start = optionals.start, end = optionals.end, shows = optionals.shows }
+    GameInput { user = optionals.user, network = required.network, amount = required.amount, start = required.start, end = required.end, shows = optionals.shows }
+
+
+type alias GameInputRequiredFields =
+    { network : String
+    , amount : Int
+    , start : Api.ScalarCodecs.Date
+    , end : Api.ScalarCodecs.Date
+    }
 
 
 type alias GameInputOptionalFields =
     { user : OptionalArgument GameUserRelation
-    , network : OptionalArgument String
-    , amount : OptionalArgument Int
-    , start : OptionalArgument Api.ScalarCodecs.Date
-    , end : OptionalArgument Api.ScalarCodecs.Date
     , shows : OptionalArgument GameShowsRelation
     }
 
@@ -44,10 +48,10 @@ references to itself either directly (recursive) or indirectly (circular). See
 -}
 type alias GameInputRaw =
     { user : OptionalArgument GameUserRelation
-    , network : OptionalArgument String
-    , amount : OptionalArgument Int
-    , start : OptionalArgument Api.ScalarCodecs.Date
-    , end : OptionalArgument Api.ScalarCodecs.Date
+    , network : String
+    , amount : Int
+    , start : Api.ScalarCodecs.Date
+    , end : Api.ScalarCodecs.Date
     , shows : OptionalArgument GameShowsRelation
     }
 
@@ -63,7 +67,7 @@ type GameInput
 encodeGameInput : GameInput -> Value
 encodeGameInput (GameInput input) =
     Encode.maybeObject
-        [ ( "user", encodeGameUserRelation |> Encode.optional input.user ), ( "network", Encode.string |> Encode.optional input.network ), ( "amount", Encode.int |> Encode.optional input.amount ), ( "start", (Api.ScalarCodecs.codecs |> Api.Scalar.unwrapEncoder .codecDate) |> Encode.optional input.start ), ( "end", (Api.ScalarCodecs.codecs |> Api.Scalar.unwrapEncoder .codecDate) |> Encode.optional input.end ), ( "shows", encodeGameShowsRelation |> Encode.optional input.shows ) ]
+        [ ( "user", encodeGameUserRelation |> Encode.optional input.user ), ( "network", Encode.string input.network |> Just ), ( "amount", Encode.int input.amount |> Just ), ( "start", (Api.ScalarCodecs.codecs |> Api.Scalar.unwrapEncoder .codecDate) input.start |> Just ), ( "end", (Api.ScalarCodecs.codecs |> Api.Scalar.unwrapEncoder .codecDate) input.end |> Just ), ( "shows", encodeGameShowsRelation |> Encode.optional input.shows ) ]
 
 
 buildGameShowsRelation : (GameShowsRelationOptionalFields -> GameShowsRelationOptionalFields) -> GameShowsRelation
@@ -114,15 +118,14 @@ buildGameUserRelation fillOptionals =
     let
         optionals =
             fillOptionals
-                { create = Absent, connect = Absent, disconnect = Absent }
+                { create = Absent, connect = Absent }
     in
-    GameUserRelation { create = optionals.create, connect = optionals.connect, disconnect = optionals.disconnect }
+    GameUserRelation { create = optionals.create, connect = optionals.connect }
 
 
 type alias GameUserRelationOptionalFields =
     { create : OptionalArgument UserInput
     , connect : OptionalArgument Api.ScalarCodecs.Id
-    , disconnect : OptionalArgument Bool
     }
 
 
@@ -134,7 +137,6 @@ references to itself either directly (recursive) or indirectly (circular). See
 type alias GameUserRelationRaw =
     { create : OptionalArgument UserInput
     , connect : OptionalArgument Api.ScalarCodecs.Id
-    , disconnect : OptionalArgument Bool
     }
 
 
@@ -149,7 +151,7 @@ type GameUserRelation
 encodeGameUserRelation : GameUserRelation -> Value
 encodeGameUserRelation (GameUserRelation input) =
     Encode.maybeObject
-        [ ( "create", encodeUserInput |> Encode.optional input.create ), ( "connect", (Api.ScalarCodecs.codecs |> Api.Scalar.unwrapEncoder .codecId) |> Encode.optional input.connect ), ( "disconnect", Encode.bool |> Encode.optional input.disconnect ) ]
+        [ ( "create", encodeUserInput |> Encode.optional input.create ), ( "connect", (Api.ScalarCodecs.codecs |> Api.Scalar.unwrapEncoder .codecId) |> Encode.optional input.connect ) ]
 
 
 buildShowGameRelation : (ShowGameRelationOptionalFields -> ShowGameRelationOptionalFields) -> ShowGameRelation
@@ -198,20 +200,20 @@ buildShowInput required fillOptionals =
     let
         optionals =
             fillOptionals
-                { game = Absent, rating = Absent, description = Absent }
+                { game = Absent }
     in
-    ShowInput { game = optionals.game, name = required.name, rating = optionals.rating, description = optionals.description }
+    ShowInput { game = optionals.game, name = required.name, rating = required.rating, description = required.description }
 
 
 type alias ShowInputRequiredFields =
-    { name : String }
+    { name : String
+    , rating : Int
+    , description : String
+    }
 
 
 type alias ShowInputOptionalFields =
-    { game : OptionalArgument ShowGameRelation
-    , rating : OptionalArgument Int
-    , description : OptionalArgument String
-    }
+    { game : OptionalArgument ShowGameRelation }
 
 
 {-| Type alias for the `ShowInput` attributes. Note that this type
@@ -222,8 +224,8 @@ references to itself either directly (recursive) or indirectly (circular). See
 type alias ShowInputRaw =
     { game : OptionalArgument ShowGameRelation
     , name : String
-    , rating : OptionalArgument Int
-    , description : OptionalArgument String
+    , rating : Int
+    , description : String
     }
 
 
@@ -238,7 +240,7 @@ type ShowInput
 encodeShowInput : ShowInput -> Value
 encodeShowInput (ShowInput input) =
     Encode.maybeObject
-        [ ( "game", encodeShowGameRelation |> Encode.optional input.game ), ( "name", Encode.string input.name |> Just ), ( "rating", Encode.int |> Encode.optional input.rating ), ( "description", Encode.string |> Encode.optional input.description ) ]
+        [ ( "game", encodeShowGameRelation |> Encode.optional input.game ), ( "name", Encode.string input.name |> Just ), ( "rating", Encode.int input.rating |> Just ), ( "description", Encode.string input.description |> Just ) ]
 
 
 buildUserGamesRelation : (UserGamesRelationOptionalFields -> UserGamesRelationOptionalFields) -> UserGamesRelation
@@ -289,18 +291,19 @@ buildUserInput required fillOptionals =
     let
         optionals =
             fillOptionals
-                { address = Absent, networks = Absent, games = Absent }
+                { id = Absent, games = Absent }
     in
-    UserInput { username = required.username, address = optionals.address, networks = optionals.networks, games = optionals.games }
+    UserInput { id = optionals.id, username = required.username, walletAddress = required.walletAddress, games = optionals.games }
 
 
 type alias UserInputRequiredFields =
-    { username : Api.ScalarCodecs.Id }
+    { username : String
+    , walletAddress : String
+    }
 
 
 type alias UserInputOptionalFields =
-    { address : OptionalArgument String
-    , networks : OptionalArgument (List (Maybe String))
+    { id : OptionalArgument Api.ScalarCodecs.Id
     , games : OptionalArgument UserGamesRelation
     }
 
@@ -311,9 +314,9 @@ references to itself either directly (recursive) or indirectly (circular). See
 <https://github.com/dillonkearns/elm-graphql/issues/33>.
 -}
 type alias UserInputRaw =
-    { username : Api.ScalarCodecs.Id
-    , address : OptionalArgument String
-    , networks : OptionalArgument (List (Maybe String))
+    { id : OptionalArgument Api.ScalarCodecs.Id
+    , username : String
+    , walletAddress : String
     , games : OptionalArgument UserGamesRelation
     }
 
@@ -329,4 +332,4 @@ type UserInput
 encodeUserInput : UserInput -> Value
 encodeUserInput (UserInput input) =
     Encode.maybeObject
-        [ ( "username", (Api.ScalarCodecs.codecs |> Api.Scalar.unwrapEncoder .codecId) input.username |> Just ), ( "address", Encode.string |> Encode.optional input.address ), ( "networks", (Encode.string |> Encode.maybe |> Encode.list) |> Encode.optional input.networks ), ( "games", encodeUserGamesRelation |> Encode.optional input.games ) ]
+        [ ( "id", (Api.ScalarCodecs.codecs |> Api.Scalar.unwrapEncoder .codecId) |> Encode.optional input.id ), ( "username", Encode.string input.username |> Just ), ( "walletAddress", Encode.string input.walletAddress |> Just ), ( "games", encodeUserGamesRelation |> Encode.optional input.games ) ]
