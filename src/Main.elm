@@ -82,7 +82,7 @@ loadCurrentPage ( model, cmd ) =
                         Nothing  ->
                             model 
 
-                (pageModel, pageCmd ) = Game.init
+                (pageModel, pageCmd ) = Game.init model.userName
             in
                 ( { mdl | page = PageGame pageModel }, Cmd.batch [ cmd,  (Cmd.map GameMsg pageCmd) ] )
                         -- ( PageGame pageModel, Cmd.map GameMsg pageCmd )

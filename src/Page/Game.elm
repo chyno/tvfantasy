@@ -1,4 +1,4 @@
-module Page.Game exposing (Model, view, Msg(..), update, subscriptions, init)
+port module Page.Game exposing (Model, view, Msg(..), update, subscriptions, init)
 
 import Browser
 import Browser.Navigation as Nav
@@ -32,9 +32,9 @@ import Api.Scalar
 import Api.Scalar exposing (Id(..))
 --Model
 -- https://github.com/dillonkearns/elm-graphql/blob/master/examples/src/Example01BasicQuery.elm
-query : SelectionSet (Maybe UserInfo) RootQuery
-query =
-    Query.findUserByID { id = Id "246306499099361812" } userSelection
+query : String ->  SelectionSet (Maybe UserInfo) RootQuery
+query userId =
+    Query.findUserByID { id = Id "246935414112256530" } userSelection
 
 type alias UserInfo =
     { address :  String }
@@ -45,9 +45,9 @@ userSelection =
         User.walletAddress
 
 
-makeRequest : Cmd Msg
-makeRequest =
-    query
+makeRequest : String -> Cmd Msg
+makeRequest userId =
+    query userId
         |> Graphql.Http.queryRequest "https://graphql.fauna.com/graphql"
         |> Graphql.Http.withHeader "Authorization" ("Bearer fnADbMd3RLACEpjT90hoJSn6SXhN281PIgIZg375" )
         |> Graphql.Http.send (RemoteData.fromResult >> GotResponse)
@@ -62,6 +62,7 @@ type alias CurrentGameModel =
 
 type alias Model =
     {
+    
         address: String
         , selectedNetwork :  String
         , possibleNetworks: List String
@@ -72,14 +73,16 @@ type alias Model =
 
 initPage: Model
 initPage = {
-     address = "not set",   possibleNetworks = ["ABC", "NBC", "CBS", "ESPN"], selectedNetwork = "", currentGame = Nothing
+     address = "init page",   possibleNetworks = ["ABC", "NBC", "CBS", "ESPN"], selectedNetwork = "", currentGame = Nothing
     }
 
+getUserId : String -> Cmd Msg
+getUserId userName =
+    userIdRequest "john123"
 
-
-init : ( Model, Cmd Msg )
-init  =
-    ( initPage, makeRequest )
+init : String  -> ( Model, Cmd Msg )
+init userName = 
+    ( initPage, getUserId userName )
 
 -- Msg
 -- fnADbMd3RLACEpjT90hoJSn6SXhN281PIgIZg375
@@ -87,12 +90,13 @@ type Msg =     NavigateShows
                 | SelectNetwork
                 | NetworkChange String
                 | GotResponse (RemoteData (Graphql.Http.Error (Maybe UserInfo)) (Maybe UserInfo))
-                
+                | LoadGameInfo String
+
 --Subcriptions
 -- Subscriptions
 subscriptions : Model -> Sub Msg
 subscriptions model =
-    Sub.none
+    Sub.batch [userIdResult LoadGameInfo]
 
 --Update
 valOrEmpty: Maybe String -> String
@@ -108,8 +112,10 @@ valOrEmpty maybeVal =
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
    case msg of 
+        LoadGameInfo userId ->
+            ({ model | address = "Load Game Info" }, makeRequest userId)
         NavigateShows ->
-            (model, (Nav.load  Routes.showsPath) )
+            ({ model | address = "navigate shows" }, (Nav.load  Routes.showsPath) )
         SelectNetwork  ->
             let
                 slcGame = { network = model.selectedNetwork ,  currentShows = ["some show", "Another show"] }
@@ -179,3 +185,6 @@ viewCurrentGame model =
     
        
     ]
+
+port userIdRequest : String -> Cmd msg
+port userIdResult : (String -> msg) -> Sub msg
