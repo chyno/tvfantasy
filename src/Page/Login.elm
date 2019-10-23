@@ -37,6 +37,7 @@ init key  =
             { isLoggedIn = False
             , address = "-"
             , message = ""
+            , userId = 0
             }
         , userInfo =
             { userName = ""
@@ -55,6 +56,7 @@ type alias LoginResultInfo =
     { isLoggedIn : Bool
     , address : String
     , message : String
+    , userId : Int
     }
 
 type alias Model =
@@ -166,6 +168,7 @@ update msg model =
                         { isLoggedIn = False
                         , address = "-"
                         , message = ""
+                        , userId = 0
                         }
                     , loadState = Loading.On
                   }
@@ -181,7 +184,7 @@ update msg model =
             case data.isLoggedIn of
                 True ->
                     Debug.log "Success  .."
-                    (model, (Nav.pushUrl model.navKey  (Routes.gamePathLogin model.userInfo.userName)) )
+                    (model, (Nav.pushUrl model.navKey  (Routes.gamePathLogin data.userId)) )
                       
                 False ->
                     Debug.log "Fail  .."
@@ -190,6 +193,7 @@ update msg model =
                         { isLoggedIn = False
                         , address = "-"
                         , message = data.message
+                        , userId = 0
                         }
                     , loadState = Loading.Off
                   } , Cmd.none ) 

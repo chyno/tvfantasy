@@ -28,13 +28,13 @@ app.ports.loginUser.subscribe(function(data) {
 
   hedgehog
   .login(data.userName, data.password)
-  .then(appLoginSendResults)
+  .then(appLoginSendResults(data.userName))
   .catch((e) => {
     app.ports.hedgeHogloginResult.send({
       address: '',
       isLoggedIn: false,
-      message: e.message
-     
+      message: e.message,
+      userId : 0
     });
 
   });
@@ -93,27 +93,33 @@ function fakeLogin() {
 }
  
 
-function appLoginSendResults(wallet) {
+function appLoginSendResults(_userName) {
  
-  let isLoggedIn = false;
-  if (hedgehog.isLoggedIn()) {
-    isLoggedIn =  true;
-  } else {
-    isLoggedIn = hedgehoge.walletExistsLocally && hedgehoge.walletExistsLocally()
-  }
+  const userName = _userName;
+  return () =>
+  {
 
-  let message= '';
-  if (!isLoggedIn) {
-    message = 'Login failed.';
-  }
-  app.ports.hedgeHogloginResult.send({
-        address: isLoggedIn ? hedgehog.getWallet().getAddressString() : '',
-        isLoggedIn: isLoggedIn,
-        message: message
-       
-      });
-    
-  
+      let isLoggedIn = false;
+      if (hedgehog.isLoggedIn()) {
+        isLoggedIn =  true;
+      } else {
+        isLoggedIn = hedgehoge.walletExistsLocally && hedgehoge.walletExistsLocally();
+      }
+
+      let message= '';
+      if (!isLoggedIn) {
+        message = 'Login failed.';
+      }
+
+     return logInService.getUserIdFromUserName(userName).then(userId => {
+        app.ports.hedgeHogloginResult.send({
+          address: isLoggedIn ? hedgehog.getWallet().getAddressString() : '',
+          isLoggedIn: isLoggedIn,
+          message: message,
+          userId : userId
+        });
+      });     
+    };
 }
 
 function isLoggedIn () {

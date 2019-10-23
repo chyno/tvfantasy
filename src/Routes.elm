@@ -65,9 +65,9 @@ showsPath =
 gamePath =
     pathFor (GameRoute Nothing)
 
-gamePathLogin: String -> String
+gamePathLogin: Int -> String
 gamePathLogin val =
-    pathFor (GameRoute  (Just  ("q=" ++ val)))
+    pathFor (GameRoute  (Just  ("q=" ++ String.fromInt val)))
 
 
 showPath id =
