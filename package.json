@@ -6,6 +6,7 @@
   "scripts": {
     "build": "elm make ./src/Main.elm --output dist/app.js",
     "client": "parcel -p 8080 src/index.html",
+    "test": "mocha",
     "start": "nf start",
     "api": "elm-graphql https://graphql.fauna.com/graphql --header 'Authorization: Bearer:fnADZ5A7mvACDa-DLm5VxzbIcDezgOhIvJYXfRco'"
   },

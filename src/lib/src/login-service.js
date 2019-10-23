@@ -22,6 +22,26 @@ const readAuthRecordFromDb = async (client, query, obj) => {
        throw(e);
      }
 };
+
+
+const _getUserIdFromUserName =  (client, query) => {  
+  return async (userName) => {
+    const userNameIndex = 'users_by_username';
+    try {
+      let ret = await client.query(
+        query.Get(
+          query.Match(query.Index(userNameIndex), userName)));
+       console.log(ret);
+       if (ret && ret.data && ret.data.userId)  {
+         return ret.data.userId;
+       }
+       return null;
+  
+     } catch (e) {
+       throw(e);
+     }
+  };
+};
   
 const createIfNotExists = async (client, query,collection, obj) => {
     // Todo: Check is exists
@@ -38,11 +58,12 @@ const createIfNotExists = async (client, query,collection, obj) => {
 
 const client = new faunadb.Client({ secret: faunaKey });
 const q = faunadb.query;
-const setAuthFn = async o\bj =>
+const setAuthFn = async obj =>
     createIfNotExists(client, q, AUTH_COL, obj);
 const setUserFn = async obj =>
     createIfNotExists(client, q, USER_COL, obj);
 const getFn = async obj => readAuthRecordFromDb(client, q, obj); 
+
 
 function LoginService() {
    //this.hedgehog  = new Hedgehog(getFn, setAuthFn, setUserFn);
@@ -50,7 +71,7 @@ function LoginService() {
 
 LoginService.prototype.hedgehog = new Hedgehog(getFn, setAuthFn, setUserFn);
 
-
+LoginService.prototype.getUserIdFromUserName = _getUserIdFromUserName(client, q);
 
 module.exports = LoginService;
 //export const hedgehog = new Hedgehog(getFn, setAuthFn, setUserFn);

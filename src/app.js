@@ -24,16 +24,16 @@ app.ports.loginUser.subscribe(function(data) {
   // For testing
   console.log("... User logging in");
   //fakeLogin();
-  //appLoginSendResults(data);
  
+
   hedgehog
   .login(data.userName, data.password)
   .then(appLoginSendResults)
-  .catch(() => {
+  .catch((e) => {
     app.ports.hedgeHogloginResult.send({
       address: '',
       isLoggedIn: false,
-      message: 'can not log in'
+      message: e.message
      
     });
 
@@ -93,8 +93,8 @@ function fakeLogin() {
 }
  
 
-function appLoginSendResults(res) {
-  console.log(res);
+function appLoginSendResults(wallet) {
+ 
   let isLoggedIn = false;
   if (hedgehog.isLoggedIn()) {
     isLoggedIn =  true;

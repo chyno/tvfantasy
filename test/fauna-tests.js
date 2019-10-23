@@ -8,7 +8,8 @@ const secretAdminKey = "fnADWu_uwLACCI7LXiCJ7Szqvqjvk8BFndUFRMvy";
 // const secretClientKey = 'fnADWgKmE-ACCNt8DvTuqmsjsRC71C3AcoGbPJ7x';
 //var client = new faunadb.Client({ secret: 'YOUR_FAUNADB_SECRET' });
 
-var fauna = require("../js/faunadb.js/index.js");
+
+const lib = require('../src/lib');
 
 xdescribe("Raw testing of Fauna Javascript API", function() {
   let client = null;
@@ -153,47 +154,11 @@ describe("Test Fauna Service", function() {
     assert.ok(result, "fauna function created");
   });
 
-  it("fauna function add new auth", async function() {
-    const collec = "authentications";
-    const lookupKey = "mylookup";
-    const objeTOAdd = {
-      lookupKey: lookupKey,
-      authfoo: "ome other raNDOME DATAs",
-      authbar: "ya ya"
-    };
-
-    // Make sure it is removed
-    //username
-    let ret;
-
-    try {
-      ret = await this.client.query(
-        q.Get(q.Match(q.Index(authenticationsIndex), lookupKey))
-      );
-      var delRes = await this.client.query(
-        q.Delete(q.Ref(q.Collection(collec), ret.ref.id))
-      );
-      assert.ok(delRes);
-    } catch (e) {}
-    
-    let result = null;
-    try {
-      let adddata = await fauna.createIfNotExists(
-        this.client,
-        q,
-        collec,
-        objeTOAdd
-      );
-      assert.ok(adddata, "fauna function created");
-
-      // Now get this record from db
-      let fn2 = fauna.readAuthRecordFromDb;
-      result = await fn2(this.client, q, { lookupKey: lookupKey });
-    } catch (e) {
-      assert.fail(e);
-    }
-    assert.ok(result, "fauna function created");
-    //assert.equal(objeTOAdd.lookupKey, result.lookupKey, 'lookup key should equal');
-    assert.equal(objeTOAdd.foo, result.foo, "lookup key should equal");
+  it("get id from isername", async function() {
+    const userID = 246935414112256540;
+    const logInService = new lib.LoginService();
+    assert.ok(logInService);
+    let id = await logInService.getUserIdFromUserName("john123");
+  assert.equal(userID, id, "expected id does not match from the db");
   });
 });

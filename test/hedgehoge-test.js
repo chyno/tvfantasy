@@ -1,7 +1,7 @@
 var assert = require("assert");
 var Web3 = require("web3");
 var getDataObj = require("./fakeds");
-var utils = require("../js/utils");
+var utils = require("../src/lib/utils");
 
 const WalletSubprovider = require("ethereumjs-wallet/provider-engine");
 const ProviderEngine = require("web3-provider-engine");
