@@ -34,7 +34,7 @@ import Api.Scalar exposing (Id(..))
 -- https://github.com/dillonkearns/elm-graphql/blob/master/examples/src/Example01BasicQuery.elm
 query : String ->  SelectionSet (Maybe UserInfo) RootQuery
 query userId =
-    Query.findUserByID { id = Id "246935414112256530" } userSelection
+    Query.findUserByID { id = Id userId } userSelection
 
 type alias UserInfo =
     { address :  String }
