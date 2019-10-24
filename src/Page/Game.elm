@@ -36,6 +36,8 @@ query : String ->  SelectionSet (Maybe UserInfo) RootQuery
 query userId =
     Query.findUserByID { id = Id userId } userSelection
 
+
+
 type alias UserInfo =
     { address :  String }
 

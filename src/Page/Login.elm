@@ -29,6 +29,38 @@ import Bootstrap.Button as Button
 import Bootstrap.Navbar as Navbar
 import Bootstrap.Tab as Tab
 import Bootstrap.Utilities.Spacing as Spacing
+import Api.Mutation as Mutation
+import Graphql.Document as Document
+import Graphql.Http
+import Graphql.Operation exposing (RootMutation)
+import Graphql.Internal.Builder.Object as Object
+import Graphql.SelectionSet as SelectionSet exposing (SelectionSet)
+-- import Api.Object.User as User
+import RemoteData exposing (RemoteData)
+
+import Api.Object exposing (User)
+import Api.Query as Query
+import Api.Scalar
+import Api.Scalar exposing (Id(..))
+import Api.Mutation exposing (CreateUserRequiredArguments, createUser)
+import Json.Decode as Decode exposing (Decoder)
+
+type alias Response =
+    {
+        id : Int
+    }
+
+-- https://github.com/dillonkearns/elm-graphql/blob/972355abe1e88261bb7618a00dd65377ac9f3600/examples/src/Github/Mutation.elm
+createUserMutation : CreateUserRequiredArguments -> SelectionSet decodesTo  User  -> SelectionSet  decodesTo RootMutation
+createUserMutation requiredArgs object_ =
+   createUser requiredArgs object_
+
+
+makeRequest : String -> String -> Cmd Msg
+makeRequest userName walletAddress =
+    createUserMutation userName walletAddress
+        |> Graphql.Http.mutationRequest "https://elm-graphql.herokuapp.com"
+        |> Graphql.Http.send (RemoteData.fromResult >> GotResponse)
 
 init : Key ->  ( Model, Cmd Msg )
 init key  =
@@ -83,6 +115,7 @@ type Msg
     | RegisterUser
     | DoneLogin LoginResultInfo
     | TabMsg Tab.State
+    | GotResponse (Graphql.Http.Error Response) Response
 
 -- Subscriptions
 subscriptions : Model -> Sub Msg
