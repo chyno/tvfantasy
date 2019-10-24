@@ -35,38 +35,52 @@ import Graphql.Http
 import Graphql.Operation exposing (RootMutation)
 import Graphql.Internal.Builder.Object as Object
 import Graphql.SelectionSet as SelectionSet exposing (SelectionSet)
--- import Api.Object.User as User
+import Api.Object.User as User
 import RemoteData exposing (RemoteData)
 import Graphql.OptionalArgument exposing (..)
-import Api.Object exposing (User)
+-- import Api.Object exposing (User)
 import Api.Query as Query
+import Api.Object
 import Api.Scalar
 import Api.Scalar exposing (Id(..))
 import Api.Mutation exposing (CreateUserRequiredArguments, createUser)
 import Json.Decode as Decode exposing (Decoder)
 import Api.InputObject exposing (..)
+import Api.ScalarCodecs
 type alias Response =
     {
-        id : Int
+        id : Id
     }
 
 -- https://github.com/dillonkearns/elm-graphql/blob/972355abe1e88261bb7618a00dd65377ac9f3600/examples/src/Github/Mutation.elm
--- createUserMutation : CreateUserRequiredArguments -> SelectionSet decodesTo  User  -> SelectionSet  decodesTo RootMutation
--- createUserMutation requiredArgs object_ =
---    createUser requiredArgs object_
 
 -- foo : SelectionSet () Graphql.Operation.RootMutation
 -- foo  =
 --     createUser args SelectionSet.empty
 --         |> SelectionSet.map (\_ -> ())
 
+
+--   SelectionSet Api.ScalarCodecs.obj_
+
+selectUser : SelectionSet Response Api.Object.User
+selectUser =
+    SelectionSet.map Response
+            User.id_ 
+
+       
+idToString : Id -> String
+idToString id =
+    case id of
+        Id val ->
+            val
+                   
+
 addUser : CreateUserRequiredArguments ->  SelectionSet Response Graphql.Operation.RootMutation
 addUser args  =
-    createUser args SelectionSet.empty
-        |> SelectionSet.map (\_ -> {id = 1})
-    -- Mutation.sendMessage { characterId = characterId, phrase = phrase } SelectionSet.empty
-    --     |> SelectionSet.map (\_ -> ())
+    createUser args selectUser
+        
 
+    
  
 getMutArgs : String -> String -> CreateUserRequiredArguments
 getMutArgs userName walletAddress = 
@@ -102,6 +116,7 @@ init key  =
         , activeTab = 0
         , loadState = Loading.Off
         , tabState = Tab.initialState
+        , userId = Nothing
         }, Cmd.none
     ) 
 
@@ -120,6 +135,7 @@ type alias Model =
     , loadState : LoadingState
     , navKey : Key
     , tabState : Tab.State
+    , userId : Maybe String
     }
 type alias UserInfo =
     { userName : String
@@ -182,7 +198,15 @@ update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
         GotResponse response ->
-            ( model, Cmd.none )
+            case response of
+                RemoteData.Loading ->
+                    ( model , Cmd.none)
+                RemoteData.Success data ->
+                    ({model | userId = Just (idToString data.id) }, Cmd.none)
+                RemoteData.Failure err ->
+                    ( model , Cmd.none)
+                RemoteData.NotAsked ->
+                    ( model , Cmd.none)
         TabMsg state ->
             ( { model | tabState = state }
             , Cmd.none
