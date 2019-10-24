@@ -55,28 +55,33 @@ type alias Response =
 -- createUserMutation requiredArgs object_ =
 --    createUser requiredArgs object_
 
-foo : SelectionSet () Graphql.Operation.RootMutation
-foo  =
+-- foo : SelectionSet () Graphql.Operation.RootMutation
+-- foo  =
+--     createUser args SelectionSet.empty
+--         |> SelectionSet.map (\_ -> ())
+
+addUser : CreateUserRequiredArguments ->  SelectionSet Response Graphql.Operation.RootMutation
+addUser args  =
     createUser args SelectionSet.empty
-        |> SelectionSet.map (\_ -> ())
+        |> SelectionSet.map (\_ -> {id = 1})
     -- Mutation.sendMessage { characterId = characterId, phrase = phrase } SelectionSet.empty
     --     |> SelectionSet.map (\_ -> ())
 
  
-args : CreateUserRequiredArguments
-args = 
+getMutArgs : String -> String -> CreateUserRequiredArguments
+getMutArgs userName walletAddress = 
     { 
         data = UserInput {
             id = Absent
-            , username = "String"
-            , walletAddress = "String"
+            , username = userName
+            , walletAddress = walletAddress
             , games = Absent
         } 
     }
 
 makeRequest : String -> String -> Cmd Msg
 makeRequest userName walletAddress =
-    foo
+    addUser (getMutArgs userName walletAddress)
         |> Graphql.Http.mutationRequest "https://elm-graphql.herokuapp.com"
         |> Graphql.Http.withHeader "Authorization" ("Bearer fnADbMd3RLACEpjT90hoJSn6SXhN281PIgIZg375" )
         |> Graphql.Http.send (RemoteData.fromResult >> GotResponse)
