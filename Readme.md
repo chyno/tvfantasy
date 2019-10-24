@@ -88,6 +88,7 @@ query qryUserInfo {
             name
             rating
             description
+            
           }
         }
       }

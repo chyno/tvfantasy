@@ -37,29 +37,48 @@ import Graphql.Internal.Builder.Object as Object
 import Graphql.SelectionSet as SelectionSet exposing (SelectionSet)
 -- import Api.Object.User as User
 import RemoteData exposing (RemoteData)
-
+import Graphql.OptionalArgument exposing (..)
 import Api.Object exposing (User)
 import Api.Query as Query
 import Api.Scalar
 import Api.Scalar exposing (Id(..))
 import Api.Mutation exposing (CreateUserRequiredArguments, createUser)
 import Json.Decode as Decode exposing (Decoder)
-
+import Api.InputObject exposing (..)
 type alias Response =
     {
         id : Int
     }
 
 -- https://github.com/dillonkearns/elm-graphql/blob/972355abe1e88261bb7618a00dd65377ac9f3600/examples/src/Github/Mutation.elm
-createUserMutation : CreateUserRequiredArguments -> SelectionSet decodesTo  User  -> SelectionSet  decodesTo RootMutation
-createUserMutation requiredArgs object_ =
-   createUser requiredArgs object_
+-- createUserMutation : CreateUserRequiredArguments -> SelectionSet decodesTo  User  -> SelectionSet  decodesTo RootMutation
+-- createUserMutation requiredArgs object_ =
+--    createUser requiredArgs object_
 
+foo : SelectionSet () Graphql.Operation.RootMutation
+foo  =
+    createUser args SelectionSet.empty
+        |> SelectionSet.map (\_ -> ())
+    -- Mutation.sendMessage { characterId = characterId, phrase = phrase } SelectionSet.empty
+    --     |> SelectionSet.map (\_ -> ())
+
+ 
+args : CreateUserRequiredArguments
+args = 
+    { 
+        data = UserInput {
+            id = Absent
+            , username = "String"
+            , walletAddress = "String"
+            , games = Absent
+        } 
+    }
 
 makeRequest : String -> String -> Cmd Msg
 makeRequest userName walletAddress =
-    createUserMutation userName walletAddress
+    foo
         |> Graphql.Http.mutationRequest "https://elm-graphql.herokuapp.com"
+        |> Graphql.Http.withHeader "Authorization" ("Bearer fnADbMd3RLACEpjT90hoJSn6SXhN281PIgIZg375" )
         |> Graphql.Http.send (RemoteData.fromResult >> GotResponse)
 
 init : Key ->  ( Model, Cmd Msg )
@@ -115,7 +134,7 @@ type Msg
     | RegisterUser
     | DoneLogin LoginResultInfo
     | TabMsg Tab.State
-    | GotResponse (Graphql.Http.Error Response) Response
+    | GotResponse (RemoteData (Graphql.Http.Error Response) Response)
 
 -- Subscriptions
 subscriptions : Model -> Sub Msg
@@ -157,6 +176,8 @@ createAccountView model =
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
+        GotResponse response ->
+            ( model, Cmd.none )
         TabMsg state ->
             ( { model | tabState = state }
             , Cmd.none
