@@ -47,20 +47,12 @@ import Api.Mutation exposing (CreateUserRequiredArguments, createUser)
 import Json.Decode as Decode exposing (Decoder)
 import Api.InputObject exposing (..)
 import Api.ScalarCodecs
+
+
 type alias Response =
     {
         id : Id
     }
-
--- https://github.com/dillonkearns/elm-graphql/blob/972355abe1e88261bb7618a00dd65377ac9f3600/examples/src/Github/Mutation.elm
-
--- foo : SelectionSet () Graphql.Operation.RootMutation
--- foo  =
---     createUser args SelectionSet.empty
---         |> SelectionSet.map (\_ -> ())
-
-
---   SelectionSet Api.ScalarCodecs.obj_
 
 selectUser : SelectionSet Response Api.Object.User
 selectUser =
@@ -68,20 +60,12 @@ selectUser =
             User.id_ 
 
        
-idToString : Id -> String
-idToString id =
-    case id of
-        Id val ->
-            val
-                   
-
+                 
 addUser : CreateUserRequiredArguments ->  SelectionSet Response Graphql.Operation.RootMutation
 addUser args  =
     createUser args selectUser
         
 
-    
- 
 getMutArgs : String -> String -> CreateUserRequiredArguments
 getMutArgs userName walletAddress = 
     { 
@@ -93,30 +77,25 @@ getMutArgs userName walletAddress =
         } 
     }
 
-makeRequest : String -> String -> Cmd Msg
-makeRequest userName walletAddress =
-    addUser (getMutArgs userName walletAddress)
+makeAddUserToGraphRequest : Model -> Cmd Msg
+makeAddUserToGraphRequest model =
+    addUser (getMutArgs model.userName model.walletAddress)
         |> Graphql.Http.mutationRequest "https://elm-graphql.herokuapp.com"
         |> Graphql.Http.withHeader "Authorization" ("Bearer fnADbMd3RLACEpjT90hoJSn6SXhN281PIgIZg375" )
-        |> Graphql.Http.send (RemoteData.fromResult >> GotResponse)
+        |> Graphql.Http.send (RemoteData.fromResult >> GotAddUserTOGraphDB)
 
 init : Key ->  ( Model, Cmd Msg )
 init key  =
-    (   { navKey = key
-            ,loginResult =
-            { isLoggedIn = False
-            , address = "-"
+    (   {   navKey = key
+            , walletAddress = ""
             , message = ""
-            }
-        , userInfo =
-            { userName = ""
+            , userName = ""
             , password = ""
             , passwordConfimation = ""
-            }
-        , activeTab = 0
-        , loadState = Loading.Off
-        , tabState = Tab.initialState
-        , userId = Nothing
+            , activeTab = 0
+            , loadState = Loading.Off
+            , tabState = Tab.initialState
+            , userId = Nothing
         }, Cmd.none
     ) 
 
@@ -128,9 +107,19 @@ type alias LoginResultInfo =
     , message : String
     }
 
+type alias CreateUserResultInfo =
+    {
+         id : String
+        , isCreated: Bool
+        , message: String
+    }
+
 type alias Model =
-    { userInfo : UserInfo
-    , loginResult : LoginResultInfo
+    { userName : String
+    , password : String
+    , walletAddress : String
+    , message : String
+    , passwordConfimation : String
     , activeTab : Int
     , loadState : LoadingState
     , navKey : Key
@@ -140,7 +129,6 @@ type alias Model =
 type alias UserInfo =
     { userName : String
     , password : String
-    , passwordConfimation : String
     }
 
 
@@ -154,13 +142,14 @@ type Msg
     | StartLoginOrCancel
     | RegisterUser
     | DoneLogin LoginResultInfo
+    | DoneAddHedgeHogAccount CreateUserResultInfo
     | TabMsg Tab.State
-    | GotResponse (RemoteData (Graphql.Http.Error Response) Response)
+    | GotAddUserTOGraphDB (RemoteData (Graphql.Http.Error Response) Response)
 
 -- Subscriptions
 subscriptions : Model -> Sub Msg
 subscriptions model =
-    Sub.batch [hedgeHogloginResult DoneLogin]
+    Sub.batch [hedgeHogloginResult DoneLogin, hedgeHogCreateUserResult DoneAddHedgeHogAccount]
 
 createAccountView : Model -> Html Msg
 createAccountView model =
@@ -169,18 +158,18 @@ createAccountView model =
         Form.form []
         [   Form.group []
                 [ Form.label [for "myusername"] [ text "Username"]
-                , Input.text [ Input.id "myusername", Input.onInput UpdateUserName, Input.value model.userInfo.userName ]
+                , Input.text [ Input.id "myusername", Input.onInput UpdateUserName, Input.value model.userName ]
                 , Form.help [] [ text "Enter User Name" ]
                 ]
             
             , Form.group []
                 [ Form.label [for "mypwd"] [ text "Password"]
-                , Input.password [ Input.id "mypwd", Input.onInput UpdateNewPassword, Input.value model.userInfo.password ]
+                , Input.password [ Input.id "mypwd", Input.onInput UpdateNewPassword, Input.value model.password ]
                 , Form.help [] [ text "Enter Password" ]
                 ]
             , Form.group []
                 [ Form.label [for "mypwdconfirm"] [ text "Confirm Password"]
-                , Input.password [ Input.id "mypwdconfirm", Input.onInput UpdateNewConfirmPassword, Input.value model.userInfo.passwordConfimation ]
+                , Input.password [ Input.id "mypwdconfirm", Input.onInput UpdateNewConfirmPassword, Input.value model.passwordConfimation ]
                 , Form.help [] [ text "Enter Password again" ]
                 ]
             
@@ -197,88 +186,57 @@ createAccountView model =
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
-        GotResponse response ->
+        GotAddUserTOGraphDB response ->
             case response of
                 RemoteData.Loading ->
-                    ( model , Cmd.none)
+                    ( { model | message = "Adding User to Graph ..." } , Cmd.none)
                 RemoteData.Success data ->
-                    ({model | userId = Just (idToString data.id) }, Cmd.none)
+                     ( { model | activeTab = 0 }, Cmd.none )
                 RemoteData.Failure err ->
-                    ( model , Cmd.none)
+                    (  { model | message = "Error adding to graph. Message: " } , Cmd.none)
                 RemoteData.NotAsked ->
                     ( model , Cmd.none)
+        DoneAddHedgeHogAccount createInfo ->
+           ({model | userId = (Just createInfo.id), message = "User added to Lgin Account" }, makeAddUserToGraphRequest model)
         TabMsg state ->
             ( { model | tabState = state }
             , Cmd.none
             )
         TabNavigate tabIndex ->
-             ( { model | activeTab = tabIndex }, Cmd.none )
+             ( { model | activeTab = tabIndex, loadState = Loading.Off }, Cmd.none )
 
         UpdateNewConfirmPassword pswd ->
-            let
-                li =
-                    model.userInfo
-            in
-            ( { model | userInfo = { li | passwordConfimation = pswd } }, Cmd.none )
+             ( { model |  passwordConfimation = pswd  }, Cmd.none )
 
         UpdatePassword pswd ->
-            let
-                li =
-                    model.userInfo
-            in
-            ( { model | userInfo = { li | password = pswd } }, Cmd.none )
+            ( { model |  password = pswd }, Cmd.none )
 
         UpdateNewPassword pswd ->
-            let
-                li =
-                    model.userInfo
-            in
-            ( { model | userInfo = { li | password = pswd } }, Cmd.none )
-
+            ( { model |  password = pswd  }, Cmd.none )
         UpdateUserName usrname ->
-            let
-                li =
-                    model.userInfo
-            in
-            ( { model | userInfo = { li | userName = usrname } }, Cmd.none )
-
+            ( { model | userName = usrname }, Cmd.none )
         StartLoginOrCancel ->
             if model.loadState == Loading.Off then
-                ( { model
-                    | loginResult =
-                        { isLoggedIn = False
-                        , address = "-"
-                        , message = ""
-                        }
-                    , loadState = Loading.On
-                  }
-                , loginUser model.userInfo
+                ( { model | walletAddress = "-" , message = "" , loadState = Loading.On }
+                , loginUser {userName = model.userName, password = model.password }
                 )
 
             else
-                ( { model | loadState = Loading.Off }, Cmd.none )
+                ( { model | walletAddress = "-" , message = "" , loadState = Loading.Off }, Cmd.none )
 
         RegisterUser ->
-            ( model, registerUser model.userInfo )
+            ( { model | message = "Adding User. Please Wait", loadState = Loading.On }, registerUser {userName = model.userName, password = model.password }  )
         DoneLogin data ->
             case data.isLoggedIn of
                 True ->
                     Debug.log "Success  .."
-                    (model, (Nav.pushUrl model.navKey  (Routes.gamePathLogin model.userInfo.userName)) )
+                    (model, (Nav.pushUrl model.navKey  (Routes.gamePathLogin model.userName)) )
                       
                 False ->
                     Debug.log "Fail  .."
-                    ( { model
-                    | loginResult =
-                        { isLoggedIn = False
-                        , address = "-"
-                        , message = data.message
-                        }
-                    , loadState = Loading.Off
-                  } , Cmd.none ) 
+                    ( { model | walletAddress = "-" , message = data.message , loadState = Loading.Off } 
+                    , Cmd.none ) 
             
-
-
 loginView : Model -> Html Msg
 loginView model =
    div []
@@ -286,13 +244,13 @@ loginView model =
         Form.form []
         [   Form.group []
                 [ Form.label [for "myusername"] [ text "Username"]
-                , Input.text [ Input.id "myusername", Input.onInput UpdateUserName, Input.value model.userInfo.userName ]
+                , Input.text [ Input.id "myusername", Input.onInput UpdateUserName, Input.value model.userName ]
                 , Form.help [] [ text "Enter User Name" ]
                 ]
             
             , Form.group []
                 [ Form.label [for "mypwd"] [ text "Password"]
-                , Input.password [ Input.id "mypwd", Input.onInput UpdatePassword, Input.value model.userInfo.password ]
+                , Input.password [ Input.id "mypwd", Input.onInput UpdatePassword, Input.value model.password ]
                 , Form.help [] [ text "Enter Password" ]
                 ]
             
@@ -305,6 +263,7 @@ loginView model =
 
     
  -- Todo : http://elm-bootstrap.info/tab 
+
 -- View
 view : Model -> Html Msg
 view model =
@@ -338,7 +297,7 @@ view model =
 
             -- LoadingState
             ]
-        , div [] [ text model.loginResult.message ]
+        , div [] [ text model.message ]
         
     ]
 
@@ -346,3 +305,4 @@ view model =
 port registerUser : UserInfo -> Cmd msg
 port loginUser : UserInfo -> Cmd msg
 port hedgeHogloginResult : (LoginResultInfo -> msg) -> Sub msg
+port hedgeHogCreateUserResult : (CreateUserResultInfo -> msg) -> Sub msg

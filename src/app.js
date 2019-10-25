@@ -61,34 +61,41 @@ app.ports.logoutUser.subscribe(function() {
   });
 });
 
+
+function getUserIdFunction(data) {
+
+  let userName = data.userName;
+  
+  return () => {
+    return logInService.getUserIdFromUserName(userName).then(function(id) {
+      app.ports.hedgeHogCreateUserResult.send({
+        isCreated: true,
+        message: "User Created",
+        id: id
+      }); 
+    });
+  }; 
+
+}
 app.ports.registerUser.subscribe(function(data) {
   hedgehog.logout();
-
+  let userInfo = data;
+  let fn = getUserIdFunction(data);
   hedgehog
-    .signUp(data.userName, data.password)
-    .then(
-      () => {
-        app.ports.hedgeHogloginResult.send({
-          address: "",
-          isLoggedIn: false,
-          message: "User Created"
-        });
-      },
+    .signUp(userInfo.userName, userInfo.password)
+    .then(fn ,
       e => {
-        app.ports.hedgeHogloginResult.send({
-          address: "",
-          isLoggedIn: false,
-          message: e.message
+        app.ports.hedgeHogCreateUserResult.send({
+          isCreated: false,
+            message: e.message
         });
       }
     )
     .catch(err =>
-      app.ports.hedgeHogloginResult.send({
-        address: "",
-        isLoggedIn: false,
-        message: err.message
-      })
-    );
+      app.ports.hedgeHogCreateUserResult.send({
+        isCreated: false,
+          message: e.message
+      }));
 });
 
 // Local Functions
