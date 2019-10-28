@@ -35,9 +35,10 @@ import Graphql.Http
 import Graphql.Operation exposing (RootMutation)
 import Graphql.Internal.Builder.Object as Object
 import Graphql.SelectionSet as SelectionSet exposing (SelectionSet)
+import Graphql.OptionalArgument exposing (..)
+
 import Api.Object.User as User
 import RemoteData exposing (RemoteData)
-import Graphql.OptionalArgument exposing (..)
 -- import Api.Object exposing (User)
 import Api.Query as Query
 import Api.Object
@@ -80,7 +81,7 @@ getMutArgs userName walletAddress =
 makeAddUserToGraphRequest : Model -> Cmd Msg
 makeAddUserToGraphRequest model =
     addUser (getMutArgs model.userName model.walletAddress)
-        |> Graphql.Http.mutationRequest "https://elm-graphql.herokuapp.com"
+        |> Graphql.Http.mutationRequest "https://graphql.fauna.com/graphql"
         |> Graphql.Http.withHeader "Authorization" ("Bearer fnADbMd3RLACEpjT90hoJSn6SXhN281PIgIZg375" )
         |> Graphql.Http.send (RemoteData.fromResult >> GotAddUserTOGraphDB)
 
@@ -180,6 +181,9 @@ createAccountView model =
             ]
     ]
 
+        
+        
+            
 
 
 -- Update
@@ -191,9 +195,9 @@ update msg model =
                 RemoteData.Loading ->
                     ( { model | message = "Adding User to Graph ..." } , Cmd.none)
                 RemoteData.Success data ->
-                     ( { model | activeTab = 0 }, Cmd.none )
+                     ( { model | activeTab = 0,  loadState = Loading.Off }, Cmd.none )
                 RemoteData.Failure err ->
-                    (  { model | message = "Error adding to graph. Message: " } , Cmd.none)
+                    (  { model | message = ". Message: " ++  (toString err) ,  loadState = Loading.Off } , Cmd.none)
                 RemoteData.NotAsked ->
                     ( model , Cmd.none)
         DoneAddHedgeHogAccount createInfo ->

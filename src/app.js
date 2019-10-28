@@ -68,11 +68,21 @@ function getUserIdFunction(data) {
   
   return () => {
     return logInService.getUserIdFromUserName(userName).then(function(id) {
+
+      if (id) {
       app.ports.hedgeHogCreateUserResult.send({
         isCreated: true,
         message: "User Created",
         id: id
       }); 
+    } else {
+      app.ports.hedgeHogCreateUserResult.send({
+        isCreated: false,
+        message: "Could not get Graph ID",
+        id: "-1"
+      });
+    }
+
     });
   }; 
 
@@ -86,15 +96,17 @@ app.ports.registerUser.subscribe(function(data) {
     .then(fn ,
       e => {
         app.ports.hedgeHogCreateUserResult.send({
-          isCreated: false,
-            message: e.message
+            isCreated: false,
+            message: e.message,
+            id: "-1"
         });
       }
     )
     .catch(err =>
       app.ports.hedgeHogCreateUserResult.send({
         isCreated: false,
-          message: e.message
+          message: e.message,
+          id: "-1"
       }));
 });
 
