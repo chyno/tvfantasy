@@ -47,7 +47,8 @@ toString err  =
                 BadStatus dt val ->
                     "Bad Status"
                 BadPayload err2 ->
-                    "Bad Payload "
-                             
-        Graphql.Http.GraphqlError graphErrors resp ->
-            "Graph Ql Error"
+                    "Bad Payload "                   
+        Graphql.Http.GraphqlError parsedData errors ->
+            List.map (\a  -> a.message) errors |>
+                List.foldl (\ x acc -> (acc   ++ ", [ " ++ x ++ " ]")) "" 
+            
