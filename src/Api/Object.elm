@@ -5,6 +5,26 @@
 module Api.Object exposing (..)
 
 
+type AvailableNetwork
+    = AvailableNetwork
+
+
+type AvailableNetworkPage
+    = AvailableNetworkPage
+
+
+type AvalableShow
+    = AvalableShow
+
+
+type AvalableShowPage
+    = AvalableShowPage
+
+
+type CurrentNetworks
+    = CurrentNetworks
+
+
 type Game
     = Game
 
@@ -15,10 +35,6 @@ type GamePage
 
 type Show
     = Show
-
-
-type ShowPage
-    = ShowPage
 
 
 type User

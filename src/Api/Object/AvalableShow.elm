@@ -2,7 +2,7 @@
 -- https://github.com/dillonkearns/elm-graphql
 
 
-module Api.Object.Show exposing (..)
+module Api.Object.AvalableShow exposing (..)
 
 import Api.InputObject
 import Api.Interface
@@ -19,21 +19,30 @@ import Graphql.SelectionSet exposing (SelectionSet)
 import Json.Decode as Decode
 
 
-game : SelectionSet decodesTo Api.Object.Game -> SelectionSet decodesTo Api.Object.Show
-game object_ =
-    Object.selectionForCompositeField "game" [] object_ identity
-
-
-name : SelectionSet String Api.Object.Show
+name : SelectionSet String Api.Object.AvalableShow
 name =
     Object.selectionForField "String" "name" [] Decode.string
 
 
-rating : SelectionSet Int Api.Object.Show
+description : SelectionSet String Api.Object.AvalableShow
+description =
+    Object.selectionForField "String" "description" [] Decode.string
+
+
+{-| The document's ID.
+-}
+id_ : SelectionSet Api.ScalarCodecs.Id Api.Object.AvalableShow
+id_ =
+    Object.selectionForField "ScalarCodecs.Id" "_id" [] (Api.ScalarCodecs.codecs |> Api.Scalar.unwrapCodecs |> .codecId |> .decoder)
+
+
+rating : SelectionSet Int Api.Object.AvalableShow
 rating =
     Object.selectionForField "Int" "rating" [] Decode.int
 
 
-description : SelectionSet String Api.Object.Show
-description =
-    Object.selectionForField "String" "description" [] Decode.string
+{-| The document's timestamp.
+-}
+ts_ : SelectionSet Api.ScalarCodecs.Long Api.Object.AvalableShow
+ts_ =
+    Object.selectionForField "ScalarCodecs.Long" "_ts" [] (Api.ScalarCodecs.codecs |> Api.Scalar.unwrapCodecs |> .codecLong |> .decoder)

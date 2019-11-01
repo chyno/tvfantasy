@@ -19,9 +19,9 @@ import Graphql.SelectionSet exposing (SelectionSet)
 import Json.Decode as Decode
 
 
-network : SelectionSet String Api.Object.Game
+network : SelectionSet (Maybe String) Api.Object.Game
 network =
-    Object.selectionForField "String" "network" [] Decode.string
+    Object.selectionForField "(Maybe String)" "network" [] (Decode.string |> Decode.nullable)
 
 
 {-| The document's ID.
@@ -31,49 +31,29 @@ id_ =
     Object.selectionForField "ScalarCodecs.Id" "_id" [] (Api.ScalarCodecs.codecs |> Api.Scalar.unwrapCodecs |> .codecId |> .decoder)
 
 
-amount : SelectionSet Int Api.Object.Game
+amount : SelectionSet (Maybe Int) Api.Object.Game
 amount =
-    Object.selectionForField "Int" "amount" [] Decode.int
+    Object.selectionForField "(Maybe Int)" "amount" [] (Decode.int |> Decode.nullable)
 
 
-end : SelectionSet Api.ScalarCodecs.Date Api.Object.Game
+end : SelectionSet (Maybe Api.ScalarCodecs.Date) Api.Object.Game
 end =
-    Object.selectionForField "ScalarCodecs.Date" "end" [] (Api.ScalarCodecs.codecs |> Api.Scalar.unwrapCodecs |> .codecDate |> .decoder)
+    Object.selectionForField "(Maybe ScalarCodecs.Date)" "end" [] (Api.ScalarCodecs.codecs |> Api.Scalar.unwrapCodecs |> .codecDate |> .decoder |> Decode.nullable)
 
 
-type alias ShowsOptionalArguments =
-    { size_ : OptionalArgument Int
-    , cursor_ : OptionalArgument String
-    }
+shows : SelectionSet decodesTo Api.Object.Show -> SelectionSet (Maybe (List decodesTo)) Api.Object.Game
+shows object_ =
+    Object.selectionForCompositeField "shows" [] object_ (identity >> Decode.list >> Decode.nullable)
 
 
-{-|
-
-  - size\_ - The number of items to return per page.
-  - cursor\_ - The pagination cursor.
-
--}
-shows : (ShowsOptionalArguments -> ShowsOptionalArguments) -> SelectionSet decodesTo Api.Object.ShowPage -> SelectionSet decodesTo Api.Object.Game
-shows fillInOptionals object_ =
-    let
-        filledInOptionals =
-            fillInOptionals { size_ = Absent, cursor_ = Absent }
-
-        optionalArgs =
-            [ Argument.optional "_size" filledInOptionals.size_ Encode.int, Argument.optional "_cursor" filledInOptionals.cursor_ Encode.string ]
-                |> List.filterMap identity
-    in
-    Object.selectionForCompositeField "shows" optionalArgs object_ identity
-
-
-start : SelectionSet Api.ScalarCodecs.Date Api.Object.Game
+start : SelectionSet (Maybe Api.ScalarCodecs.Date) Api.Object.Game
 start =
-    Object.selectionForField "ScalarCodecs.Date" "start" [] (Api.ScalarCodecs.codecs |> Api.Scalar.unwrapCodecs |> .codecDate |> .decoder)
+    Object.selectionForField "(Maybe ScalarCodecs.Date)" "start" [] (Api.ScalarCodecs.codecs |> Api.Scalar.unwrapCodecs |> .codecDate |> .decoder |> Decode.nullable)
 
 
-user : SelectionSet decodesTo Api.Object.User -> SelectionSet decodesTo Api.Object.Game
-user object_ =
-    Object.selectionForCompositeField "user" [] object_ identity
+userName : SelectionSet Api.ScalarCodecs.Id Api.Object.Game
+userName =
+    Object.selectionForField "ScalarCodecs.Id" "userName" [] (Api.ScalarCodecs.codecs |> Api.Scalar.unwrapCodecs |> .codecId |> .decoder)
 
 
 {-| The document's timestamp.

@@ -2,7 +2,7 @@
 -- https://github.com/dillonkearns/elm-graphql
 
 
-module Api.Object.User exposing (..)
+module Api.Object.CurrentNetworks exposing (..)
 
 import Api.InputObject
 import Api.Interface
@@ -19,35 +19,20 @@ import Graphql.SelectionSet exposing (SelectionSet)
 import Json.Decode as Decode
 
 
-username : SelectionSet String Api.Object.User
-username =
-    Object.selectionForField "String" "username" [] Decode.string
-
-
 {-| The document's ID.
 -}
-id_ : SelectionSet Api.ScalarCodecs.Id Api.Object.User
+id_ : SelectionSet Api.ScalarCodecs.Id Api.Object.CurrentNetworks
 id_ =
     Object.selectionForField "ScalarCodecs.Id" "_id" [] (Api.ScalarCodecs.codecs |> Api.Scalar.unwrapCodecs |> .codecId |> .decoder)
 
 
-walletAddress : SelectionSet String Api.Object.User
-walletAddress =
-    Object.selectionForField "String" "walletAddress" [] Decode.string
-
-
-id : SelectionSet (Maybe Api.ScalarCodecs.Id) Api.Object.User
-id =
-    Object.selectionForField "(Maybe ScalarCodecs.Id)" "id" [] (Api.ScalarCodecs.codecs |> Api.Scalar.unwrapCodecs |> .codecId |> .decoder |> Decode.nullable)
-
-
-games : SelectionSet decodesTo Api.Object.Game -> SelectionSet (Maybe (List decodesTo)) Api.Object.User
-games object_ =
-    Object.selectionForCompositeField "games" [] object_ (identity >> Decode.list >> Decode.nullable)
-
-
 {-| The document's timestamp.
 -}
-ts_ : SelectionSet Api.ScalarCodecs.Long Api.Object.User
+ts_ : SelectionSet Api.ScalarCodecs.Long Api.Object.CurrentNetworks
 ts_ =
     Object.selectionForField "ScalarCodecs.Long" "_ts" [] (Api.ScalarCodecs.codecs |> Api.Scalar.unwrapCodecs |> .codecLong |> .decoder)
+
+
+networkNames : SelectionSet (Maybe (List String)) Api.Object.CurrentNetworks
+networkNames =
+    Object.selectionForField "(Maybe (List String))" "NetworkNames" [] (Decode.string |> Decode.list |> Decode.nullable)
