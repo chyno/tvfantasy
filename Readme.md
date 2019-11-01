@@ -35,66 +35,30 @@ mutation foo {
     name
   }
 }
-
- 
-
-
-
- ## **********************************************************
- ## Create User
- ###  "_id": "246935414112256530",
- mutation  createUser {
-createUser(data : {
-  username : "testchyno"
-  walletAddress : ""
- 
-  
-})
+## Create game
+ mutation bar {
+  createGame(data : {
+    userName: "john123",
+    network: "CBS"
+  })
   {
     _id
-    username
+    userName
   }
 }
 
-# **********************************************************************
-# Greate Game
-mutation  createGame {
- createGame(data: {
-   user: {connect: 246935414112256530}
-  network : "my network"
-  amount : 42
-  start: "2018-11-11"
-  end: "2018-12-11"
-})
-  {
+## read game
+query {
+  allGames {
+    data  {
     _id
-    
-  }
-}
-
-# *************************************************************
-# Query User by Id
-query qryUserInfo {
-  findUserByID(id: 246935414112256530) {
-    username
-    walletAddress
-    id
-    games {
-      data {
-        amount
-        network
-        start
-        end
-        shows {
-          data {
-            name
-            rating
-            description
-            
-          }
-        }
+    userName
+      network
+      shows {
+        name
       }
-    }
-   
+  }
   }
 }
+
+
