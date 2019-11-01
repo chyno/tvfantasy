@@ -21,16 +21,18 @@
 ## elm-graphql https://graphql.fauna.com/graphql --header "Authorization:Bearer fnADbMd3RLACEpjT90hoJSn6SXhN281PIgIZg375"
 
 ## Add Networks
-### "_id": "246935131080622610",
- mutation  createCurrentNetworks {
-createCurrentNetworks(data: {
-  NetworkNames : ["Galaxy Network", 
-    "US Fantasy", 
-    "Sports Now", "CHYNO Network"]
-})
+### "_id": "247852697206653458",
+mutation foo {
+  createAvailableNetwork(data : {
+    
+    name: "CBS"
+    rating: 3
+    description: "CBS Network"
+  
+  })
   {
-    _id,
-    NetworkNames
+    _id
+    name
   }
 }
 

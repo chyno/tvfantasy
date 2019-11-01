@@ -64,49 +64,80 @@ app.ports.logoutUser.subscribe(function() {
 
 function getUserIdFunction(data) {
 
-  let userName = data.userName;
+  const userName = data.userName;
   
   return () => {
-    return logInService.getUserIdFromUserName(userName).then(function(id) {
+     
+     logInService.getUserIdFromUserName(userName).then(function(id) {
 
       if (id) {
       app.ports.hedgeHogCreateUserResult.send({
         isCreated: true,
         message: "User Created",
-        id: id
+
       }); 
     } else {
       app.ports.hedgeHogCreateUserResult.send({
         isCreated: false,
-        message: "Could not get Graph ID",
-        id: "-1"
+        message: "Could not get Graph ID"
+     
       });
     }
 
     });
   }; 
-
 }
+
+
+app.ports.setUserGraphId.subscribe(function(data) {
+  logInService.setId(data.UserName, data.id).then(function() {
+    app.ports.hedgeHogCreateUserResult.send({
+      isCreated: true,
+      message: "Graph User Record Created",
+    }); 
+  } ,
+    e => {
+      app.ports.hedgeHogCreateUserResult.send({
+          isCreated: false,
+          message: e.message
+         
+      });
+    }
+  )
+  .catch(err =>
+    app.ports.hedgeHogCreateUserResult.send({
+      isCreated: false,
+       message: e.message      
+    }));
+
+
+});
+
 app.ports.registerUser.subscribe(function(data) {
   hedgehog.logout();
-  let userInfo = data;
-  let fn = getUserIdFunction(data);
+ 
+  
   hedgehog
-    .signUp(userInfo.userName, userInfo.password)
-    .then(fn ,
+    .signUp(data.userName, data.password)
+    .then(function() {
+      app.ports.hedgeHogCreateUserResult.send({
+        isCreated: true,
+        message: "User Created",
+      }); 
+    } ,
       e => {
         app.ports.hedgeHogCreateUserResult.send({
             isCreated: false,
-            message: e.message,
-            id: "-1"
+            message: e.message
+           
         });
       }
     )
     .catch(err =>
       app.ports.hedgeHogCreateUserResult.send({
         isCreated: false,
-          message: e.message,
-          id: "-1"
+          message: e.message
+         
       }));
 });
 

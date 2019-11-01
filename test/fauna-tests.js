@@ -154,11 +154,20 @@ describe("Test Fauna Service", function() {
     assert.ok(result, "fauna function created");
   });
 
-  it("get id from isername", async function() {
-    const userID = 246935414112256540;
+  xit("get id from isername", async function() {
+    const userID = 247500531029770770;
     const logInService = new lib.LoginService();
     assert.ok(logInService);
     let id = await logInService.getUserIdFromUserName("john123");
   assert.equal(userID, id, "expected id does not match from the db");
+  });
+
+  it("get id from isername", async function() {
+    const userName = "f";
+    const idval = "myid";
+    const logInService = new lib.LoginService();
+    assert.ok(logInService);
+    let res = await logInService.setId(userName,idval);
+  assert.equal(idval, res.id, "expected id does not match from the db");
   });
 });

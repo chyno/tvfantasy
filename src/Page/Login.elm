@@ -55,18 +55,54 @@ type alias Response =
         id : Id
     }
 
+-- Model
+type alias LoginResultInfo =
+    { isLoggedIn : Bool
+    , address : String
+    , message : String
+    }
+
+type alias CreateUserResultInfo =
+    {
+         isCreated: Bool
+        , message: String
+    }
+
+type alias Model =
+    { userName : String
+    , password : String
+    , walletAddress : String
+    , message : String
+    , passwordConfimation : String
+    , activeTab : Int
+    , loadState : LoadingState
+    , navKey : Key
+    , tabState : Tab.State
+    , userId : Maybe String
+    }
+
+type alias UserInfo =
+    { userName : String
+    , password : String
+    }
+
+type alias UserIdUpdate =
+    { userName : String
+    , id : String
+    }
+
+-- End Model *****************************************
+
 selectUser : SelectionSet Response Api.Object.User
 selectUser =
     SelectionSet.map Response
             User.id_ 
 
-       
-                 
+                      
 addUser : CreateUserRequiredArguments ->  SelectionSet Response Graphql.Operation.RootMutation
 addUser args  =
     createUser args selectUser
         
-
 getMutArgs : String -> String -> CreateUserRequiredArguments
 getMutArgs userName walletAddress = 
     { 
@@ -101,38 +137,6 @@ init key  =
     ) 
 
 
--- Model
-type alias LoginResultInfo =
-    { isLoggedIn : Bool
-    , address : String
-    , message : String
-    }
-
-type alias CreateUserResultInfo =
-    {
-         id : String
-        , isCreated: Bool
-        , message: String
-    }
-
-type alias Model =
-    { userName : String
-    , password : String
-    , walletAddress : String
-    , message : String
-    , passwordConfimation : String
-    , activeTab : Int
-    , loadState : LoadingState
-    , navKey : Key
-    , tabState : Tab.State
-    , userId : Maybe String
-    }
-type alias UserInfo =
-    { userName : String
-    , password : String
-    }
-
-
 -- Message
 type Msg
     = TabNavigate Int
@@ -146,6 +150,7 @@ type Msg
     | DoneAddHedgeHogAccount CreateUserResultInfo
     | TabMsg Tab.State
     | GotAddUserTOGraphDB (RemoteData (Graphql.Http.Error Response) Response)
+    | UpdateGraphUserId String
 
 -- Subscriptions
 subscriptions : Model -> Sub Msg
@@ -181,15 +186,13 @@ createAccountView model =
             ]
     ]
 
-        
-        
-            
-
-
+  
 -- Update
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
+        UpdateGraphUserId id ->
+            ({ model | userId = Just id, message = "Setting Graph id in User Cllection"}, setUserGraphId {userName = model.userName, id = id } )
         GotAddUserTOGraphDB response ->
             case response of
                 RemoteData.Loading ->
@@ -201,7 +204,8 @@ update msg model =
                 RemoteData.NotAsked ->
                     ( model , Cmd.none)
         DoneAddHedgeHogAccount createInfo ->
-           ({model | userId = (Just createInfo.id), message = "User added to Lgin Account" }, makeAddUserToGraphRequest model)
+            
+            ({model |  message = "User added to Lgin Account" }, makeAddUserToGraphRequest model)
         TabMsg state ->
             ( { model | tabState = state }
             , Cmd.none
@@ -305,7 +309,7 @@ view model =
         
     ]
 
-
+port setUserGraphId : UserIdUpdate -> Cmd msg 
 port registerUser : UserInfo -> Cmd msg
 port loginUser : UserInfo -> Cmd msg
 port hedgeHogloginResult : (LoginResultInfo -> msg) -> Sub msg

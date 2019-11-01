@@ -80,7 +80,7 @@ initPage = {
 
 getUserId : String -> Cmd Msg
 getUserId userName =
-    userIdRequest "john123"
+    userIdRequest   userName
 
 init : String  -> ( Model, Cmd Msg )
 init userName = 

@@ -49,6 +49,16 @@ toString err  =
                 BadPayload err2 ->
                     "Bad Payload "                   
         Graphql.Http.GraphqlError parsedData errors ->
-            List.map (\a  -> a.message) errors |>
-                List.foldl (\ x acc -> (acc   ++ ", [ " ++ x ++ " ]")) "" 
+            let
+                errorMessages =   List.map (\a  -> a.message) errors |>
+                    List.foldl (\ x acc -> (acc   ++ ", [ " ++ x ++ " ]")) "" 
+            in
+            case parsedData of
+                ParsedData prs ->
+                    errorMessages ++ ". Has Parsed data."
+                UnparsedData value ->
+                    errorMessages ++ ". Has Unparsed data."
+                    
+                
+          
             

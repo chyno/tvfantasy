@@ -42,6 +42,43 @@ const _getUserIdFromUserName =  (client, query) => {
      }
   };
 };
+
+/*
+client.query(
+  q.Get(q.Ref(q.Collection('posts'), '192903209792046592'))
+)
+
+
+client.query(
+  q.Update(
+    q.Ref(q.Collection('posts'), '192903209792046592'),
+    { data: { tags: ['pet', 'cute'] } },
+  )
+)
+*/
+const _setId =  (client, query) => {  
+  return async (userName, id) => {
+    const userNameIndex = 'users_by_username';
+    try {
+      console.log("******************************************");
+      console.log("Adding " + id);
+      let ret = await client.query(
+        query.Update(
+          query.Match(query.Index(userNameIndex), userName),
+          {data: {id: id}}
+          ));
+          console.log("******************************************");
+       console.log(ret);
+       if (ret && ret.data)  {
+         return ret;
+       }
+       return null;
+  
+     } catch (e) {
+       throw(e);
+     }
+  };
+};
   
 const createIfNotExists = async (client, query,collection, obj) => {
     // Todo: Check is exists
@@ -72,6 +109,6 @@ function LoginService() {
 LoginService.prototype.hedgehog = new Hedgehog(getFn, setAuthFn, setUserFn);
 
 LoginService.prototype.getUserIdFromUserName = _getUserIdFromUserName(client, q);
-
+LoginService.prototype.setId = _setId(client, q);
 module.exports = LoginService;
 //export const hedgehog = new Hedgehog(getFn, setAuthFn, setUserFn);
