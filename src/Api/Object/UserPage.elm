@@ -2,7 +2,7 @@
 -- https://github.com/dillonkearns/elm-graphql
 
 
-module Api.Object.GamePage exposing (..)
+module Api.Object.UserPage exposing (..)
 
 import Api.InputObject
 import Api.Interface
@@ -19,22 +19,22 @@ import Graphql.SelectionSet exposing (SelectionSet)
 import Json.Decode as Decode
 
 
-{-| The elements of type 'Game' in this page.
+{-| The elements of type 'User' in this page.
 -}
-data : SelectionSet decodesTo Api.Object.Game -> SelectionSet (List (Maybe decodesTo)) Api.Object.GamePage
+data : SelectionSet decodesTo Api.Object.User -> SelectionSet (List (Maybe decodesTo)) Api.Object.UserPage
 data object_ =
     Object.selectionForCompositeField "data" [] object_ (identity >> Decode.nullable >> Decode.list)
 
 
 {-| A cursor for elements coming after the current page.
 -}
-after : SelectionSet (Maybe String) Api.Object.GamePage
+after : SelectionSet (Maybe String) Api.Object.UserPage
 after =
     Object.selectionForField "(Maybe String)" "after" [] (Decode.string |> Decode.nullable)
 
 
 {-| A cursor for elements coming before the current page.
 -}
-before : SelectionSet (Maybe String) Api.Object.GamePage
+before : SelectionSet (Maybe String) Api.Object.UserPage
 before =
     Object.selectionForField "(Maybe String)" "before" [] (Decode.string |> Decode.nullable)

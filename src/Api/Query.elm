@@ -44,29 +44,13 @@ availableNetwork fillInOptionals object_ =
     Object.selectionForCompositeField "availableNetwork" optionalArgs object_ identity
 
 
-type alias AllGamesOptionalArguments =
-    { size_ : OptionalArgument Int
-    , cursor_ : OptionalArgument String
-    }
+type alias UserByUserNameRequiredArguments =
+    { username : Api.ScalarCodecs.Id }
 
 
-{-|
-
-  - size\_ - The number of items to return per page.
-  - cursor\_ - The pagination cursor.
-
--}
-allGames : (AllGamesOptionalArguments -> AllGamesOptionalArguments) -> SelectionSet decodesTo Api.Object.GamePage -> SelectionSet decodesTo RootQuery
-allGames fillInOptionals object_ =
-    let
-        filledInOptionals =
-            fillInOptionals { size_ = Absent, cursor_ = Absent }
-
-        optionalArgs =
-            [ Argument.optional "_size" filledInOptionals.size_ Encode.int, Argument.optional "_cursor" filledInOptionals.cursor_ Encode.string ]
-                |> List.filterMap identity
-    in
-    Object.selectionForCompositeField "allGames" optionalArgs object_ identity
+userByUserName : UserByUserNameRequiredArguments -> SelectionSet decodesTo Api.Object.User -> SelectionSet (Maybe decodesTo) RootQuery
+userByUserName requiredArgs object_ =
+    Object.selectionForCompositeField "userByUserName" [ Argument.required "username" requiredArgs.username (Api.ScalarCodecs.codecs |> Api.Scalar.unwrapEncoder .codecId) ] object_ (identity >> Decode.nullable)
 
 
 type alias FindAvailableNetworkByIDRequiredArguments =
@@ -83,49 +67,7 @@ findAvailableNetworkByID requiredArgs object_ =
     Object.selectionForCompositeField "findAvailableNetworkByID" [ Argument.required "id" requiredArgs.id (Api.ScalarCodecs.codecs |> Api.Scalar.unwrapEncoder .codecId) ] object_ (identity >> Decode.nullable)
 
 
-type alias FindGameByIDRequiredArguments =
-    { id : Api.ScalarCodecs.Id }
-
-
-{-| Find a document from the collection of 'Game' by its id.
-
-  - id - The 'Game' document's ID
-
--}
-findGameByID : FindGameByIDRequiredArguments -> SelectionSet decodesTo Api.Object.Game -> SelectionSet (Maybe decodesTo) RootQuery
-findGameByID requiredArgs object_ =
-    Object.selectionForCompositeField "findGameByID" [ Argument.required "id" requiredArgs.id (Api.ScalarCodecs.codecs |> Api.Scalar.unwrapEncoder .codecId) ] object_ (identity >> Decode.nullable)
-
-
-type alias FindShowByIDRequiredArguments =
-    { id : Api.ScalarCodecs.Id }
-
-
-{-| Find a document from the collection of 'Show' by its id.
-
-  - id - The 'Show' document's ID
-
--}
-findShowByID : FindShowByIDRequiredArguments -> SelectionSet decodesTo Api.Object.Show -> SelectionSet (Maybe decodesTo) RootQuery
-findShowByID requiredArgs object_ =
-    Object.selectionForCompositeField "findShowByID" [ Argument.required "id" requiredArgs.id (Api.ScalarCodecs.codecs |> Api.Scalar.unwrapEncoder .codecId) ] object_ (identity >> Decode.nullable)
-
-
-type alias FindAvalableShowByIDRequiredArguments =
-    { id : Api.ScalarCodecs.Id }
-
-
-{-| Find a document from the collection of 'AvalableShow' by its id.
-
-  - id - The 'AvalableShow' document's ID
-
--}
-findAvalableShowByID : FindAvalableShowByIDRequiredArguments -> SelectionSet decodesTo Api.Object.AvalableShow -> SelectionSet (Maybe decodesTo) RootQuery
-findAvalableShowByID requiredArgs object_ =
-    Object.selectionForCompositeField "findAvalableShowByID" [ Argument.required "id" requiredArgs.id (Api.ScalarCodecs.codecs |> Api.Scalar.unwrapEncoder .codecId) ] object_ (identity >> Decode.nullable)
-
-
-type alias AvailableShowsOptionalArguments =
+type alias AllUsersOptionalArguments =
     { size_ : OptionalArgument Int
     , cursor_ : OptionalArgument String
     }
@@ -137,8 +79,8 @@ type alias AvailableShowsOptionalArguments =
   - cursor\_ - The pagination cursor.
 
 -}
-availableShows : (AvailableShowsOptionalArguments -> AvailableShowsOptionalArguments) -> SelectionSet decodesTo Api.Object.AvalableShowPage -> SelectionSet decodesTo RootQuery
-availableShows fillInOptionals object_ =
+allUsers : (AllUsersOptionalArguments -> AllUsersOptionalArguments) -> SelectionSet decodesTo Api.Object.UserPage -> SelectionSet decodesTo RootQuery
+allUsers fillInOptionals object_ =
     let
         filledInOptionals =
             fillInOptionals { size_ = Absent, cursor_ = Absent }
@@ -147,7 +89,7 @@ availableShows fillInOptionals object_ =
             [ Argument.optional "_size" filledInOptionals.size_ Encode.int, Argument.optional "_cursor" filledInOptionals.cursor_ Encode.string ]
                 |> List.filterMap identity
     in
-    Object.selectionForCompositeField "availableShows" optionalArgs object_ identity
+    Object.selectionForCompositeField "allUsers" optionalArgs object_ identity
 
 
 type alias FindUserByIDRequiredArguments =
@@ -162,46 +104,3 @@ type alias FindUserByIDRequiredArguments =
 findUserByID : FindUserByIDRequiredArguments -> SelectionSet decodesTo Api.Object.User -> SelectionSet (Maybe decodesTo) RootQuery
 findUserByID requiredArgs object_ =
     Object.selectionForCompositeField "findUserByID" [ Argument.required "id" requiredArgs.id (Api.ScalarCodecs.codecs |> Api.Scalar.unwrapEncoder .codecId) ] object_ (identity >> Decode.nullable)
-
-
-type alias GameByUserNameOptionalArguments =
-    { size_ : OptionalArgument Int
-    , cursor_ : OptionalArgument String
-    }
-
-
-type alias GameByUserNameRequiredArguments =
-    { userName : Api.ScalarCodecs.Id }
-
-
-{-|
-
-  - size\_ - The number of items to return per page.
-  - cursor\_ - The pagination cursor.
-
--}
-gameByUserName : (GameByUserNameOptionalArguments -> GameByUserNameOptionalArguments) -> GameByUserNameRequiredArguments -> SelectionSet decodesTo Api.Object.GamePage -> SelectionSet decodesTo RootQuery
-gameByUserName fillInOptionals requiredArgs object_ =
-    let
-        filledInOptionals =
-            fillInOptionals { size_ = Absent, cursor_ = Absent }
-
-        optionalArgs =
-            [ Argument.optional "_size" filledInOptionals.size_ Encode.int, Argument.optional "_cursor" filledInOptionals.cursor_ Encode.string ]
-                |> List.filterMap identity
-    in
-    Object.selectionForCompositeField "gameByUserName" (optionalArgs ++ [ Argument.required "userName" requiredArgs.userName (Api.ScalarCodecs.codecs |> Api.Scalar.unwrapEncoder .codecId) ]) object_ identity
-
-
-type alias FindCurrentNetworksByIDRequiredArguments =
-    { id : Api.ScalarCodecs.Id }
-
-
-{-| Find a document from the collection of 'CurrentNetworks' by its id.
-
-  - id - The 'CurrentNetworks' document's ID
-
--}
-findCurrentNetworksByID : FindCurrentNetworksByIDRequiredArguments -> SelectionSet decodesTo Api.Object.CurrentNetworks -> SelectionSet (Maybe decodesTo) RootQuery
-findCurrentNetworksByID requiredArgs object_ =
-    Object.selectionForCompositeField "findCurrentNetworksByID" [ Argument.required "id" requiredArgs.id (Api.ScalarCodecs.codecs |> Api.Scalar.unwrapEncoder .codecId) ] object_ (identity >> Decode.nullable)

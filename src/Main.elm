@@ -18,7 +18,7 @@ type alias Model =
     , navKey : Key
     , route : Route
     , page : Page
-    , userName : String
+    , username : String
     }
 
 
@@ -50,7 +50,7 @@ init flags url navKey =
             , navKey = navKey
             , route = Routes.parseUrl url
             , page =   PageLogin lgModel
-            , userName = ""
+            , username = ""
            
             }
     in
@@ -78,11 +78,11 @@ loadCurrentPage ( model, cmd ) =
             let
                 mdl = case maybeVal of
                         Just val ->
-                            {model | userName = val}
+                            {model | username = val}
                         Nothing  ->
                             model 
 
-                (pageModel, pageCmd ) = Game.init mdl.userName
+                (pageModel, pageCmd ) = Game.init mdl.username
             in
                 ( { mdl | page = PageGame pageModel }, Cmd.batch [ cmd,  (Cmd.map GameMsg pageCmd) ] )
                         -- ( PageGame pageModel, Cmd.map GameMsg pageCmd )
@@ -225,7 +225,7 @@ headerView model =
        i [ style "flex-basis" "10px",  class "brand-lockup__logo brand-lockup__logo--animate"] []
         , span[style "text-align" "left",  class " brand-lockup__title brand-lockup__title--animate"][text "TV Fantasy"] 
         ,div [style "text-align" "right"] [
-            span [][text ("Welcome " ++ model.userName)]
+            span [][text ("Welcome " ++ model.username)]
             ,  Button.linkButton [  Button.onClick Logout ] [ text "Log Out" ]  
          ]
     ]

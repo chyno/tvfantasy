@@ -1,7 +1,7 @@
 import faunadb, { query as q } from "faunadb";
 
 var client = new faunadb.Client({ secret: 'YOUR_FAUNADB_SECRET' });
-const userName = 'test1';
+const username = 'test1';
 
 client.query(
     q.CreateIndex(
@@ -15,7 +15,7 @@ client.query(
     client.query(
         q.Create(
           q.Collection("users"),
-          { data: { username: userName, foo:'bar' } }))
+          { data: { username: username, foo:'bar' } }))
       .then((ret) => { 
           console.log(ret);
           // Now lets retreive

@@ -19,9 +19,14 @@ import Graphql.SelectionSet exposing (SelectionSet)
 import Json.Decode as Decode
 
 
-username : SelectionSet String Api.Object.User
+network : SelectionSet (Maybe String) Api.Object.User
+network =
+    Object.selectionForField "(Maybe String)" "network" [] (Decode.string |> Decode.nullable)
+
+
+username : SelectionSet Api.ScalarCodecs.Id Api.Object.User
 username =
-    Object.selectionForField "String" "username" [] Decode.string
+    Object.selectionForField "ScalarCodecs.Id" "username" [] (Api.ScalarCodecs.codecs |> Api.Scalar.unwrapCodecs |> .codecId |> .decoder)
 
 
 {-| The document's ID.
@@ -36,14 +41,19 @@ walletAddress =
     Object.selectionForField "String" "walletAddress" [] Decode.string
 
 
-id : SelectionSet (Maybe Api.ScalarCodecs.Id) Api.Object.User
-id =
-    Object.selectionForField "(Maybe ScalarCodecs.Id)" "id" [] (Api.ScalarCodecs.codecs |> Api.Scalar.unwrapCodecs |> .codecId |> .decoder |> Decode.nullable)
+amount : SelectionSet (Maybe Int) Api.Object.User
+amount =
+    Object.selectionForField "(Maybe Int)" "amount" [] (Decode.int |> Decode.nullable)
 
 
-games : SelectionSet decodesTo Api.Object.Game -> SelectionSet (Maybe (List decodesTo)) Api.Object.User
-games object_ =
-    Object.selectionForCompositeField "games" [] object_ (identity >> Decode.list >> Decode.nullable)
+end : SelectionSet (Maybe Api.ScalarCodecs.Date) Api.Object.User
+end =
+    Object.selectionForField "(Maybe ScalarCodecs.Date)" "end" [] (Api.ScalarCodecs.codecs |> Api.Scalar.unwrapCodecs |> .codecDate |> .decoder |> Decode.nullable)
+
+
+start : SelectionSet (Maybe Api.ScalarCodecs.Date) Api.Object.User
+start =
+    Object.selectionForField "(Maybe ScalarCodecs.Date)" "start" [] (Api.ScalarCodecs.codecs |> Api.Scalar.unwrapCodecs |> .codecDate |> .decoder |> Decode.nullable)
 
 
 {-| The document's timestamp.

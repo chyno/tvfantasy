@@ -69,7 +69,7 @@ type alias CreateUserResultInfo =
     }
 
 type alias Model =
-    { userName : String
+    { username : String
     , password : String
     , walletAddress : String
     , message : String
@@ -82,12 +82,12 @@ type alias Model =
     }
 
 type alias UserInfo =
-    { userName : String
+    { username : String
     , password : String
     }
 
 type alias UserIdUpdate =
-    { userName : String
+    { username : String
     , id : String
     }
 
@@ -104,19 +104,22 @@ addUser args  =
     createUser args selectUser
         
 getMutArgs : String -> String -> CreateUserRequiredArguments
-getMutArgs userName walletAddress = 
+getMutArgs username walletAddress = 
     { 
-        data = UserInput {
-            id = Absent
-            , username = userName
+        data =   {
+            username =  Id username
             , walletAddress = walletAddress
-            , games = Absent
+            , amount = Absent
+            , end = Absent
+            , start = Absent
+            , network = Absent
+             
         } 
     }
 
 makeAddUserToGraphRequest : Model -> Cmd Msg
 makeAddUserToGraphRequest model =
-    addUser (getMutArgs model.userName model.walletAddress)
+    addUser (getMutArgs model.username model.walletAddress)
         |> Graphql.Http.mutationRequest "https://graphql.fauna.com/graphql"
         |> Graphql.Http.withHeader "Authorization" ("Bearer fnADbMd3RLACEpjT90hoJSn6SXhN281PIgIZg375" )
         |> Graphql.Http.send (RemoteData.fromResult >> GotAddUserTOGraphDB)
@@ -126,7 +129,7 @@ init key  =
     (   {   navKey = key
             , walletAddress = ""
             , message = ""
-            , userName = ""
+            , username = ""
             , password = ""
             , passwordConfimation = ""
             , activeTab = 0
@@ -164,7 +167,7 @@ createAccountView model =
         Form.form []
         [   Form.group []
                 [ Form.label [for "myusername"] [ text "Username"]
-                , Input.text [ Input.id "myusername", Input.onInput UpdateUserName, Input.value model.userName ]
+                , Input.text [ Input.id "myusername", Input.onInput UpdateUserName, Input.value model.username ]
                 , Form.help [] [ text "Enter User Name" ]
                 ]
             
@@ -192,7 +195,7 @@ update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
         UpdateGraphUserId id ->
-            ({ model | userId = Just id, message = "Setting Graph id in User Cllection"}, setUserGraphId {userName = model.userName, id = id } )
+            ({ model | userId = Just id, message = "Setting Graph id in User Cllection"}, setUserGraphId {username = model.username, id = id } )
         GotAddUserTOGraphDB response ->
             case response of
                 RemoteData.Loading ->
@@ -222,23 +225,23 @@ update msg model =
         UpdateNewPassword pswd ->
             ( { model |  password = pswd  }, Cmd.none )
         UpdateUserName usrname ->
-            ( { model | userName = usrname }, Cmd.none )
+            ( { model | username = usrname }, Cmd.none )
         StartLoginOrCancel ->
             if model.loadState == Loading.Off then
                 ( { model | walletAddress = "-" , message = "" , loadState = Loading.On }
-                , loginUser {userName = model.userName, password = model.password }
+                , loginUser {username = model.username, password = model.password }
                 )
 
             else
                 ( { model | walletAddress = "-" , message = "" , loadState = Loading.Off }, Cmd.none )
 
         RegisterUser ->
-            ( { model | message = "Adding User. Please Wait", loadState = Loading.On }, registerUser {userName = model.userName, password = model.password }  )
+            ( { model | message = "Adding User. Please Wait", loadState = Loading.On }, registerUser {username = model.username, password = model.password }  )
         DoneLogin data ->
             case data.isLoggedIn of
                 True ->
                     Debug.log "Success  .."
-                    (model, (Nav.pushUrl model.navKey  (Routes.gamePathLogin model.userName)) )
+                    (model, (Nav.pushUrl model.navKey  (Routes.gamePathLogin model.username)) )
                       
                 False ->
                     Debug.log "Fail  .."
@@ -252,7 +255,7 @@ loginView model =
         Form.form []
         [   Form.group []
                 [ Form.label [for "myusername"] [ text "Username"]
-                , Input.text [ Input.id "myusername", Input.onInput UpdateUserName, Input.value model.userName ]
+                , Input.text [ Input.id "myusername", Input.onInput UpdateUserName, Input.value model.username ]
                 , Form.help [] [ text "Enter User Name" ]
                 ]
             

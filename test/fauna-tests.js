@@ -102,11 +102,11 @@ xdescribe("Raw testing of Fauna Javascript API", function() {
   });
 
   xit("can get user record by username ", async function() {
-    const userName = "myusername";
+    const username = "myusername";
     // assert(item);
     try {
       let ret = await client.query(
-        q.Get(q.Match(q.Index(userIndex), userName))
+        q.Get(q.Match(q.Index(userIndex), username))
       );
       // .then((ret) => console.log(ret))
 
@@ -163,11 +163,11 @@ describe("Test Fauna Service", function() {
   });
 
   it("get id from isername", async function() {
-    const userName = "f";
+    const username = "f";
     const idval = "myid";
     const logInService = new lib.LoginService();
     assert.ok(logInService);
-    let res = await logInService.setId(userName,idval);
+    let res = await logInService.setId(username,idval);
   assert.equal(idval, res.id, "expected id does not match from the db");
   });
 });

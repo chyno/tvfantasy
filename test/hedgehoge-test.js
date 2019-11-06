@@ -6,7 +6,7 @@ var utils = require("../src/lib/utils");
 const WalletSubprovider = require("ethereumjs-wallet/provider-engine");
 const ProviderEngine = require("web3-provider-engine");
 const { Hedgehog, WalletManager, Authentication } = require("@audius/hedgehog");
-const userName = "foo";
+const username = "foo";
 const password = "bar";
 
 const dbObj = getDataObj();
@@ -42,12 +42,12 @@ xdescribe("Can create fake data", function() {
     };
 
     dbObj.db = fdata;
-    let lookupKey = await WalletManager.createAuthLookupKey(userName, password);
+    let lookupKey = await WalletManager.createAuthLookupKey(username, password);
     let data = await getFn({ lookupKey: lookupKey });
     assert.ok(data, "fake data created");
 
     let lookupKey1 = await WalletManager.createAuthLookupKey(
-      userName + "1",
+      username + "1",
       password + "1"
     );
     let data1 = await getFn({ lookupKey: lookupKey1 });

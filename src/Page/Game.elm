@@ -79,12 +79,12 @@ initPage = {
     }
 
 getUserId : String -> Cmd Msg
-getUserId userName =
-    userIdRequest   userName
+getUserId username =
+    userIdRequest   username
 
 init : String  -> ( Model, Cmd Msg )
-init userName = 
-    ( initPage, getUserId userName )
+init username = 
+    ( initPage, getUserId username )
 
 -- Msg
 -- fnADbMd3RLACEpjT90hoJSn6SXhN281PIgIZg375

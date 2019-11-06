@@ -1,7 +1,7 @@
 const faunadb = require('faunadb');
 const { Hedgehog, /*WalletManager, Authentication */ } = require('@audius/hedgehog');
 const AUTH_COL = "authentications";
-const USER_COL = "users";
+const USER_COL = "User";
 const faunaKey = "fnADWu_uwLACCI7LXiCJ7Szqvqjvk8BFndUFRMvy";
 
 const readAuthRecordFromDb = async (client, query, obj) => {
@@ -25,12 +25,12 @@ const readAuthRecordFromDb = async (client, query, obj) => {
 
 
 const _getUserIdFromUserName =  (client, query) => {  
-  return async (userName) => {
+  return async (username) => {
     const userNameIndex = 'users_by_username';
     try {
       let ret = await client.query(
         query.Get(
-          query.Match(query.Index(userNameIndex), userName)));
+          query.Match(query.Index(userNameIndex), username)));
        console.log(ret);
        if (ret && ret.data && ret.data.userId)  {
          return ret.data.userId;
@@ -57,14 +57,14 @@ client.query(
 )
 */
 const _setId =  (client, query) => {  
-  return async (userName, id) => {
+  return async (username, id) => {
     const userNameIndex = 'users_by_username';
     try {
       console.log("******************************************");
       console.log("Adding " + id);
       let ret = await client.query(
         query.Update(
-          query.Match(query.Index(userNameIndex), userName),
+          query.Match(query.Index(userNameIndex), username),
           {data: {id: id}}
           ));
           console.log("******************************************");

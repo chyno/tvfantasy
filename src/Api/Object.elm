@@ -13,29 +13,9 @@ type AvailableNetworkPage
     = AvailableNetworkPage
 
 
-type AvalableShow
-    = AvalableShow
-
-
-type AvalableShowPage
-    = AvalableShowPage
-
-
-type CurrentNetworks
-    = CurrentNetworks
-
-
-type Game
-    = Game
-
-
-type GamePage
-    = GamePage
-
-
-type Show
-    = Show
-
-
 type User
     = User
+
+
+type UserPage
+    = UserPage

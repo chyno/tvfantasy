@@ -6,23 +6,23 @@ var getExisintWallet = async (hedgehog, username, password) => {
   let wallet;
   
   if (!hedgehog.isLoggedIn()) { 
-    wallet = await hedgehog.login(userName, password);
+    wallet = await hedgehog.login(username, password);
   }
-  //await hedgehog.signUp(userName + "1", password + "1");
+  //await hedgehog.signUp(username + "1", password + "1");
   if (!wallet) {
     wallet = hedgehog.getWallet();
   }
   return wallet;
 };
 
-var getNewWallet = async (hedgehog, userName, password) => {
+var getNewWallet = async (hedgehog, username, password) => {
   let wallet;
-  wallet = await hedgehog.signUp(userName, password);
+  wallet = await hedgehog.signUp(username, password);
 
   // if (!hedgehog.isLoggedIn()) { 
-  //   wallet = await hedgehog.login(userName, password);
+  //   wallet = await hedgehog.login(username, password);
   // }
-  // //await hedgehog.signUp(userName + "1", password + "1");
+  // //await hedgehog.signUp(username + "1", password + "1");
   // if (!wallet) {
   //   wallet = hedgehog.getWallet();
   // }

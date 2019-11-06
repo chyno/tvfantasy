@@ -1,19 +1,19 @@
-
-type Game  {
-  userName: ID!
+type User   {
+  username: ID!
+  walletAddress: String!
   network: String
   amount: Int
   start: Date
   end: Date
-  shows: [Show!] 
+  # shows: [Show!] 
 }
 
-type Show @embedded {
-  game : Game!
-  name: String!
-  rating: Int!
-  description: String!
-}
+# type Show @embedded {
+#   game : Game!
+#   name: String!
+#   rating: Int!
+#   description: String!
+# }
 
 type AvailableNetwork  {
   name: String!
@@ -21,11 +21,10 @@ type AvailableNetwork  {
   description: String!
 }
 
-type CurrentNetworks {
-  NetworkNames: [String!]
-}
+
 type Query {
-   allGames: [Game!]
-   gameByUserName(userName: ID!): [Game!]
-   availableNetwork: [AvailableNetwork]
+  # allGames: [Game]
+  allUsers: [User]
+  userByUserName(username: ID!): User
+  availableNetwork: [AvailableNetwork]
 }

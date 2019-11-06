@@ -38,12 +38,12 @@ mutation foo {
 ## Create game
  mutation bar {
   createGame(data : {
-    userName: "john123",
+    username: "john123",
     network: "CBS"
   })
   {
     _id
-    userName
+    username
   }
 }
 
@@ -52,7 +52,7 @@ query {
   allGames {
     data  {
     _id
-    userName
+    username
       network
       shows {
         name

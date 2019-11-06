@@ -19,8 +19,8 @@ const logInService = new lib.LoginService();
 const hedgehog = logInService.hedgehog;
 
 
-app.ports.userIdRequest.subscribe(function(userName) {
-  return logInService.getUserIdFromUserName(userName).then(userId => {
+app.ports.userIdRequest.subscribe(function(username) {
+  return logInService.getUserIdFromUserName(username).then(userId => {
     if (userId) {
       app.ports.userIdResult.send(userId.toString());
     } else {
@@ -38,7 +38,7 @@ app.ports.loginUser.subscribe(function(data) {
  
 
   hedgehog
-  .login(data.userName, data.password)
+  .login(data.username, data.password)
   .then(appLoginSendResults)
   .catch((e) => {
     app.ports.hedgeHogloginResult.send({
@@ -64,11 +64,11 @@ app.ports.logoutUser.subscribe(function() {
 
 function getUserIdFunction(data) {
 
-  const userName = data.userName;
+  const username = data.username;
   
   return () => {
      
-     logInService.getUserIdFromUserName(userName).then(function(id) {
+     logInService.getUserIdFromUserName(username).then(function(id) {
 
       if (id) {
       app.ports.hedgeHogCreateUserResult.send({
@@ -118,7 +118,7 @@ app.ports.registerUser.subscribe(function(data) {
  
   
   hedgehog
-    .signUp(data.userName, data.password)
+    .signUp(data.username, data.password)
     .then(function() {
       app.ports.hedgeHogCreateUserResult.send({
         isCreated: true,
