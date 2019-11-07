@@ -46,14 +46,43 @@ encodeAvailableNetworkInput input =
         [ ( "name", Encode.string input.name |> Just ), ( "rating", Encode.int input.rating |> Just ), ( "description", Encode.string input.description |> Just ) ]
 
 
+buildShowInput : ShowInputRequiredFields -> ShowInput
+buildShowInput required =
+    { name = required.name, rating = required.rating, description = required.description }
+
+
+type alias ShowInputRequiredFields =
+    { name : String
+    , rating : Int
+    , description : String
+    }
+
+
+{-| Type for the ShowInput input object.
+-}
+type alias ShowInput =
+    { name : String
+    , rating : Int
+    , description : String
+    }
+
+
+{-| Encode a ShowInput into a value that can be used as an argument.
+-}
+encodeShowInput : ShowInput -> Value
+encodeShowInput input =
+    Encode.maybeObject
+        [ ( "name", Encode.string input.name |> Just ), ( "rating", Encode.int input.rating |> Just ), ( "description", Encode.string input.description |> Just ) ]
+
+
 buildUserInput : UserInputRequiredFields -> (UserInputOptionalFields -> UserInputOptionalFields) -> UserInput
 buildUserInput required fillOptionals =
     let
         optionals =
             fillOptionals
-                { network = Absent, amount = Absent, start = Absent, end = Absent }
+                { network = Absent, amount = Absent, start = Absent, end = Absent, shows = Absent }
     in
-    { username = required.username, walletAddress = required.walletAddress, network = optionals.network, amount = optionals.amount, start = optionals.start, end = optionals.end }
+    { username = required.username, walletAddress = required.walletAddress, network = optionals.network, amount = optionals.amount, start = optionals.start, end = optionals.end, shows = optionals.shows }
 
 
 type alias UserInputRequiredFields =
@@ -67,6 +96,7 @@ type alias UserInputOptionalFields =
     , amount : OptionalArgument Int
     , start : OptionalArgument Api.ScalarCodecs.Date
     , end : OptionalArgument Api.ScalarCodecs.Date
+    , shows : OptionalArgument (List ShowInput)
     }
 
 
@@ -79,6 +109,7 @@ type alias UserInput =
     , amount : OptionalArgument Int
     , start : OptionalArgument Api.ScalarCodecs.Date
     , end : OptionalArgument Api.ScalarCodecs.Date
+    , shows : OptionalArgument (List ShowInput)
     }
 
 
@@ -87,4 +118,4 @@ type alias UserInput =
 encodeUserInput : UserInput -> Value
 encodeUserInput input =
     Encode.maybeObject
-        [ ( "username", (Api.ScalarCodecs.codecs |> Api.Scalar.unwrapEncoder .codecId) input.username |> Just ), ( "walletAddress", Encode.string input.walletAddress |> Just ), ( "network", Encode.string |> Encode.optional input.network ), ( "amount", Encode.int |> Encode.optional input.amount ), ( "start", (Api.ScalarCodecs.codecs |> Api.Scalar.unwrapEncoder .codecDate) |> Encode.optional input.start ), ( "end", (Api.ScalarCodecs.codecs |> Api.Scalar.unwrapEncoder .codecDate) |> Encode.optional input.end ) ]
+        [ ( "username", (Api.ScalarCodecs.codecs |> Api.Scalar.unwrapEncoder .codecId) input.username |> Just ), ( "walletAddress", Encode.string input.walletAddress |> Just ), ( "network", Encode.string |> Encode.optional input.network ), ( "amount", Encode.int |> Encode.optional input.amount ), ( "start", (Api.ScalarCodecs.codecs |> Api.Scalar.unwrapEncoder .codecDate) |> Encode.optional input.start ), ( "end", (Api.ScalarCodecs.codecs |> Api.Scalar.unwrapEncoder .codecDate) |> Encode.optional input.end ), ( "shows", (encodeShowInput |> Encode.list) |> Encode.optional input.shows ) ]

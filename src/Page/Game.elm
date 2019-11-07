@@ -33,23 +33,30 @@ import Api.Scalar exposing (Id(..))
 --Model
 -- https://github.com/dillonkearns/elm-graphql/blob/master/examples/src/Example01BasicQuery.elm
 query : String ->  SelectionSet (Maybe UserInfo) RootQuery
-query userId =
-    Query.findUserByID { id = Id userId } userSelection
+query un =
+    Query.userByUserName { username = Id un } userSelection
 
 
 
 type alias UserInfo =
-    { address :  String }
+    { 
+        walletAddress :  String
+        , amount : Maybe Int
+        , network: Maybe String
+       
+     }
 
 userSelection : SelectionSet UserInfo Api.Object.User
 userSelection =
-    SelectionSet.map UserInfo
+    SelectionSet.map3 UserInfo
         User.walletAddress
-
+        User.amount
+        User.network
+       
 
 makeRequest : String -> Cmd Msg
-makeRequest userId =
-    query userId
+makeRequest username =
+    query username
         |> Graphql.Http.queryRequest "https://graphql.fauna.com/graphql"
         |> Graphql.Http.withHeader "Authorization" ("Bearer fnADbMd3RLACEpjT90hoJSn6SXhN281PIgIZg375" )
         |> Graphql.Http.send (RemoteData.fromResult >> GotResponse)
@@ -64,8 +71,8 @@ type alias CurrentGameModel =
 
 type alias Model =
     {
-    
-        address: String
+        message: Maybe String
+        , walletAddress: String
         , selectedNetwork :  String
         , possibleNetworks: List String
         , currentGame : Maybe CurrentGameModel
@@ -75,16 +82,13 @@ type alias Model =
 
 initPage: Model
 initPage = {
-     address = "init page",   possibleNetworks = ["ABC", "NBC", "CBS", "ESPN"], selectedNetwork = "", currentGame = Nothing
+     message = Nothing, walletAddress = "",   possibleNetworks = ["ABC", "NBC", "CBS", "ESPN"], selectedNetwork = "", currentGame = Nothing
     }
 
-getUserId : String -> Cmd Msg
-getUserId username =
-    userIdRequest   username
 
 init : String  -> ( Model, Cmd Msg )
 init username = 
-    ( initPage, getUserId username )
+    ( initPage, makeRequest username )
 
 -- Msg
 -- fnADbMd3RLACEpjT90hoJSn6SXhN281PIgIZg375
@@ -115,9 +119,9 @@ update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
    case msg of 
         LoadGameInfo userId ->
-            ({ model | address = "Load Game Info" }, makeRequest userId)
+            ({ model | message = Just "Load Game Info" }, makeRequest userId)
         NavigateShows ->
-            ({ model | address = "navigate shows" }, (Nav.load  Routes.showsPath) )
+            ({ model | message = Just "navigate shows" }, (Nav.load  Routes.showsPath) )
         SelectNetwork  ->
             let
                 slcGame = { network = model.selectedNetwork ,  currentShows = ["some show", "Another show"] }
@@ -128,17 +132,17 @@ update msg model =
         GotResponse response ->
             case response of
                 RemoteData.Loading ->
-                    ({ model | address = "loading..." }, Cmd.none)
+                    ({ model | message = Just "loading..." }, Cmd.none)
                 RemoteData.Success maybeData ->
                     case maybeData of
                         Just data ->
-                            ({ model | address =  data.address }, Cmd.none)
+                            ({ model | walletAddress =  data.walletAddress, message = Just "Loaded !" }, Cmd.none)
                         Nothing ->
-                            ({ model | address = "no address" }, Cmd.none)
+                            ({ model | message = Just "no address" }, Cmd.none)
                 RemoteData.Failure err ->
-                    ({ model | address = "err" }, Cmd.none)
+                    ({ model | message = Just "err" }, Cmd.none)
                 RemoteData.NotAsked ->
-                    ({ model | address = "Not Asked" }, Cmd.none)
+                    ({ model | message = Just "Not Asked" }, Cmd.none)
       
 view : Model -> Html Msg
 view model =
@@ -149,10 +153,17 @@ view model =
                     viewCurrentGame mdl
                 Nothing ->
                     viewSelectGame model
-                    
+        msgText = 
+                case model.message of
+                Just messg ->
+                    messg
+                Nothing ->
+                    ""
     in
         div [] 
-        [ vw ]
+        [
+            h1[][ text msgText]
+            ,vw ]
         
 
    
@@ -161,7 +172,7 @@ view model =
 viewSelectGame : Model -> Html Msg
 viewSelectGame model =
     div[][
-        div [][text ("address : "  ++ model.address)]
+        div [][text ("address : "  ++ model.walletAddress)]
         , Form.form []
         [   
             Form.group []
@@ -188,5 +199,5 @@ viewCurrentGame model =
        
     ]
 
-port userIdRequest : String -> Cmd msg
+
 port userIdResult : (String -> msg) -> Sub msg

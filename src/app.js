@@ -19,16 +19,7 @@ const logInService = new lib.LoginService();
 const hedgehog = logInService.hedgehog;
 
 
-app.ports.userIdRequest.subscribe(function(username) {
-  return logInService.getUserIdFromUserName(username).then(userId => {
-    if (userId) {
-      app.ports.userIdResult.send(userId.toString());
-    } else {
-      app.ports.userIdResult.send("err");
-    }
-    
-  });
-});
+
 
 // Subscriptions
 app.ports.loginUser.subscribe(function(data) {
@@ -62,56 +53,6 @@ app.ports.logoutUser.subscribe(function() {
 });
 
 
-function getUserIdFunction(data) {
-
-  const username = data.username;
-  
-  return () => {
-     
-     logInService.getUserIdFromUserName(username).then(function(id) {
-
-      if (id) {
-      app.ports.hedgeHogCreateUserResult.send({
-        isCreated: true,
-        message: "User Created",
-
-      }); 
-    } else {
-      app.ports.hedgeHogCreateUserResult.send({
-        isCreated: false,
-        message: "Could not get Graph ID"
-     
-      });
-    }
-
-    });
-  }; 
-}
-
-
-app.ports.setUserGraphId.subscribe(function(data) {
-  logInService.setId(data.UserName, data.id).then(function() {
-    app.ports.hedgeHogCreateUserResult.send({
-      isCreated: true,
-      message: "Graph User Record Created",
-    }); 
-  } ,
-    e => {
-      app.ports.hedgeHogCreateUserResult.send({
-          isCreated: false,
-          message: e.message
-         
-      });
-    }
-  )
-  .catch(err =>
-    app.ports.hedgeHogCreateUserResult.send({
-      isCreated: false,
-       message: e.message      
-    }));
-
-
-});
 
 app.ports.registerUser.subscribe(function(data) {
   hedgehog.logout();
@@ -143,7 +84,6 @@ app.ports.registerUser.subscribe(function(data) {
 
 // Local Functions
 
-
 function fakeLogin() {
   app.ports.hedgeHogloginResult.send({
     address: "1234",
@@ -152,9 +92,7 @@ function fakeLogin() {
   });
 }
  
-
 function appLoginSendResults() {
- 
  
       let isLoggedIn = false;
       if (hedgehog.isLoggedIn()) {
@@ -176,12 +114,12 @@ function appLoginSendResults() {
   
 }
 
-function isLoggedIn () {
-  if (hedgehog.isLoggedIn()) {
-    return true;
-  } else {
-    return (
-      hh.walletExistsLocally && hh.walletExistsLocally()
-    );
-  }
-}
+// function isLoggedIn () {
+//   if (hedgehog.isLoggedIn()) {
+//     return true;
+//   } else {
+//     return (
+//       hh.walletExistsLocally && hh.walletExistsLocally()
+//     );
+//   }
+// }

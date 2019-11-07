@@ -13,6 +13,10 @@ type AvailableNetworkPage
     = AvailableNetworkPage
 
 
+type Show
+    = Show
+
+
 type User
     = User
 

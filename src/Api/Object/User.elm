@@ -51,6 +51,11 @@ end =
     Object.selectionForField "(Maybe ScalarCodecs.Date)" "end" [] (Api.ScalarCodecs.codecs |> Api.Scalar.unwrapCodecs |> .codecDate |> .decoder |> Decode.nullable)
 
 
+shows : SelectionSet decodesTo Api.Object.Show -> SelectionSet (Maybe (List decodesTo)) Api.Object.User
+shows object_ =
+    Object.selectionForCompositeField "shows" [] object_ (identity >> Decode.list >> Decode.nullable)
+
+
 start : SelectionSet (Maybe Api.ScalarCodecs.Date) Api.Object.User
 start =
     Object.selectionForField "(Maybe ScalarCodecs.Date)" "start" [] (Api.ScalarCodecs.codecs |> Api.Scalar.unwrapCodecs |> .codecDate |> .decoder |> Decode.nullable)

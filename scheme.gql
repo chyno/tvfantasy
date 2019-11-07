@@ -5,15 +5,14 @@ type User   {
   amount: Int
   start: Date
   end: Date
-  # shows: [Show!] 
+  shows: [Show!] 
 }
 
-# type Show @embedded {
-#   game : Game!
-#   name: String!
-#   rating: Int!
-#   description: String!
-# }
+type Show @embedded {
+  name: String!
+  rating: Int!
+  description: String!
+}
 
 type AvailableNetwork  {
   name: String!

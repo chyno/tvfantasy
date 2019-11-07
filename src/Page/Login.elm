@@ -113,16 +113,11 @@ getMutArgs username walletAddress =
             , end = Absent
             , start = Absent
             , network = Absent
+            , shows = Absent
              
         } 
     }
 
-makeAddUserToGraphRequest : Model -> Cmd Msg
-makeAddUserToGraphRequest model =
-    addUser (getMutArgs model.username model.walletAddress)
-        |> Graphql.Http.mutationRequest "https://graphql.fauna.com/graphql"
-        |> Graphql.Http.withHeader "Authorization" ("Bearer fnADbMd3RLACEpjT90hoJSn6SXhN281PIgIZg375" )
-        |> Graphql.Http.send (RemoteData.fromResult >> GotAddUserTOGraphDB)
 
 init : Key ->  ( Model, Cmd Msg )
 init key  =
@@ -152,8 +147,8 @@ type Msg
     | DoneLogin LoginResultInfo
     | DoneAddHedgeHogAccount CreateUserResultInfo
     | TabMsg Tab.State
-    | GotAddUserTOGraphDB (RemoteData (Graphql.Http.Error Response) Response)
-    | UpdateGraphUserId String
+   
+   
 
 -- Subscriptions
 subscriptions : Model -> Sub Msg
@@ -194,21 +189,9 @@ createAccountView model =
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
-        UpdateGraphUserId id ->
-            ({ model | userId = Just id, message = "Setting Graph id in User Cllection"}, setUserGraphId {username = model.username, id = id } )
-        GotAddUserTOGraphDB response ->
-            case response of
-                RemoteData.Loading ->
-                    ( { model | message = "Adding User to Graph ..." } , Cmd.none)
-                RemoteData.Success data ->
-                     ( { model | activeTab = 0,  loadState = Loading.Off }, Cmd.none )
-                RemoteData.Failure err ->
-                    (  { model | message = ". Message: " ++  (toString err) ,  loadState = Loading.Off } , Cmd.none)
-                RemoteData.NotAsked ->
-                    ( model , Cmd.none)
         DoneAddHedgeHogAccount createInfo ->
             
-            ({model |  message = "User added to Lgin Account" }, makeAddUserToGraphRequest model)
+            ({model |  message = "User added to Lgin Account" }, Cmd.none)
         TabMsg state ->
             ( { model | tabState = state }
             , Cmd.none
