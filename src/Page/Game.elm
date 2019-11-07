@@ -136,7 +136,7 @@ update msg model =
                 RemoteData.Success maybeData ->
                     case maybeData of
                         Just data ->
-                            ({ model | walletAddress =  data.walletAddress, message = Just "Loaded !" }, Cmd.none)
+                            ({ model | walletAddress =  data.walletAddress, message = Nothing }, Cmd.none)
                         Nothing ->
                             ({ model | message = Just "no address" }, Cmd.none)
                 RemoteData.Failure err ->
@@ -162,8 +162,9 @@ view model =
     in
         div [] 
         [
-            h1[][ text msgText]
-            ,vw ]
+            vw
+            , div[][text msgText]
+         ]
         
 
    
