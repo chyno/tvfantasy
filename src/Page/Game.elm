@@ -30,28 +30,53 @@ import Api.Object.User as User
 import Api.Query as Query
 import Api.Scalar
 import Api.Scalar exposing (Id(..))
---Model
+
+
+-- Model
+type alias UserInfo =
+    { 
+        walletAddress :  String
+        , amount : Maybe Int
+        , network:  String
+       
+    }
+
+type alias Model =
+    {
+        message: Maybe String
+        , currentShows: List String
+        , possibleNetworks: List String
+        , walletAddress :  String
+        , amount : Maybe Int
+        , network:  String
+    }
+
 -- https://github.com/dillonkearns/elm-graphql/blob/master/examples/src/Example01BasicQuery.elm
 query : String ->  SelectionSet (Maybe UserInfo) RootQuery
 query un =
     Query.userByUserName { username = Id un } userSelection
 
 
+mapToString : Maybe String -> String
+mapToString maybeVal =
+    case maybeVal of
+        Just val ->
+            val
+        Nothing ->
+            ""
 
-type alias UserInfo =
-    { 
-        walletAddress :  String
-        , amount : Maybe Int
-        , network: Maybe String
-       
-     }
 
+stringFragment : SelectionSet (Maybe String) Api.Object.User -> SelectionSet String Api.Object.User
+stringFragment userSelectionMaybeVal =
+    SelectionSet.map mapToString userSelectionMaybeVal
+               
+   
 userSelection : SelectionSet UserInfo Api.Object.User
 userSelection =
     SelectionSet.map3 UserInfo
         User.walletAddress
         User.amount
-        User.network
+        (User.network |> stringFragment)
        
 
 makeRequest : String -> Cmd Msg
@@ -69,18 +94,17 @@ makeRequest username =
             
 --     }
 
-type alias Model =
-    {
-        message: Maybe String
-       , currentShows: List String
-        , userInfo : Maybe UserInfo
-    }
 
 
 
 initPage: Model
 initPage = {
-     message = Nothing, userInfo = Nothing , currentShows = []
+    message = Nothing
+    , walletAddress = ""
+    , amount = Nothing
+    , network = ""
+    ,  currentShows = []
+    , possibleNetworks = ["ABC", "NBC", "CBS", "ESPN"]
     }
 
 
@@ -102,17 +126,8 @@ subscriptions : Model -> Sub Msg
 subscriptions model =
     Sub.none
 
---Update
-valOrEmpty: Maybe String -> String
-valOrEmpty maybeVal =
-    case maybeVal of
-        Just val ->
-            val
-    
-        Nothing ->
-            ""
-            
 
+--Update
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
    case msg of 
@@ -125,8 +140,7 @@ update msg model =
             -- in
             --   ({model | currentGame = Just slcGame }, Cmd.none)
         NetworkChange netwrk -> 
-            (model, Cmd.none)
-            -- ( {model | selectedNetwork =  netwrk }, Cmd.none) 
+            ( {model | network =  netwrk }, Cmd.none) 
         GotResponse response ->
             case response of
                 RemoteData.Loading ->
@@ -134,24 +148,20 @@ update msg model =
                 RemoteData.Success maybeData ->
                     case maybeData of
                         Just data ->
-                            ({ model | userInfo =  Just data, message = Nothing }, Cmd.none)
+                            ({ model | walletAddress =  data.walletAddress, amount = data.amount, network = data.network,  message = Nothing }, Cmd.none)
                         Nothing ->
-                            ({ model | message = Just "could not return data" }, Cmd.none)
+                            ({ model | message = Just "could not return data", walletAddress =  "", amount = Nothing, network = "" }, Cmd.none)
                 RemoteData.Failure err ->
                     ({ model | message = Just "err" }, Cmd.none)
                 RemoteData.NotAsked ->
                     ({ model | message = Just "Not Asked" }, Cmd.none)
-      
+
+
+-- View
 view : Model -> Html Msg
 view model =
     let
-        vw = div[][]
-            --  case model.currentGame of
-            --     Just mdl ->
-            --         viewCurrentGame mdl
-            --     Nothing ->
-            --         viewSelectGame model
-        msgText = 
+     msgText = 
                 case model.message of
                 Just messg ->
                     messg
@@ -160,31 +170,31 @@ view model =
     in
         div [] 
         [
-            vw
+            div [][text ("address : "  ++ model.walletAddress)]
+            , (viewNetwork model)
             , div[][text msgText]
          ]
         
 
-   
-
--- -- View
--- viewSelectGame : Model -> Html Msg
--- viewSelectGame model =
---     div[][
---         div [][text ("address : "  ++ model.walletAddress)]
---         , Form.form []
---         [   
---             Form.group []
---             [ Form.label [ for "mynetworks" ] [ text "My Networks" ]
---             , Select.select [ Select.id "mynetworks", Select.onChange NetworkChange ]
---                 (List.map (\x ->  Select.item [] [ text x ]) model.possibleNetworks) 
-                           
---             ]
---         ]
---         ,    
+viewNetwork : Model -> Html Msg
+viewNetwork model =
+    div[][
+        
+        label [] [text model.network]
+        , Form.form []
+        [   
             
---          div[][  Button.button [ Button.primary,  Button.onClick SelectNetwork ] [ text "Select Network" ]]
---     ]
+            Form.group []
+            [ Form.label [ for "mynetworks" ] [ text "Avaliable Networks" ]
+            , Select.select [ Select.id "mynetworks", Select.onChange NetworkChange ]
+                (List.map (\x ->  Select.item [] [ text x ]) model.possibleNetworks) 
+                           
+            ]
+        ]
+        ,    
+            
+         div[][  Button.button [ Button.primary,  Button.onClick SelectNetwork ] [ text "Change Network" ]]
+    ]
     
 -- viewCurrentGame : CurrentGameModel -> Html Msg
 -- viewCurrentGame model =

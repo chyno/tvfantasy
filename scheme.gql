@@ -1,8 +1,8 @@
 type User   {
   username: ID!
   walletAddress: String!
-  network: String
-  amount: Int
+  network: String!
+  amount: Int!
   start: Date
   end: Date
   shows: [Show!] 
