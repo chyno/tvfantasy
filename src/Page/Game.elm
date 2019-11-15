@@ -48,9 +48,142 @@ type alias Model =
         , possibleNetworks: List String
         , walletAddress :  String
         , amount : Maybe Int
-        , network:  String
+        , network:  Maybe String
+        , selectedNetwork:  String
     }
 
+
+
+type Msg =     NavigateShows 
+                | SelectNetwork
+                | NetworkChange String
+                | GotResponse (RemoteData (Graphql.Http.Error (Maybe UserInfo)) (Maybe UserInfo))
+                | ChangeNetowrk
+
+
+
+initPage: Model
+initPage = {
+    message = Nothing
+    , walletAddress = ""
+    , amount = Nothing
+    , network = Nothing
+    , selectedNetwork = ""
+    ,  currentShows = []
+    , possibleNetworks = ["ABC", "NBC", "CBS", "ESPN"]
+    }
+
+
+init : String  -> ( Model, Cmd Msg )
+init username = 
+    ( initPage, makeRequest username )
+
+               
+
+--Subcriptions
+-- Subscriptions
+subscriptions : Model -> Sub Msg
+subscriptions model =
+    Sub.none
+
+
+--Update
+update : Msg -> Model -> ( Model, Cmd Msg )
+update msg model =
+   case msg of
+        ChangeNetowrk ->
+         ({model | network = Nothing }, Cmd.none)
+        NavigateShows ->
+            ({ model | message = Just "navigate shows" }, (Nav.load  Routes.showsPath) )
+        SelectNetwork  ->
+             ({model | network = Just model.selectedNetwork }, Cmd.none)
+        NetworkChange netwrk -> 
+            ( {model | selectedNetwork =  netwrk }, Cmd.none) 
+        GotResponse response ->
+            case response of
+                RemoteData.Loading ->
+                    ({ model | message = Just "loading..." }, Cmd.none)
+                RemoteData.Success maybeData ->
+                    case maybeData of
+                        Just data ->
+                            ({ model | walletAddress =  data.walletAddress, amount = data.amount, network = Just data.network,  message = Nothing }, Cmd.none)
+                        Nothing ->
+                            ({ model | message = Just "could not return data", walletAddress =  "", amount = Nothing, network = Nothing }, Cmd.none)
+                RemoteData.Failure err ->
+                    ({ model | message = Just "err" }, Cmd.none)
+                RemoteData.NotAsked ->
+                    ({ model | message = Just "Not Asked" }, Cmd.none)
+
+
+-- View
+view : Model -> Html Msg
+view model =
+    let
+        msgText = 
+                case model.message of
+                    Just messg ->
+                        messg
+                    Nothing ->
+                        ""
+        bodyView = 
+                case model.network of
+                    Just val ->
+                        viewNetworkShows val 
+                    Nothing ->
+                        viewChooseNetwork 
+    in
+        div [] 
+        [
+            div [][text ("address : "  ++ model.walletAddress)]
+            , (bodyView model)
+            , div[][text msgText]
+         ]
+        
+
+viewChooseNetwork : Model -> Html Msg
+viewChooseNetwork model =
+    div[][
+        
+        label [] [text model.selectedNetwork]
+        , Form.form []
+        [   
+            Form.group []
+            [ Form.label [ for "mynetworks" ] [ text "Avaliable Networks" ]
+            , Select.select [ Select.id "mynetworks", Select.onChange NetworkChange ]
+                (List.map (\x ->  Select.item [] [ text x ]) model.possibleNetworks) 
+                           
+            ]
+        ]
+        ,    
+        Button.button [ Button.primary,  Button.onClick SelectNetwork ] [ text "Select" ]
+    ]
+    
+viewNetworkShows : String -> Model -> Html Msg
+viewNetworkShows network model = 
+    div [] [
+        h3[][text network]
+        
+        , ListGroup.ul
+            (List.map (\x ->  ListGroup.li [] [ text x ]) model.currentShows)
+        , Button.button [ Button.primary,  Button.onClick NavigateShows ] [ text "Choose Available Shows" ]
+
+      , Button.button [Button.secondary, Button.onClick ChangeNetowrk][ text "Change Netowrk"]
+    ]
+
+-- viewCurrentGame : CurrentGameModel -> Html Msg
+-- viewCurrentGame model =
+--  div[][
+--         h3[][text model.network]
+        
+--         , ListGroup.ul
+--             (List.map (\x ->  ListGroup.li [] [ text x ]) model.currentShows)
+--         , Button.button [ Button.primary,  Button.onClick NavigateShows ] [ text "View Available Shows" ]
+    
+       
+--     ]
+
+
+-- Query
 -- https://github.com/dillonkearns/elm-graphql/blob/master/examples/src/Example01BasicQuery.elm
 query : String ->  SelectionSet (Maybe UserInfo) RootQuery
 query un =
@@ -85,127 +218,4 @@ makeRequest username =
         |> Graphql.Http.queryRequest "https://graphql.fauna.com/graphql"
         |> Graphql.Http.withHeader "Authorization" ("Bearer fnADbMd3RLACEpjT90hoJSn6SXhN281PIgIZg375" )
         |> Graphql.Http.send (RemoteData.fromResult >> GotResponse)
-
-
--- type alias CurrentGameModel =
---     {
---         network:  String
---         ,  currentShows: List String
-            
---     }
-
-
-
-
-initPage: Model
-initPage = {
-    message = Nothing
-    , walletAddress = ""
-    , amount = Nothing
-    , network = ""
-    ,  currentShows = []
-    , possibleNetworks = ["ABC", "NBC", "CBS", "ESPN"]
-    }
-
-
-init : String  -> ( Model, Cmd Msg )
-init username = 
-    ( initPage, makeRequest username )
-
--- Msg
--- fnADbMd3RLACEpjT90hoJSn6SXhN281PIgIZg375
-type Msg =     NavigateShows 
-                | SelectNetwork
-                | NetworkChange String
-                | GotResponse (RemoteData (Graphql.Http.Error (Maybe UserInfo)) (Maybe UserInfo))
-               
-
---Subcriptions
--- Subscriptions
-subscriptions : Model -> Sub Msg
-subscriptions model =
-    Sub.none
-
-
---Update
-update : Msg -> Model -> ( Model, Cmd Msg )
-update msg model =
-   case msg of 
-        NavigateShows ->
-            ({ model | message = Just "navigate shows" }, (Nav.load  Routes.showsPath) )
-        SelectNetwork  ->
-            (model, Cmd.none)
-            -- let
-            --     slcGame = { network = model.selectedNetwork ,  currentShows = ["some show", "Another show"] }
-            -- in
-            --   ({model | currentGame = Just slcGame }, Cmd.none)
-        NetworkChange netwrk -> 
-            ( {model | network =  netwrk }, Cmd.none) 
-        GotResponse response ->
-            case response of
-                RemoteData.Loading ->
-                    ({ model | message = Just "loading..." }, Cmd.none)
-                RemoteData.Success maybeData ->
-                    case maybeData of
-                        Just data ->
-                            ({ model | walletAddress =  data.walletAddress, amount = data.amount, network = data.network,  message = Nothing }, Cmd.none)
-                        Nothing ->
-                            ({ model | message = Just "could not return data", walletAddress =  "", amount = Nothing, network = "" }, Cmd.none)
-                RemoteData.Failure err ->
-                    ({ model | message = Just "err" }, Cmd.none)
-                RemoteData.NotAsked ->
-                    ({ model | message = Just "Not Asked" }, Cmd.none)
-
-
--- View
-view : Model -> Html Msg
-view model =
-    let
-     msgText = 
-                case model.message of
-                Just messg ->
-                    messg
-                Nothing ->
-                    "success!"
-    in
-        div [] 
-        [
-            div [][text ("address : "  ++ model.walletAddress)]
-            , (viewNetwork model)
-            , div[][text msgText]
-         ]
-        
-
-viewNetwork : Model -> Html Msg
-viewNetwork model =
-    div[][
-        
-        label [] [text model.network]
-        , Form.form []
-        [   
-            
-            Form.group []
-            [ Form.label [ for "mynetworks" ] [ text "Avaliable Networks" ]
-            , Select.select [ Select.id "mynetworks", Select.onChange NetworkChange ]
-                (List.map (\x ->  Select.item [] [ text x ]) model.possibleNetworks) 
-                           
-            ]
-        ]
-        ,    
-            
-         div[][  Button.button [ Button.primary,  Button.onClick SelectNetwork ] [ text "Change Network" ]]
-    ]
-    
--- viewCurrentGame : CurrentGameModel -> Html Msg
--- viewCurrentGame model =
---  div[][
---         h3[][text model.network]
-        
---         , ListGroup.ul
---             (List.map (\x ->  ListGroup.li [] [ text x ]) model.currentShows)
---         , Button.button [ Button.primary,  Button.onClick NavigateShows ] [ text "View Available Shows" ]
-    
-       
---     ]
-
 
