@@ -17,38 +17,149 @@ import Graphql.SelectionSet exposing (SelectionSet)
 import Json.Decode as Decode
 
 
-buildAvailableNetworkInput : AvailableNetworkInputRequiredFields -> AvailableNetworkInput
-buildAvailableNetworkInput required =
-    { name = required.name, rating = required.rating, description = required.description }
+buildNetworkInput : NetworkInputRequiredFields -> (NetworkInputOptionalFields -> NetworkInputOptionalFields) -> NetworkInput
+buildNetworkInput required fillOptionals =
+    let
+        optionals =
+            fillOptionals
+                { user = Absent, shows = Absent }
+    in
+    NetworkInput { name = required.name, rating = required.rating, description = required.description, user = optionals.user, shows = optionals.shows }
 
 
-type alias AvailableNetworkInputRequiredFields =
+type alias NetworkInputRequiredFields =
     { name : String
     , rating : Int
     , description : String
     }
 
 
-{-| Type for the AvailableNetworkInput input object.
--}
-type alias AvailableNetworkInput =
-    { name : String
-    , rating : Int
-    , description : String
+type alias NetworkInputOptionalFields =
+    { user : OptionalArgument NetworkUserRelation
+    , shows : OptionalArgument NetworkShowsRelation
     }
 
 
-{-| Encode a AvailableNetworkInput into a value that can be used as an argument.
+{-| Type alias for the `NetworkInput` attributes. Note that this type
+needs to use the `NetworkInput` type (not just a plain type alias) because it has
+references to itself either directly (recursive) or indirectly (circular). See
+<https://github.com/dillonkearns/elm-graphql/issues/33>.
 -}
-encodeAvailableNetworkInput : AvailableNetworkInput -> Value
-encodeAvailableNetworkInput input =
+type alias NetworkInputRaw =
+    { name : String
+    , rating : Int
+    , description : String
+    , user : OptionalArgument NetworkUserRelation
+    , shows : OptionalArgument NetworkShowsRelation
+    }
+
+
+{-| Type for the NetworkInput input object.
+-}
+type NetworkInput
+    = NetworkInput NetworkInputRaw
+
+
+{-| Encode a NetworkInput into a value that can be used as an argument.
+-}
+encodeNetworkInput : NetworkInput -> Value
+encodeNetworkInput (NetworkInput input) =
     Encode.maybeObject
-        [ ( "name", Encode.string input.name |> Just ), ( "rating", Encode.int input.rating |> Just ), ( "description", Encode.string input.description |> Just ) ]
+        [ ( "name", Encode.string input.name |> Just ), ( "rating", Encode.int input.rating |> Just ), ( "description", Encode.string input.description |> Just ), ( "user", encodeNetworkUserRelation |> Encode.optional input.user ), ( "shows", encodeNetworkShowsRelation |> Encode.optional input.shows ) ]
 
 
-buildShowInput : ShowInputRequiredFields -> ShowInput
-buildShowInput required =
-    { name = required.name, rating = required.rating, description = required.description }
+buildNetworkShowsRelation : (NetworkShowsRelationOptionalFields -> NetworkShowsRelationOptionalFields) -> NetworkShowsRelation
+buildNetworkShowsRelation fillOptionals =
+    let
+        optionals =
+            fillOptionals
+                { create = Absent, connect = Absent, disconnect = Absent }
+    in
+    NetworkShowsRelation { create = optionals.create, connect = optionals.connect, disconnect = optionals.disconnect }
+
+
+type alias NetworkShowsRelationOptionalFields =
+    { create : OptionalArgument (List (Maybe ShowInput))
+    , connect : OptionalArgument (List (Maybe Api.ScalarCodecs.Id))
+    , disconnect : OptionalArgument (List (Maybe Api.ScalarCodecs.Id))
+    }
+
+
+{-| Type alias for the `NetworkShowsRelation` attributes. Note that this type
+needs to use the `NetworkShowsRelation` type (not just a plain type alias) because it has
+references to itself either directly (recursive) or indirectly (circular). See
+<https://github.com/dillonkearns/elm-graphql/issues/33>.
+-}
+type alias NetworkShowsRelationRaw =
+    { create : OptionalArgument (List (Maybe ShowInput))
+    , connect : OptionalArgument (List (Maybe Api.ScalarCodecs.Id))
+    , disconnect : OptionalArgument (List (Maybe Api.ScalarCodecs.Id))
+    }
+
+
+{-| Type for the NetworkShowsRelation input object.
+-}
+type NetworkShowsRelation
+    = NetworkShowsRelation NetworkShowsRelationRaw
+
+
+{-| Encode a NetworkShowsRelation into a value that can be used as an argument.
+-}
+encodeNetworkShowsRelation : NetworkShowsRelation -> Value
+encodeNetworkShowsRelation (NetworkShowsRelation input) =
+    Encode.maybeObject
+        [ ( "create", (encodeShowInput |> Encode.maybe |> Encode.list) |> Encode.optional input.create ), ( "connect", ((Api.ScalarCodecs.codecs |> Api.Scalar.unwrapEncoder .codecId) |> Encode.maybe |> Encode.list) |> Encode.optional input.connect ), ( "disconnect", ((Api.ScalarCodecs.codecs |> Api.Scalar.unwrapEncoder .codecId) |> Encode.maybe |> Encode.list) |> Encode.optional input.disconnect ) ]
+
+
+buildNetworkUserRelation : (NetworkUserRelationOptionalFields -> NetworkUserRelationOptionalFields) -> NetworkUserRelation
+buildNetworkUserRelation fillOptionals =
+    let
+        optionals =
+            fillOptionals
+                { create = Absent, connect = Absent }
+    in
+    NetworkUserRelation { create = optionals.create, connect = optionals.connect }
+
+
+type alias NetworkUserRelationOptionalFields =
+    { create : OptionalArgument UserInput
+    , connect : OptionalArgument Api.ScalarCodecs.Id
+    }
+
+
+{-| Type alias for the `NetworkUserRelation` attributes. Note that this type
+needs to use the `NetworkUserRelation` type (not just a plain type alias) because it has
+references to itself either directly (recursive) or indirectly (circular). See
+<https://github.com/dillonkearns/elm-graphql/issues/33>.
+-}
+type alias NetworkUserRelationRaw =
+    { create : OptionalArgument UserInput
+    , connect : OptionalArgument Api.ScalarCodecs.Id
+    }
+
+
+{-| Type for the NetworkUserRelation input object.
+-}
+type NetworkUserRelation
+    = NetworkUserRelation NetworkUserRelationRaw
+
+
+{-| Encode a NetworkUserRelation into a value that can be used as an argument.
+-}
+encodeNetworkUserRelation : NetworkUserRelation -> Value
+encodeNetworkUserRelation (NetworkUserRelation input) =
+    Encode.maybeObject
+        [ ( "create", encodeUserInput |> Encode.optional input.create ), ( "connect", (Api.ScalarCodecs.codecs |> Api.Scalar.unwrapEncoder .codecId) |> Encode.optional input.connect ) ]
+
+
+buildShowInput : ShowInputRequiredFields -> (ShowInputOptionalFields -> ShowInputOptionalFields) -> ShowInput
+buildShowInput required fillOptionals =
+    let
+        optionals =
+            fillOptionals
+                { network = Absent }
+    in
+    ShowInput { name = required.name, rating = required.rating, description = required.description, network = optionals.network }
 
 
 type alias ShowInputRequiredFields =
@@ -58,21 +169,76 @@ type alias ShowInputRequiredFields =
     }
 
 
-{-| Type for the ShowInput input object.
+type alias ShowInputOptionalFields =
+    { network : OptionalArgument ShowNetworkRelation }
+
+
+{-| Type alias for the `ShowInput` attributes. Note that this type
+needs to use the `ShowInput` type (not just a plain type alias) because it has
+references to itself either directly (recursive) or indirectly (circular). See
+<https://github.com/dillonkearns/elm-graphql/issues/33>.
 -}
-type alias ShowInput =
+type alias ShowInputRaw =
     { name : String
     , rating : Int
     , description : String
+    , network : OptionalArgument ShowNetworkRelation
     }
+
+
+{-| Type for the ShowInput input object.
+-}
+type ShowInput
+    = ShowInput ShowInputRaw
 
 
 {-| Encode a ShowInput into a value that can be used as an argument.
 -}
 encodeShowInput : ShowInput -> Value
-encodeShowInput input =
+encodeShowInput (ShowInput input) =
     Encode.maybeObject
-        [ ( "name", Encode.string input.name |> Just ), ( "rating", Encode.int input.rating |> Just ), ( "description", Encode.string input.description |> Just ) ]
+        [ ( "name", Encode.string input.name |> Just ), ( "rating", Encode.int input.rating |> Just ), ( "description", Encode.string input.description |> Just ), ( "network", encodeShowNetworkRelation |> Encode.optional input.network ) ]
+
+
+buildShowNetworkRelation : (ShowNetworkRelationOptionalFields -> ShowNetworkRelationOptionalFields) -> ShowNetworkRelation
+buildShowNetworkRelation fillOptionals =
+    let
+        optionals =
+            fillOptionals
+                { create = Absent, connect = Absent }
+    in
+    ShowNetworkRelation { create = optionals.create, connect = optionals.connect }
+
+
+type alias ShowNetworkRelationOptionalFields =
+    { create : OptionalArgument NetworkInput
+    , connect : OptionalArgument Api.ScalarCodecs.Id
+    }
+
+
+{-| Type alias for the `ShowNetworkRelation` attributes. Note that this type
+needs to use the `ShowNetworkRelation` type (not just a plain type alias) because it has
+references to itself either directly (recursive) or indirectly (circular). See
+<https://github.com/dillonkearns/elm-graphql/issues/33>.
+-}
+type alias ShowNetworkRelationRaw =
+    { create : OptionalArgument NetworkInput
+    , connect : OptionalArgument Api.ScalarCodecs.Id
+    }
+
+
+{-| Type for the ShowNetworkRelation input object.
+-}
+type ShowNetworkRelation
+    = ShowNetworkRelation ShowNetworkRelationRaw
+
+
+{-| Encode a ShowNetworkRelation into a value that can be used as an argument.
+-}
+encodeShowNetworkRelation : ShowNetworkRelation -> Value
+encodeShowNetworkRelation (ShowNetworkRelation input) =
+    Encode.maybeObject
+        [ ( "create", encodeNetworkInput |> Encode.optional input.create ), ( "connect", (Api.ScalarCodecs.codecs |> Api.Scalar.unwrapEncoder .codecId) |> Encode.optional input.connect ) ]
 
 
 buildUserInput : UserInputRequiredFields -> (UserInputOptionalFields -> UserInputOptionalFields) -> UserInput
@@ -80,9 +246,9 @@ buildUserInput required fillOptionals =
     let
         optionals =
             fillOptionals
-                { network = Absent, amount = Absent, start = Absent, end = Absent, shows = Absent }
+                { networks = Absent, amount = Absent, start = Absent, end = Absent }
     in
-    { username = required.username, walletAddress = required.walletAddress, network = optionals.network, amount = optionals.amount, start = optionals.start, end = optionals.end, shows = optionals.shows }
+    UserInput { username = required.username, walletAddress = required.walletAddress, networks = optionals.networks, amount = optionals.amount, start = optionals.start, end = optionals.end }
 
 
 type alias UserInputRequiredFields =
@@ -92,30 +258,80 @@ type alias UserInputRequiredFields =
 
 
 type alias UserInputOptionalFields =
-    { network : OptionalArgument String
+    { networks : OptionalArgument UserNetworksRelation
     , amount : OptionalArgument Int
     , start : OptionalArgument Api.ScalarCodecs.Date
     , end : OptionalArgument Api.ScalarCodecs.Date
-    , shows : OptionalArgument (List ShowInput)
+    }
+
+
+{-| Type alias for the `UserInput` attributes. Note that this type
+needs to use the `UserInput` type (not just a plain type alias) because it has
+references to itself either directly (recursive) or indirectly (circular). See
+<https://github.com/dillonkearns/elm-graphql/issues/33>.
+-}
+type alias UserInputRaw =
+    { username : Api.ScalarCodecs.Id
+    , walletAddress : String
+    , networks : OptionalArgument UserNetworksRelation
+    , amount : OptionalArgument Int
+    , start : OptionalArgument Api.ScalarCodecs.Date
+    , end : OptionalArgument Api.ScalarCodecs.Date
     }
 
 
 {-| Type for the UserInput input object.
 -}
-type alias UserInput =
-    { username : Api.ScalarCodecs.Id
-    , walletAddress : String
-    , network : OptionalArgument String
-    , amount : OptionalArgument Int
-    , start : OptionalArgument Api.ScalarCodecs.Date
-    , end : OptionalArgument Api.ScalarCodecs.Date
-    , shows : OptionalArgument (List ShowInput)
-    }
+type UserInput
+    = UserInput UserInputRaw
 
 
 {-| Encode a UserInput into a value that can be used as an argument.
 -}
 encodeUserInput : UserInput -> Value
-encodeUserInput input =
+encodeUserInput (UserInput input) =
     Encode.maybeObject
-        [ ( "username", (Api.ScalarCodecs.codecs |> Api.Scalar.unwrapEncoder .codecId) input.username |> Just ), ( "walletAddress", Encode.string input.walletAddress |> Just ), ( "network", Encode.string |> Encode.optional input.network ), ( "amount", Encode.int |> Encode.optional input.amount ), ( "start", (Api.ScalarCodecs.codecs |> Api.Scalar.unwrapEncoder .codecDate) |> Encode.optional input.start ), ( "end", (Api.ScalarCodecs.codecs |> Api.Scalar.unwrapEncoder .codecDate) |> Encode.optional input.end ), ( "shows", (encodeShowInput |> Encode.list) |> Encode.optional input.shows ) ]
+        [ ( "username", (Api.ScalarCodecs.codecs |> Api.Scalar.unwrapEncoder .codecId) input.username |> Just ), ( "walletAddress", Encode.string input.walletAddress |> Just ), ( "networks", encodeUserNetworksRelation |> Encode.optional input.networks ), ( "amount", Encode.int |> Encode.optional input.amount ), ( "start", (Api.ScalarCodecs.codecs |> Api.Scalar.unwrapEncoder .codecDate) |> Encode.optional input.start ), ( "end", (Api.ScalarCodecs.codecs |> Api.Scalar.unwrapEncoder .codecDate) |> Encode.optional input.end ) ]
+
+
+buildUserNetworksRelation : (UserNetworksRelationOptionalFields -> UserNetworksRelationOptionalFields) -> UserNetworksRelation
+buildUserNetworksRelation fillOptionals =
+    let
+        optionals =
+            fillOptionals
+                { create = Absent, connect = Absent, disconnect = Absent }
+    in
+    UserNetworksRelation { create = optionals.create, connect = optionals.connect, disconnect = optionals.disconnect }
+
+
+type alias UserNetworksRelationOptionalFields =
+    { create : OptionalArgument (List (Maybe NetworkInput))
+    , connect : OptionalArgument (List (Maybe Api.ScalarCodecs.Id))
+    , disconnect : OptionalArgument (List (Maybe Api.ScalarCodecs.Id))
+    }
+
+
+{-| Type alias for the `UserNetworksRelation` attributes. Note that this type
+needs to use the `UserNetworksRelation` type (not just a plain type alias) because it has
+references to itself either directly (recursive) or indirectly (circular). See
+<https://github.com/dillonkearns/elm-graphql/issues/33>.
+-}
+type alias UserNetworksRelationRaw =
+    { create : OptionalArgument (List (Maybe NetworkInput))
+    , connect : OptionalArgument (List (Maybe Api.ScalarCodecs.Id))
+    , disconnect : OptionalArgument (List (Maybe Api.ScalarCodecs.Id))
+    }
+
+
+{-| Type for the UserNetworksRelation input object.
+-}
+type UserNetworksRelation
+    = UserNetworksRelation UserNetworksRelationRaw
+
+
+{-| Encode a UserNetworksRelation into a value that can be used as an argument.
+-}
+encodeUserNetworksRelation : UserNetworksRelation -> Value
+encodeUserNetworksRelation (UserNetworksRelation input) =
+    Encode.maybeObject
+        [ ( "create", (encodeNetworkInput |> Encode.maybe |> Encode.list) |> Encode.optional input.create ), ( "connect", ((Api.ScalarCodecs.codecs |> Api.Scalar.unwrapEncoder .codecId) |> Encode.maybe |> Encode.list) |> Encode.optional input.connect ), ( "disconnect", ((Api.ScalarCodecs.codecs |> Api.Scalar.unwrapEncoder .codecId) |> Encode.maybe |> Encode.list) |> Encode.optional input.disconnect ) ]

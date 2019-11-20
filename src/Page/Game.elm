@@ -33,11 +33,18 @@ import Api.Scalar exposing (Id(..))
 
 
 -- Model
+type alias Network = 
+    {
+        name: String
+        , rating: Int
+        , description: String 
+    }
+
 type alias UserInfo =
     { 
         walletAddress :  String
         , amount : Maybe Int
-        , network:  String
+        , networks:  List Network
        
     }
 
@@ -45,11 +52,11 @@ type alias Model =
     {
         message: Maybe String
         , currentShows: List String
-        , possibleNetworks: List String
         , walletAddress :  String
         , amount : Maybe Int
-        , network:  Maybe String
+        , networks:  List Network
         , selectedNetwork:  String
+        
     }
 
 
@@ -57,8 +64,8 @@ type alias Model =
 type Msg =     NavigateShows 
                 | SelectNetwork
                 | NetworkChange String
-                | GotResponse (RemoteData (Graphql.Http.Error (Maybe UserInfo)) (Maybe UserInfo))
-                | ChangeNetowrk
+                | GotUserInfoResponse (RemoteData (Graphql.Http.Error (Maybe UserInfo)) (Maybe UserInfo))
+                | ChangeNetwork
 
 
 
@@ -67,21 +74,19 @@ initPage = {
     message = Nothing
     , walletAddress = ""
     , amount = Nothing
-    , network = Nothing
+    , networks = []
     , selectedNetwork = ""
-    ,  currentShows = []
-    , possibleNetworks = ["ABC", "NBC", "CBS", "ESPN"]
+    ,  currentShows = [] 
     }
 
 
 init : String  -> ( Model, Cmd Msg )
 init username = 
-    ( initPage, makeRequest username )
+    ( initPage, makeUserInfoRequest username )
 
                
 
 --Subcriptions
--- Subscriptions
 subscriptions : Model -> Sub Msg
 subscriptions model =
     Sub.none
@@ -91,24 +96,27 @@ subscriptions model =
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
    case msg of
-        ChangeNetowrk ->
-         ({model | network = Nothing }, Cmd.none)
+        ChangeNetwork ->
+         ({model | selectedNetwork = "" }, Cmd.none)
         NavigateShows ->
             ({ model | message = Just "navigate shows" }, (Nav.load  Routes.showsPath) )
         SelectNetwork  ->
-             ({model | network = Just model.selectedNetwork }, Cmd.none)
+            (model, Cmd.none)
+            --  ({model | network = Just model.selectedNetwork }, Cmd.none)
         NetworkChange netwrk -> 
             ( {model | selectedNetwork =  netwrk }, Cmd.none) 
-        GotResponse response ->
+        GotUserInfoResponse response ->
             case response of
                 RemoteData.Loading ->
                     ({ model | message = Just "loading..." }, Cmd.none)
                 RemoteData.Success maybeData ->
                     case maybeData of
                         Just data ->
-                            ({ model | walletAddress =  data.walletAddress, amount = data.amount, network = Just data.network,  message = Nothing }, Cmd.none)
+                            -- TODOE: get networks
+                            ({ model | walletAddress =  data.walletAddress, amount = data.amount,  message = Nothing }, Cmd.none)
+                            -- ({ model | walletAddress =  data.walletAddress, amount = data.amount, network = Just data.network,  message = Nothing }, Cmd.none)
                         Nothing ->
-                            ({ model | message = Just "could not return data", walletAddress =  "", amount = Nothing, network = Nothing }, Cmd.none)
+                            ({ model | message = Just "could not return data", walletAddress =  "", amount = Nothing, networks = [] }, Cmd.none)
                 RemoteData.Failure err ->
                     ({ model | message = Just "err" }, Cmd.none)
                 RemoteData.NotAsked ->
@@ -125,16 +133,18 @@ view model =
                         messg
                     Nothing ->
                         ""
-        bodyView = 
-                case model.network of
-                    Just val ->
-                        viewNetworkShows val 
-                    Nothing ->
-                        viewChooseNetwork 
+        ntwrk = "TODO: need to get child info"
+        bodyView = viewChooseNetwork
+                -- case model.network of
+                --     Just val ->
+                --         viewNetworkShows val 
+                --     Nothing ->
+                --         viewChooseNetwork 
     in
         div [] 
         [
             div [][text ("address : "  ++ model.walletAddress)]
+            , h3[][text ntwrk]
             , (bodyView model)
             , div[][text msgText]
          ]
@@ -143,14 +153,12 @@ view model =
 viewChooseNetwork : Model -> Html Msg
 viewChooseNetwork model =
     div[][
-        
-        label [] [text model.selectedNetwork]
-        , Form.form []
+        Form.form []
         [   
             Form.group []
             [ Form.label [ for "mynetworks" ] [ text "Avaliable Networks" ]
             , Select.select [ Select.id "mynetworks", Select.onChange NetworkChange ]
-                (List.map (\x ->  Select.item [] [ text x ]) model.possibleNetworks) 
+                (List.map (\x ->  Select.item [] [ text x ]) ["need to iplment"]) 
                            
             ]
         ]
@@ -161,34 +169,44 @@ viewChooseNetwork model =
 viewNetworkShows : String -> Model -> Html Msg
 viewNetworkShows network model = 
     div [] [
-        h3[][text network]
-        
-        , ListGroup.ul
+        ListGroup.ul
             (List.map (\x ->  ListGroup.li [] [ text x ]) model.currentShows)
         , Button.button [ Button.primary,  Button.onClick NavigateShows ] [ text "Choose Available Shows" ]
-
-      , Button.button [Button.secondary, Button.onClick ChangeNetowrk][ text "Change Netowrk"]
+        , Button.button [Button.secondary, Button.onClick ChangeNetwork][ text "Change Network"]
     ]
 
--- viewCurrentGame : CurrentGameModel -> Html Msg
--- viewCurrentGame model =
---  div[][
---         h3[][text model.network]
-        
---         , ListGroup.ul
---             (List.map (\x ->  ListGroup.li [] [ text x ]) model.currentShows)
---         , Button.button [ Button.primary,  Button.onClick NavigateShows ] [ text "View Available Shows" ]
-    
-       
---     ]
 
-
--- Query
--- https://github.com/dillonkearns/elm-graphql/blob/master/examples/src/Example01BasicQuery.elm
-query : String ->  SelectionSet (Maybe UserInfo) RootQuery
-query un =
+-- User Info Query
+queryUserInfo : String ->  SelectionSet (Maybe UserInfo) RootQuery
+queryUserInfo un =
     Query.userByUserName { username = Id un } userSelection
 
+
+--  SelectionSet (List Network) Api.Object.User
+emptyNetwork :  List Network
+emptyNetwork  = []
+
+userSelection : SelectionSet UserInfo Api.Object.User
+userSelection =
+    SelectionSet.map3 UserInfo
+        User.walletAddress
+        User.amount
+        (SelectionSet.succeed emptyNetwork)
+        
+       
+
+makeUserInfoRequest : String -> Cmd Msg
+makeUserInfoRequest username =
+    queryUserInfo username
+        |> Graphql.Http.queryRequest "https://graphql.fauna.com/graphql"
+        |> Graphql.Http.withHeader "Authorization" ("Bearer fnADbMd3RLACEpjT90hoJSn6SXhN281PIgIZg375" )
+        |> Graphql.Http.send (RemoteData.fromResult >> GotUserInfoResponse)
+
+
+-- Helper
+stringFragment : SelectionSet (Maybe String) Api.Object.User -> SelectionSet String Api.Object.User
+stringFragment userSelectionMaybeVal =
+    SelectionSet.map mapToString userSelectionMaybeVal
 
 mapToString : Maybe String -> String
 mapToString maybeVal =
@@ -197,25 +215,3 @@ mapToString maybeVal =
             val
         Nothing ->
             ""
-
-
-stringFragment : SelectionSet (Maybe String) Api.Object.User -> SelectionSet String Api.Object.User
-stringFragment userSelectionMaybeVal =
-    SelectionSet.map mapToString userSelectionMaybeVal
-               
-   
-userSelection : SelectionSet UserInfo Api.Object.User
-userSelection =
-    SelectionSet.map3 UserInfo
-        User.walletAddress
-        User.amount
-        (User.network |> stringFragment)
-       
-
-makeRequest : String -> Cmd Msg
-makeRequest username =
-    query username
-        |> Graphql.Http.queryRequest "https://graphql.fauna.com/graphql"
-        |> Graphql.Http.withHeader "Authorization" ("Bearer fnADbMd3RLACEpjT90hoJSn6SXhN281PIgIZg375" )
-        |> Graphql.Http.send (RemoteData.fromResult >> GotResponse)
-

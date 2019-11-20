@@ -5,16 +5,20 @@
 module Api.Object exposing (..)
 
 
-type AvailableNetwork
-    = AvailableNetwork
+type Network
+    = Network
 
 
-type AvailableNetworkPage
-    = AvailableNetworkPage
+type NetworkPage
+    = NetworkPage
 
 
 type Show
     = Show
+
+
+type ShowPage
+    = ShowPage
 
 
 type User

@@ -1,29 +1,34 @@
 type User   {
   username: ID!
   walletAddress: String!
-  network: String!
-  amount: Int!
+  networks: [Network!] @relation
+  amount: Int
   start: Date
   end: Date
-  shows: [Show!] 
+ 
 }
 
-type Show @embedded {
+type Show  {
   name: String!
   rating: Int!
   description: String!
+  network: Network!
 }
 
-type AvailableNetwork  {
+type Network {
   name: String!
   rating: Int!
   description: String!
+  user: User!
+  shows: [Show!] @relation
 }
 
 
 type Query {
   # allGames: [Game]
   allUsers: [User]
+  allNetworks: [Network]
+  allShows: [Show]
   userByUserName(username: ID!): User
-  availableNetwork: [AvailableNetwork]
+ 
 }

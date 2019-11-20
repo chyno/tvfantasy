@@ -22,45 +22,62 @@
 ## Code Generation
 ## elm-graphql https://graphql.fauna.com/graphql --header "Authorization:Bearer fnADbMd3RLACEpjT90hoJSn6SXhN281PIgIZg375"
 
-## Add Networks
+## Add User
 ### "_id": "247852697206653458",
-mutation foo {
-  createAvailableNetwork(data : {
-    
-    name: "CBS"
-    rating: 3
-    description: "CBS Network"
-  
+mutation {
+  createUser( data : {
+     amount: 1
+     username: "chyno2"
+     walletAddress: "111"
+     networks: {connect: "249585712236593682" }
+     
   })
+  {
+    _id
+  }
+}
+
+## ad network
+mutation {
+  createNetwork(data: {
+    name: "abc"
+    rating:3
+    description: "main network"
+  
+  }
+  )
   {
     _id
     name
   }
 }
-## Create game
- mutation bar {
-  createGame(data : {
-    username: "john123",
-    network: "CBS"
-  })
-  {
-    _id
-    username
+
+{
+  "data": {
+    "createNetwork": {
+      "_id": "249584647410811410",
+      "name": "abc"
+    }
   }
 }
 
-## read game
+
+## read user
 query {
-  allGames {
-    data  {
-    _id
+  allUsers {data 
+  {
+    amount
     username
-      network
-      shows {
+    walletAddress
+    networks 
+    {
+      data  {
         name
+        rating
+        description
       }
-  }
-  }
+    }
+  }}
 }
 
 

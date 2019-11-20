@@ -19,9 +19,29 @@ import Graphql.SelectionSet exposing (SelectionSet)
 import Json.Decode as Decode
 
 
-network : SelectionSet (Maybe String) Api.Object.User
-network =
-    Object.selectionForField "(Maybe String)" "network" [] (Decode.string |> Decode.nullable)
+type alias NetworksOptionalArguments =
+    { size_ : OptionalArgument Int
+    , cursor_ : OptionalArgument String
+    }
+
+
+{-|
+
+  - size\_ - The number of items to return per page.
+  - cursor\_ - The pagination cursor.
+
+-}
+networks : (NetworksOptionalArguments -> NetworksOptionalArguments) -> SelectionSet decodesTo Api.Object.NetworkPage -> SelectionSet decodesTo Api.Object.User
+networks fillInOptionals object_ =
+    let
+        filledInOptionals =
+            fillInOptionals { size_ = Absent, cursor_ = Absent }
+
+        optionalArgs =
+            [ Argument.optional "_size" filledInOptionals.size_ Encode.int, Argument.optional "_cursor" filledInOptionals.cursor_ Encode.string ]
+                |> List.filterMap identity
+    in
+    Object.selectionForCompositeField "networks" optionalArgs object_ identity
 
 
 username : SelectionSet Api.ScalarCodecs.Id Api.Object.User
@@ -49,11 +69,6 @@ amount =
 end : SelectionSet (Maybe Api.ScalarCodecs.Date) Api.Object.User
 end =
     Object.selectionForField "(Maybe ScalarCodecs.Date)" "end" [] (Api.ScalarCodecs.codecs |> Api.Scalar.unwrapCodecs |> .codecDate |> .decoder |> Decode.nullable)
-
-
-shows : SelectionSet decodesTo Api.Object.Show -> SelectionSet (Maybe (List decodesTo)) Api.Object.User
-shows object_ =
-    Object.selectionForCompositeField "shows" [] object_ (identity >> Decode.list >> Decode.nullable)
 
 
 start : SelectionSet (Maybe Api.ScalarCodecs.Date) Api.Object.User

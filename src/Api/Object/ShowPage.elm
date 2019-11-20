@@ -2,7 +2,7 @@
 -- https://github.com/dillonkearns/elm-graphql
 
 
-module Api.Object.AvailableNetworkPage exposing (..)
+module Api.Object.ShowPage exposing (..)
 
 import Api.InputObject
 import Api.Interface
@@ -19,22 +19,22 @@ import Graphql.SelectionSet exposing (SelectionSet)
 import Json.Decode as Decode
 
 
-{-| The elements of type 'AvailableNetwork' in this page.
+{-| The elements of type 'Show' in this page.
 -}
-data : SelectionSet decodesTo Api.Object.AvailableNetwork -> SelectionSet (List (Maybe decodesTo)) Api.Object.AvailableNetworkPage
+data : SelectionSet decodesTo Api.Object.Show -> SelectionSet (List (Maybe decodesTo)) Api.Object.ShowPage
 data object_ =
     Object.selectionForCompositeField "data" [] object_ (identity >> Decode.nullable >> Decode.list)
 
 
 {-| A cursor for elements coming after the current page.
 -}
-after : SelectionSet (Maybe String) Api.Object.AvailableNetworkPage
+after : SelectionSet (Maybe String) Api.Object.ShowPage
 after =
     Object.selectionForField "(Maybe String)" "after" [] (Decode.string |> Decode.nullable)
 
 
 {-| A cursor for elements coming before the current page.
 -}
-before : SelectionSet (Maybe String) Api.Object.AvailableNetworkPage
+before : SelectionSet (Maybe String) Api.Object.ShowPage
 before =
     Object.selectionForField "(Maybe String)" "before" [] (Decode.string |> Decode.nullable)

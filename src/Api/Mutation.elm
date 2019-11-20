@@ -36,6 +36,20 @@ updateUser requiredArgs object_ =
     Object.selectionForCompositeField "updateUser" [ Argument.required "id" requiredArgs.id (Api.ScalarCodecs.codecs |> Api.Scalar.unwrapEncoder .codecId), Argument.required "data" requiredArgs.data Api.InputObject.encodeUserInput ] object_ (identity >> Decode.nullable)
 
 
+type alias DeleteShowRequiredArguments =
+    { id : Api.ScalarCodecs.Id }
+
+
+{-| Delete an existing document in the collection of 'Show'
+
+  - id - The 'Show' document's ID
+
+-}
+deleteShow : DeleteShowRequiredArguments -> SelectionSet decodesTo Api.Object.Show -> SelectionSet (Maybe decodesTo) RootMutation
+deleteShow requiredArgs object_ =
+    Object.selectionForCompositeField "deleteShow" [ Argument.required "id" requiredArgs.id (Api.ScalarCodecs.codecs |> Api.Scalar.unwrapEncoder .codecId) ] object_ (identity >> Decode.nullable)
+
+
 type alias CreateUserRequiredArguments =
     { data : Api.InputObject.UserInput }
 
@@ -50,35 +64,32 @@ createUser requiredArgs object_ =
     Object.selectionForCompositeField "createUser" [ Argument.required "data" requiredArgs.data Api.InputObject.encodeUserInput ] object_ identity
 
 
-type alias CreateAvailableNetworkRequiredArguments =
-    { data : Api.InputObject.AvailableNetworkInput }
+type alias DeleteNetworkRequiredArguments =
+    { id : Api.ScalarCodecs.Id }
 
 
-{-| Create a new document in the collection of 'AvailableNetwork'
+{-| Delete an existing document in the collection of 'Network'
 
-  - data - 'AvailableNetwork' input values
-
--}
-createAvailableNetwork : CreateAvailableNetworkRequiredArguments -> SelectionSet decodesTo Api.Object.AvailableNetwork -> SelectionSet decodesTo RootMutation
-createAvailableNetwork requiredArgs object_ =
-    Object.selectionForCompositeField "createAvailableNetwork" [ Argument.required "data" requiredArgs.data Api.InputObject.encodeAvailableNetworkInput ] object_ identity
-
-
-type alias UpdateAvailableNetworkRequiredArguments =
-    { id : Api.ScalarCodecs.Id
-    , data : Api.InputObject.AvailableNetworkInput
-    }
-
-
-{-| Update an existing document in the collection of 'AvailableNetwork'
-
-  - id - The 'AvailableNetwork' document's ID
-  - data - 'AvailableNetwork' input values
+  - id - The 'Network' document's ID
 
 -}
-updateAvailableNetwork : UpdateAvailableNetworkRequiredArguments -> SelectionSet decodesTo Api.Object.AvailableNetwork -> SelectionSet (Maybe decodesTo) RootMutation
-updateAvailableNetwork requiredArgs object_ =
-    Object.selectionForCompositeField "updateAvailableNetwork" [ Argument.required "id" requiredArgs.id (Api.ScalarCodecs.codecs |> Api.Scalar.unwrapEncoder .codecId), Argument.required "data" requiredArgs.data Api.InputObject.encodeAvailableNetworkInput ] object_ (identity >> Decode.nullable)
+deleteNetwork : DeleteNetworkRequiredArguments -> SelectionSet decodesTo Api.Object.Network -> SelectionSet (Maybe decodesTo) RootMutation
+deleteNetwork requiredArgs object_ =
+    Object.selectionForCompositeField "deleteNetwork" [ Argument.required "id" requiredArgs.id (Api.ScalarCodecs.codecs |> Api.Scalar.unwrapEncoder .codecId) ] object_ (identity >> Decode.nullable)
+
+
+type alias CreateShowRequiredArguments =
+    { data : Api.InputObject.ShowInput }
+
+
+{-| Create a new document in the collection of 'Show'
+
+  - data - 'Show' input values
+
+-}
+createShow : CreateShowRequiredArguments -> SelectionSet decodesTo Api.Object.Show -> SelectionSet decodesTo RootMutation
+createShow requiredArgs object_ =
+    Object.selectionForCompositeField "createShow" [ Argument.required "data" requiredArgs.data Api.InputObject.encodeShowInput ] object_ identity
 
 
 type alias DeleteUserRequiredArguments =
@@ -95,15 +106,49 @@ deleteUser requiredArgs object_ =
     Object.selectionForCompositeField "deleteUser" [ Argument.required "id" requiredArgs.id (Api.ScalarCodecs.codecs |> Api.Scalar.unwrapEncoder .codecId) ] object_ (identity >> Decode.nullable)
 
 
-type alias DeleteAvailableNetworkRequiredArguments =
-    { id : Api.ScalarCodecs.Id }
+type alias UpdateShowRequiredArguments =
+    { id : Api.ScalarCodecs.Id
+    , data : Api.InputObject.ShowInput
+    }
 
 
-{-| Delete an existing document in the collection of 'AvailableNetwork'
+{-| Update an existing document in the collection of 'Show'
 
-  - id - The 'AvailableNetwork' document's ID
+  - id - The 'Show' document's ID
+  - data - 'Show' input values
 
 -}
-deleteAvailableNetwork : DeleteAvailableNetworkRequiredArguments -> SelectionSet decodesTo Api.Object.AvailableNetwork -> SelectionSet (Maybe decodesTo) RootMutation
-deleteAvailableNetwork requiredArgs object_ =
-    Object.selectionForCompositeField "deleteAvailableNetwork" [ Argument.required "id" requiredArgs.id (Api.ScalarCodecs.codecs |> Api.Scalar.unwrapEncoder .codecId) ] object_ (identity >> Decode.nullable)
+updateShow : UpdateShowRequiredArguments -> SelectionSet decodesTo Api.Object.Show -> SelectionSet (Maybe decodesTo) RootMutation
+updateShow requiredArgs object_ =
+    Object.selectionForCompositeField "updateShow" [ Argument.required "id" requiredArgs.id (Api.ScalarCodecs.codecs |> Api.Scalar.unwrapEncoder .codecId), Argument.required "data" requiredArgs.data Api.InputObject.encodeShowInput ] object_ (identity >> Decode.nullable)
+
+
+type alias UpdateNetworkRequiredArguments =
+    { id : Api.ScalarCodecs.Id
+    , data : Api.InputObject.NetworkInput
+    }
+
+
+{-| Update an existing document in the collection of 'Network'
+
+  - id - The 'Network' document's ID
+  - data - 'Network' input values
+
+-}
+updateNetwork : UpdateNetworkRequiredArguments -> SelectionSet decodesTo Api.Object.Network -> SelectionSet (Maybe decodesTo) RootMutation
+updateNetwork requiredArgs object_ =
+    Object.selectionForCompositeField "updateNetwork" [ Argument.required "id" requiredArgs.id (Api.ScalarCodecs.codecs |> Api.Scalar.unwrapEncoder .codecId), Argument.required "data" requiredArgs.data Api.InputObject.encodeNetworkInput ] object_ (identity >> Decode.nullable)
+
+
+type alias CreateNetworkRequiredArguments =
+    { data : Api.InputObject.NetworkInput }
+
+
+{-| Create a new document in the collection of 'Network'
+
+  - data - 'Network' input values
+
+-}
+createNetwork : CreateNetworkRequiredArguments -> SelectionSet decodesTo Api.Object.Network -> SelectionSet decodesTo RootMutation
+createNetwork requiredArgs object_ =
+    Object.selectionForCompositeField "createNetwork" [ Argument.required "data" requiredArgs.data Api.InputObject.encodeNetworkInput ] object_ identity

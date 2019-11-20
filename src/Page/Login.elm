@@ -102,21 +102,26 @@ selectUser =
 addUser : CreateUserRequiredArguments ->  SelectionSet Response Graphql.Operation.RootMutation
 addUser args  =
     createUser args selectUser
+
+
+getUserDataRaw : String -> String -> UserInputRaw
+getUserDataRaw username walletAddress = 
+     {
+        username =  Id username
+        , walletAddress = walletAddress
+        , networks = Absent
+        , amount = Absent
+        , end = Absent
+        , start = Absent          
         
-getMutArgs : String -> String -> CreateUserRequiredArguments
-getMutArgs username walletAddress = 
-    { 
-        data =   {
-            username =  Id username
-            , walletAddress = walletAddress
-            , amount = Absent
-            , end = Absent
-            , start = Absent
-            , network = Absent
-            , shows = Absent
-             
-        } 
     }
+
+
+-- getMutArgs : String -> String -> CreateUserRequiredArguments
+-- getMutArgs username walletAddress = 
+--     { 
+--         data =   (getUserDataRaw username walletAddress)
+--     }
 
 
 init : Key ->  ( Model, Cmd Msg )

@@ -19,9 +19,26 @@ import Graphql.SelectionSet exposing (SelectionSet)
 import Json.Decode as Decode
 
 
+network : SelectionSet decodesTo Api.Object.Network -> SelectionSet decodesTo Api.Object.Show
+network object_ =
+    Object.selectionForCompositeField "network" [] object_ identity
+
+
 name : SelectionSet String Api.Object.Show
 name =
     Object.selectionForField "String" "name" [] Decode.string
+
+
+description : SelectionSet String Api.Object.Show
+description =
+    Object.selectionForField "String" "description" [] Decode.string
+
+
+{-| The document's ID.
+-}
+id_ : SelectionSet Api.ScalarCodecs.Id Api.Object.Show
+id_ =
+    Object.selectionForField "ScalarCodecs.Id" "_id" [] (Api.ScalarCodecs.codecs |> Api.Scalar.unwrapCodecs |> .codecId |> .decoder)
 
 
 rating : SelectionSet Int Api.Object.Show
@@ -29,6 +46,8 @@ rating =
     Object.selectionForField "Int" "rating" [] Decode.int
 
 
-description : SelectionSet String Api.Object.Show
-description =
-    Object.selectionForField "String" "description" [] Decode.string
+{-| The document's timestamp.
+-}
+ts_ : SelectionSet Api.ScalarCodecs.Long Api.Object.Show
+ts_ =
+    Object.selectionForField "ScalarCodecs.Long" "_ts" [] (Api.ScalarCodecs.codecs |> Api.Scalar.unwrapCodecs |> .codecLong |> .decoder)
