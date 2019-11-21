@@ -33,11 +33,19 @@ import Api.Scalar exposing (Id(..))
 
 
 -- Model
+type alias Show =
+    {
+        name: String
+        , rating: Int
+        , description: String
+    }
+
 type alias Network = 
     {
         name: String
         , rating: Int
         , description: String 
+        , shows: List Show
     }
 
 type alias UserInfo =
@@ -186,12 +194,16 @@ queryUserInfo un =
 emptyNetwork :  List Network
 emptyNetwork  = []
 
+type alias Foo = List Network
+
 userSelection : SelectionSet UserInfo Api.Object.User
 userSelection =
     SelectionSet.map3 UserInfo
         User.walletAddress
         User.amount
         (SelectionSet.succeed emptyNetwork)
+        -- SelectionSet.map emptyNetwork  User.networks
+        
         
        
 
