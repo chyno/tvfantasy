@@ -18,7 +18,7 @@ import Bootstrap.Form.Textarea as Textarea
 import Bootstrap.Form.Fieldset as Fieldset
 import Bootstrap.Button as Button
 import Bootstrap.ListGroup as ListGroup
-
+import Graphql.OptionalArgument exposing (OptionalArgument(..))
 import Graphql.Document as Document
 import Graphql.Http
 import Graphql.Operation exposing (RootQuery)
@@ -27,32 +27,47 @@ import Graphql.SelectionSet as SelectionSet exposing (SelectionSet)
 import RemoteData exposing (RemoteData)
 import Api.Object
 import Api.Object.User as User
+import Api.Object.Network as Network
+import Api.Object.NetworkPage as NetworkPage
+import Api.Object.Show as Show
+import Api.Object.ShowPage as ShowPage
+import Api.Object.NetworkPage as NetworkPage
 import Api.Query as Query
 import Api.Scalar
 import Api.Scalar exposing (Id(..))
 
 
 -- Model
-type alias Show =
+type alias ShowData =
+    {
+       data : List (Maybe ShowInfo)
+    }
+
+type alias ShowInfo =
     {
         name: String
         , rating: Int
         , description: String
     }
 
-type alias Network = 
+type alias NetworkData =
+    {
+       data : List (Maybe NetworkInfo)
+    }
+
+type alias NetworkInfo = 
     {
         name: String
         , rating: Int
         , description: String 
-        , shows: List Show
+        , shows: List ShowInfo
     }
 
 type alias UserInfo =
     { 
         walletAddress :  String
         , amount : Maybe Int
-        , networks:  List Network
+        , networks:  List (Maybe NetworkInfo)
        
     }
 
@@ -62,7 +77,7 @@ type alias Model =
         , currentShows: List String
         , walletAddress :  String
         , amount : Maybe Int
-        , networks:  List Network
+        , networks:  List NetworkInfo
         , selectedNetwork:  String
         
     }
@@ -191,21 +206,62 @@ queryUserInfo un =
 
 
 --  SelectionSet (List Network) Api.Object.User
-emptyNetwork :  List Network
+emptyNetwork :  List NetworkInfo
 emptyNetwork  = []
 
-type alias Foo = List Network
+
+networkDataParser : NetworkData -> (List (Maybe NetworkInfo))
+networkDataParser ndata = 
+    ndata.data
 
 userSelection : SelectionSet UserInfo Api.Object.User
 userSelection =
     SelectionSet.map3 UserInfo
         User.walletAddress
         User.amount
-        (SelectionSet.succeed emptyNetwork)
-        -- SelectionSet.map emptyNetwork  User.networks
+        ((User.networks fillArgs networkPageSelection) |> SelectionSet.map networkDataParser)
         
-        
+
+showPageSelection : SelectionSet ShowData Api.Object.ShowPage
+showPageSelection =
+    SelectionSet.map ShowData
+        (ShowPage.data showSelection)
+
+networkPageSelection : SelectionSet NetworkData Api.Object.NetworkPage
+networkPageSelection =
+    SelectionSet.map NetworkData
+        (NetworkPage.data networkSelection)
+
+showSelection : SelectionSet ShowInfo Api.Object.Show
+showSelection =
+    SelectionSet.map3 ShowInfo
+        Show.name
+        Show.rating
+        Show.description
+
+emptyShow : List ShowInfo
+emptyShow  = []
+
+fillArgs : Network.ShowsOptionalArguments -> Network.ShowsOptionalArguments
+fillArgs x = x 
+
+showDataParser : ShowData -> List ShowInfo
+showDataParser sdata = 
+    sdata.data |> values
+
+
+networkSelection : SelectionSet NetworkInfo Api.Object.Network
+networkSelection =
+    SelectionSet.map4 NetworkInfo
+        Network.name
+        Network.rating
+        Network.description
+        ((Network.shows fillArgs showPageSelection) |> SelectionSet.map showDataParser)
+        -- ((User.networks fillArgs networkPageSelection) |> SelectionSet.map networkDataParser)
+        -- (SelectionSet.succeed emptyShow)
        
+
+
 
 makeUserInfoRequest : String -> Cmd Msg
 makeUserInfoRequest username =
@@ -227,3 +283,15 @@ mapToString maybeVal =
             val
         Nothing ->
             ""
+foldrValues : Maybe a -> List a -> List a
+foldrValues item list =
+    case item of
+        Nothing ->
+            list
+
+        Just v ->
+            v :: list
+
+values : List (Maybe a) -> List a
+values =
+    List.foldr foldrValues []
