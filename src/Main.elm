@@ -62,6 +62,7 @@ loadCurrentPage ( model, cmd ) =
     case model.route of
         Routes.ShowsRoute ->
             let
+            
                 ( pageModel, pageCmd ) = Show.init model.flags
             in
              ( { model | page = PageShow pageModel }, Cmd.batch [ cmd, (Cmd.map ShowMsg pageCmd) ] )

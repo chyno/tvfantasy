@@ -79,16 +79,22 @@ type alias Model =
         , amount : Maybe Int
         , networks:  List NetworkInfo
         , selectedNetwork:  String
-        
+        , currentNetwork : Maybe NetworkInfo
     }
 
 
 
-type Msg =     NavigateShows 
+type Msg =      UpdateNetworkName String
+                | UpdateRating String
+                | UpdateDescription String
+                | UpdateNetwork
+                | CancelUpdateNetwork
+                | NavigateShows 
                 | SelectNetwork
                 | NetworkChange String
                 | GotUserInfoResponse (RemoteData (Graphql.Http.Error (Maybe UserInfo)) (Maybe UserInfo))
                 | ChangeNetwork
+                
 
 
 
@@ -99,7 +105,9 @@ initPage = {
     , amount = Nothing
     , networks = []
     , selectedNetwork = ""
-    ,  currentShows = [] 
+    , currentShows = [] 
+    , currentNetwork = Nothing
+    
     }
 
 
@@ -119,8 +127,18 @@ subscriptions model =
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
    case msg of
+        UpdateNetworkName networkName ->
+            (model, Cmd.none)
+        UpdateRating rating ->
+            (model, Cmd.none)
+        UpdateDescription description ->
+            (model, Cmd.none)
+        UpdateNetwork ->
+            (model, Cmd.none)
+        CancelUpdateNetwork ->
+            (model, Cmd.none)
         ChangeNetwork ->
-         ({model | selectedNetwork = "" }, Cmd.none)
+            ({model | selectedNetwork = "" }, Cmd.none)
         NavigateShows ->
             ({ model | message = Just "navigate shows" }, (Nav.load  Routes.showsPath) )
         SelectNetwork  ->
@@ -145,7 +163,14 @@ update msg model =
                 RemoteData.NotAsked ->
                     ({ model | message = Just "Not Asked" }, Cmd.none)
 
-
+initNetwork : NetworkInfo
+initNetwork = 
+    {
+        name  = ""
+        , rating   = 2
+        , description   = ""
+        , shows = []
+    }
 -- View
 view : Model -> Html Msg
 view model =
@@ -156,19 +181,18 @@ view model =
                         messg
                     Nothing ->
                         ""
-        ntwrk = "TODO: need to get child info"
-        bodyView = viewChooseNetwork
-                -- case model.network of
-                --     Just val ->
-                --         viewNetworkShows val 
-                --     Nothing ->
-                --         viewChooseNetwork 
+       
+        bodyView = 
+                case (List.length model.networks )  of
+                    0 ->
+                        viewAddNetwork initNetwork 
+                    _ ->
+                        viewChooseNetwork model
     in
         div [] 
         [
             div [][text ("address : "  ++ model.walletAddress)]
-            , h3[][text ntwrk]
-            , (bodyView model)
+            , bodyView 
             , div[][text msgText]
          ]
         
@@ -188,15 +212,46 @@ viewChooseNetwork model =
         ,    
         Button.button [ Button.primary,  Button.onClick SelectNetwork ] [ text "Select" ]
     ]
-    
-viewNetworkShows : String -> Model -> Html Msg
-viewNetworkShows network model = 
-    div [] [
-        ListGroup.ul
-            (List.map (\x ->  ListGroup.li [] [ text x ]) model.currentShows)
-        , Button.button [ Button.primary,  Button.onClick NavigateShows ] [ text "Choose Available Shows" ]
-        , Button.button [Button.secondary, Button.onClick ChangeNetwork][ text "Change Network"]
+
+viewAddNetwork : NetworkInfo -> Html Msg
+viewAddNetwork model =
+      div []
+    [ 
+        Form.form []
+        [   Form.group []
+                [ Form.label [for "networkname"] [ text "Network Name"]
+                , Input.text [ Input.id "networkname", Input.onInput  UpdateNetworkName, Input.value model.name ]
+                , Form.help [] [ text "Enter Network" ]
+                ]
+            
+            , Form.group []
+                [ Form.label [for "myrating"] [ text "Rating"]
+                , Input.password [ Input.id "myrating", Input.onInput  UpdateRating, Input.value (String.fromInt model.rating) ]
+                , Form.help [] [ text "Enter Rating" ]
+                ]
+            , Form.group []
+                [ Form.label [for "mydescription"] [ text "Description"]
+                , Input.password [ Input.id "mydescription", Input.onInput UpdateDescription, Input.value model.description ]
+                , Form.help [] [ text "Enter Description" ]
+
+                ]
+            
+        ]
+        , div[class "button-group"][
+                Button.button [ Button.primary,  Button.onClick  UpdateNetwork ] [ text "Add Network" ]
+                , Button.button [ Button.secondary, Button.onClick  CancelUpdateNetwork ] [ text "Cancel" ]
+            ]
     ]
+
+
+-- viewNetworkShows : String -> Model -> Html Msg
+-- viewNetworkShows network model = 
+--     div [] [
+--         ListGroup.ul
+--             (List.map (\x ->  ListGroup.li [] [ text x ]) model.currentShows)
+--         , Button.button [ Button.primary,  Button.onClick NavigateShows ] [ text "Choose Available Shows" ]
+--         , Button.button [Button.secondary, Button.onClick ChangeNetwork][ text "Change Network"]
+--     ]
 
 
 -- User Info Query
