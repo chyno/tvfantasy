@@ -79,22 +79,34 @@ type alias Model =
         , amount : Maybe Int
         , networks:  List NetworkInfo
         , selectedNetwork:  String
-        , currentNetwork : Maybe NetworkInfo
+        , currentNetwork :  NetworkInfo
     }
 
+initNetwork : NetworkInfo
+initNetwork = 
+    {
+        name  = ""
+        , rating   = 0
+        , description   = ""
+        , shows = []
+    }
 
+-- Message
+type NetworkMsg = UpdateNetworkName String
+                        | UpdateRating String
+                        | UpdateDescription String
 
-type Msg =      UpdateNetworkName String
-                | UpdateRating String
-                | UpdateDescription String
-                | UpdateNetwork
+type GameMsg =  UpdateNetwork
                 | CancelUpdateNetwork
                 | NavigateShows 
                 | SelectNetwork
                 | NetworkChange String
                 | GotUserInfoResponse (RemoteData (Graphql.Http.Error (Maybe UserInfo)) (Maybe UserInfo))
                 | ChangeNetwork
-                
+               
+
+type Msg =  NetworkMessage NetworkMsg 
+            | GameMessage GameMsg
 
 
 
@@ -106,7 +118,7 @@ initPage = {
     , networks = []
     , selectedNetwork = ""
     , currentShows = [] 
-    , currentNetwork = Nothing
+    , currentNetwork = initNetwork
     
     }
 
@@ -123,9 +135,17 @@ subscriptions model =
     Sub.none
 
 
---Update
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
+    case msg of
+        GameMessage msg1 -> 
+            updateGame msg1 model
+        NetworkMessage msg2 ->
+            updateNetwork msg2 model
+            
+--Update
+updateNetwork : NetworkMsg -> NetworkInfo -> ( Model, Cmd Msg )
+updateNetwork msg model =
    case msg of
         UpdateNetworkName networkName ->
             (model, Cmd.none)
@@ -133,10 +153,18 @@ update msg model =
             (model, Cmd.none)
         UpdateDescription description ->
             (model, Cmd.none)
+
+updateGame : GameMsg -> Model -> ( Model, Cmd Msg )
+updateGame msg model =
+    case msg of
         UpdateNetwork ->
-            (model, Cmd.none)
+            let
+                wn = model.currentNetwork
+        
+            in
+                ({ model | currentNetwork = initNetwork, networks = (wn::model.networks)} , Cmd.none)
         CancelUpdateNetwork ->
-            (model, Cmd.none)
+            ({ model | currentNetwork = initNetwork }, Cmd.none)
         ChangeNetwork ->
             ({model | selectedNetwork = "" }, Cmd.none)
         NavigateShows ->
@@ -162,15 +190,10 @@ update msg model =
                     ({ model | message = Just "err" }, Cmd.none)
                 RemoteData.NotAsked ->
                     ({ model | message = Just "Not Asked" }, Cmd.none)
+    
 
-initNetwork : NetworkInfo
-initNetwork = 
-    {
-        name  = ""
-        , rating   = 2
-        , description   = ""
-        , shows = []
-    }
+        
+
 -- View
 view : Model -> Html Msg
 view model =
@@ -323,7 +346,7 @@ makeUserInfoRequest username =
     queryUserInfo username
         |> Graphql.Http.queryRequest "https://graphql.fauna.com/graphql"
         |> Graphql.Http.withHeader "Authorization" ("Bearer fnADbMd3RLACEpjT90hoJSn6SXhN281PIgIZg375" )
-        |> Graphql.Http.send (RemoteData.fromResult >> GotUserInfoResponse)
+        |> Graphql.Http.send (RemoteData.fromResult >> (GameMessage GotUserInfoResponse))
 
 
 -- Helper
