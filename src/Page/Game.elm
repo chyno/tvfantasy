@@ -92,21 +92,17 @@ initNetwork =
     }
 
 -- Message
-type NetworkMsg = UpdateNetworkName String
-                        | UpdateRating String
-                        | UpdateDescription String
-
-type GameMsg =  UpdateNetwork
-                | CancelUpdateNetwork
-                | NavigateShows 
-                | SelectNetwork
-                | NetworkChange String
-                | GotUserInfoResponse (RemoteData (Graphql.Http.Error (Maybe UserInfo)) (Maybe UserInfo))
-                | ChangeNetwork
+type Msg =  UpdateNetworkName String
+            | UpdateRating String
+            | UpdateDescription String
+            | UpdateNetwork
+            | CancelUpdateNetwork
+            | NavigateShows 
+            | SelectNetwork
+            | NetworkChange String
+            | GotUserInfoResponse (RemoteData (Graphql.Http.Error (Maybe UserInfo)) (Maybe UserInfo))
+            | ChangeNetwork
                
-
-type Msg =  NetworkMessage NetworkMsg 
-            | GameMessage GameMsg
 
 
 
@@ -135,28 +131,17 @@ subscriptions model =
     Sub.none
 
 
+  
+--Update
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
-        GameMessage msg1 -> 
-            updateGame msg1 model
-        NetworkMessage msg2 ->
-            updateNetwork msg2 model
-            
---Update
-updateNetwork : NetworkMsg -> NetworkInfo -> ( Model, Cmd Msg )
-updateNetwork msg model =
-   case msg of
         UpdateNetworkName networkName ->
             (model, Cmd.none)
         UpdateRating rating ->
             (model, Cmd.none)
         UpdateDescription description ->
             (model, Cmd.none)
-
-updateGame : GameMsg -> Model -> ( Model, Cmd Msg )
-updateGame msg model =
-    case msg of
         UpdateNetwork ->
             let
                 wn = model.currentNetwork
@@ -218,7 +203,7 @@ view model =
             , bodyView 
             , div[][text msgText]
          ]
-        
+    
 
 viewChooseNetwork : Model -> Html Msg
 viewChooseNetwork model =
@@ -227,7 +212,7 @@ viewChooseNetwork model =
         [   
             Form.group []
             [ Form.label [ for "mynetworks" ] [ text "Avaliable Networks" ]
-            , Select.select [ Select.id "mynetworks", Select.onChange NetworkChange ]
+            , Select.select [ Select.id "mynetworks", Select.onChange NetworkChange  ]
                 (List.map (\x ->  Select.item [] [ text x ]) ["need to iplment"]) 
                            
             ]
@@ -249,19 +234,19 @@ viewAddNetwork model =
             
             , Form.group []
                 [ Form.label [for "myrating"] [ text "Rating"]
-                , Input.password [ Input.id "myrating", Input.onInput  UpdateRating, Input.value (String.fromInt model.rating) ]
+                , Input.password [ Input.id "myrating", Input.onInput   UpdateRating, Input.value (String.fromInt model.rating) ]
                 , Form.help [] [ text "Enter Rating" ]
                 ]
             , Form.group []
                 [ Form.label [for "mydescription"] [ text "Description"]
-                , Input.password [ Input.id "mydescription", Input.onInput UpdateDescription, Input.value model.description ]
+                , Input.password [ Input.id "mydescription", Input.onInput  UpdateDescription, Input.value model.description ]
                 , Form.help [] [ text "Enter Description" ]
 
                 ]
             
         ]
         , div[class "button-group"][
-                Button.button [ Button.primary,  Button.onClick  UpdateNetwork ] [ text "Add Network" ]
+                Button.button [ Button.primary,  Button.onClick   UpdateNetwork ] [ text "Add Network" ]
                 , Button.button [ Button.secondary, Button.onClick  CancelUpdateNetwork ] [ text "Cancel" ]
             ]
     ]
@@ -346,7 +331,7 @@ makeUserInfoRequest username =
     queryUserInfo username
         |> Graphql.Http.queryRequest "https://graphql.fauna.com/graphql"
         |> Graphql.Http.withHeader "Authorization" ("Bearer fnADbMd3RLACEpjT90hoJSn6SXhN281PIgIZg375" )
-        |> Graphql.Http.send (RemoteData.fromResult >> (GameMessage GotUserInfoResponse))
+        |> Graphql.Http.send (RemoteData.fromResult >> GotUserInfoResponse)
 
 
 -- Helper
