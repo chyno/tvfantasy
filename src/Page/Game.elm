@@ -71,7 +71,7 @@ type alias UserInfo =
        
     }
 
-type alias Model =
+type alias GameModel =
     {
         message: Maybe String
         , currentShows: List String
@@ -79,8 +79,11 @@ type alias Model =
         , amount : Maybe Int
         , networks:  List NetworkInfo
         , selectedNetwork:  String
-        , currentNetwork :  NetworkInfo
+        -- , currentNetwork :  NetworkInfo
     }
+
+type  Model =  RunGame GameModel 
+                    | MangeNetwork NetworkInfo
 
 initNetwork : NetworkInfo
 initNetwork = 
@@ -106,7 +109,7 @@ type Msg =  UpdateNetworkName String
 
 
 
-initPage: Model
+initPage: GameModel
 initPage = {
     message = Nothing
     , walletAddress = ""
@@ -114,14 +117,13 @@ initPage = {
     , networks = []
     , selectedNetwork = ""
     , currentShows = [] 
-    , currentNetwork = initNetwork
     
     }
 
 
 init : String  -> ( Model, Cmd Msg )
 init username = 
-    ( initPage, makeUserInfoRequest username )
+    (MangeNetwork initNetwork, makeUserInfoRequest username )
 
                
 
@@ -130,28 +132,27 @@ subscriptions : Model -> Sub Msg
 subscriptions model =
     Sub.none
 
-
-  
---Update
-update : Msg -> Model -> ( Model, Cmd Msg )
-update msg model =
+updateRunGame : Msg -> GameModel -> ( GameModel, Cmd Msg )
+updateRunGame msg model =
     case msg of
         UpdateNetworkName networkName ->
-            (model, Cmd.none)
+            ( model, Cmd.none)
         UpdateRating rating ->
-            (model, Cmd.none)
+            ( model, Cmd.none)
         UpdateDescription description ->
-            (model, Cmd.none)
+            ( model, Cmd.none)
+
+updateMangeNetwork : Msg -> NetworkInfo -> (NetworkInfo, Cmd Msg)
+updateMangeNetwork msg model =
+    case msg of
         UpdateNetwork ->
-            let
-                wn = model.currentNetwork
-        
-            in
-                ({ model | currentNetwork = initNetwork, networks = (wn::model.networks)} , Cmd.none)
+            (model , Cmd.none)
         CancelUpdateNetwork ->
-            ({ model | currentNetwork = initNetwork }, Cmd.none)
+            (model , Cmd.none)
+            -- ({ model | currentNetwork = initNetwork }, Cmd.none)
         ChangeNetwork ->
-            ({model | selectedNetwork = "" }, Cmd.none)
+            (model , Cmd.none)
+            -- ({model | selectedNetwork = "" }, Cmd.none)
         NavigateShows ->
             ({ model | message = Just "navigate shows" }, (Nav.load  Routes.showsPath) )
         SelectNetwork  ->
@@ -175,81 +176,114 @@ update msg model =
                     ({ model | message = Just "err" }, Cmd.none)
                 RemoteData.NotAsked ->
                     ({ model | message = Just "Not Asked" }, Cmd.none)
-    
 
+gameModelToModel : ( GameModel, Cmd Msg ) -> ( Model, Cmd Msg ) 
+gameModelToModel gameD = 
+    let
+        (gmodel, msg) = gameD
+    in
+        (RunGame gmodel, msg)
+
+networkModelToModel : ( NetworkInfo, Cmd Msg ) -> ( Model, Cmd Msg ) 
+networkModelToModel gameN = 
+    let
+        (gmodel, msg) = gameN
+    in
+        (MangeNetwork gmodel, msg)
+
+
+--Update
+update : Msg -> Model -> ( Model, Cmd Msg )
+update msg model =
+    case model of
+        RunGame mdl ->
+            updateRunGame msg model |> gameModelToModel
+        MangeNetwork mdl ->
+            updateMangeNetwork msg MangeNetwork |> networkModelToModel
+        
+         
+view : Model -> Html Msg
+view model = 
+    case model of
+        RunGame mdl ->
+           div[][text "Run Game"]
+        MangeNetwork nmdl ->
+           div [][text "Manage Network"]  
         
 
--- View
-view : Model -> Html Msg
-view model =
-    let
-        msgText = 
-                case model.message of
-                    Just messg ->
-                        messg
-                    Nothing ->
-                        ""
+
+
+-- -- View
+-- view : Model -> Html Msg
+-- view model =
+--     let
+--         msgText = 
+--                 case model.message of
+--                     Just messg ->
+--                         messg
+--                     Nothing ->
+--                         ""
        
-        bodyView = 
-                case (List.length model.networks )  of
-                    0 ->
-                        viewAddNetwork initNetwork 
-                    _ ->
-                        viewChooseNetwork model
-    in
-        div [] 
-        [
-            div [][text ("address : "  ++ model.walletAddress)]
-            , bodyView 
-            , div[][text msgText]
-         ]
+--         bodyView = 
+--                 case (List.length model.networks )  of
+--                     0 ->
+--                         viewAddNetwork initNetwork 
+--                     _ ->
+--                         viewChooseNetwork model
+--     in
+--         div [] 
+--         [
+--             div [][text ("address : "  ++ model.walletAddress)]
+--             , bodyView 
+--             , div[][text msgText]
+--          ]
     
 
-viewChooseNetwork : Model -> Html Msg
-viewChooseNetwork model =
-    div[][
-        Form.form []
-        [   
-            Form.group []
-            [ Form.label [ for "mynetworks" ] [ text "Avaliable Networks" ]
-            , Select.select [ Select.id "mynetworks", Select.onChange NetworkChange  ]
-                (List.map (\x ->  Select.item [] [ text x ]) ["need to iplment"]) 
+-- viewChooseNetwork : Model -> Html Msg
+-- viewChooseNetwork model =
+--     div[][
+--         Form.form []
+--         [   
+--             Form.group []
+--             [ Form.label [ for "mynetworks" ] [ text "Avaliable Networks" ]
+--             , Select.select [ Select.id "mynetworks", Select.onChange NetworkChange  ]
+--                 (List.map (\x ->  Select.item [] [ text x ]) ["need to iplment"]) 
                            
-            ]
-        ]
-        ,    
-        Button.button [ Button.primary,  Button.onClick SelectNetwork ] [ text "Select" ]
-    ]
+--             ]
+--         ]
+--         ,    
+--         Button.button [ Button.primary,  Button.onClick SelectNetwork ] [ text "Select" ]
+--     ]
 
-viewAddNetwork : NetworkInfo -> Html Msg
-viewAddNetwork model =
-      div []
-    [ 
-        Form.form []
-        [   Form.group []
-                [ Form.label [for "networkname"] [ text "Network Name"]
-                , Input.text [ Input.id "networkname", Input.onInput  UpdateNetworkName, Input.value model.name ]
-                , Form.help [] [ text "Enter Network" ]
-                ]
+-- viewAddNetwork : NetworkInfo -> Html Msg
+-- viewAddNetwork model =
+--       div []
+--     [ 
+--         Form.form []
+--         [   Form.group []
+--                 [ Form.label [for "networkname"] [ text "Network Name"]
+--                 , Input.text [ Input.id "networkname", Input.onInput  UpdateNetworkName, Input.value model.name ]
+--                 , Form.help [] [ text "Enter Network" ]
+--                 ]
             
-            , Form.group []
-                [ Form.label [for "myrating"] [ text "Rating"]
-                , Input.password [ Input.id "myrating", Input.onInput   UpdateRating, Input.value (String.fromInt model.rating) ]
-                , Form.help [] [ text "Enter Rating" ]
-                ]
-            , Form.group []
-                [ Form.label [for "mydescription"] [ text "Description"]
-                , Input.password [ Input.id "mydescription", Input.onInput  UpdateDescription, Input.value model.description ]
-                , Form.help [] [ text "Enter Description" ]
+--             , Form.group []
+--                 [ Form.label [for "myrating"] [ text "Rating"]
+--                 , Input.password [ Input.id "myrating", Input.onInput   UpdateRating, Input.value (String.fromInt model.rating) ]
+--                 , Form.help [] [ text "Enter Rating" ]
+--                 ]
+--             , Form.group []
+--                 [ Form.label [for "mydescription"] [ text "Description"]
+--                 , Input.password [ Input.id "mydescription", Input.onInput  UpdateDescription, Input.value model.description ]
+--                 , Form.help [] [ text "Enter Description" ]
 
-                ]
+--                 ]
             
-        ]
-        , div[class "button-group"][
-                Button.button [ Button.primary,  Button.onClick   UpdateNetwork ] [ text "Add Network" ]
-                , Button.button [ Button.secondary, Button.onClick  CancelUpdateNetwork ] [ text "Cancel" ]
-            ]
-    ]
+--         ]
+--         , div[class "button-group"][
+--                 Button.button [ Button.primary,  Button.onClick   UpdateNetwork ] [ text "Add Network" ]
+--                 , Button.button [ Button.secondary, Button.onClick  CancelUpdateNetwork ] [ text "Cancel" ]
+--             ]
+--     ]
 
 
 -- viewNetworkShows : String -> Model -> Html Msg
