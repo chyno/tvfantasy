@@ -79,7 +79,33 @@ update msg model =
             
 -- View
 view : Model -> Html Msg
-view model =  
+view model =
+    case model of
+        Loading lmessage ->
+            loadingView lmessage
+        LoadingProblem errMessage ->
+            errorView errMessage
+        Success loadedModel ->
+            chooseNetworkView loadedModel
+        Details loadedModel ->
+            playGameView loadedModel
+    
+loadingView : String -> Html Msg
+loadingView  message =
+    div[][]
+
+errorView : String -> Html Msg
+errorView  errMessage =
+    div[][]
+
+
+chooseNetworkView : LoadedModel -> Html Msg
+chooseNetworkView  model =
+    div[][]
+
+
+playGameView : LoadedModel -> Html Msg
+playGameView  model =
     div[][]
 
 
