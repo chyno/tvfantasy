@@ -1,4 +1,4 @@
-module Shared exposing (Flags, RemoteDataMsg(..), mapRemoteData, toString)
+module Shared exposing (Flags, RemoteDataMsg(..), mapRemoteData, toString, ShowInfo, NetworkInfo, UserInfo)
 import Graphql.Http.GraphqlError as GraphqlError exposing(..)
 import Graphql.Http exposing (..)
 import RemoteData exposing (RemoteData)
@@ -61,4 +61,27 @@ toString err  =
                     
                 
           
-            
+-- Shared data
+type alias ShowInfo =
+    {
+        name: String
+        , rating: Int
+        , description: String
+    }
+
+type alias NetworkInfo = 
+    {
+        name: String
+        , rating: Int
+        , description: String 
+        , shows: List ShowInfo
+    }
+
+type alias UserInfo =
+    { 
+        walletAddress :  String
+        , amount : Maybe Int
+        , networks:  List (Maybe NetworkInfo)
+       
+    }
+
