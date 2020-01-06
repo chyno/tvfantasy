@@ -1,23 +1,22 @@
 module Page.Game exposing (Model, Msg(.. ), init, subscriptions, update, view)
 import Html exposing (..)
+import Html.Attributes exposing (..)
+import Html.Events exposing (onClick)
 import GameApi exposing(queryUserInfo)
-import  Shared exposing  (ShowInfo, NetworkInfo, UserInfo)
+import  Shared exposing  ( NetworkInfo, UserInfo)
 import RemoteData exposing (RemoteData)
 import Graphql.OptionalArgument exposing (OptionalArgument(..))
-import Graphql.Document as Document
 import Graphql.Http
-import Graphql.Operation exposing (RootQuery)
-import Graphql.SelectionSet as SelectionSet exposing (SelectionSet)
-
-
-type Msg =  GotUserInfoResponse (RemoteData (Graphql.Http.Error (Maybe UserInfo)) (Maybe UserInfo))
-
-
--- type Problem = Problem String
-
+import Bootstrap.Form as Form
+import Bootstrap.Form.Select as Select
+import Bootstrap.Button as Button
+import Bootstrap.ListGroup as ListGroup
+import Routes exposing (showsPath)
+import Browser.Navigation as Nav
+-- Model
 type Model =    Loading String
                 | LoadingProblem String
-                | Success LoadedModel 
+                | SelectNetwork LoadedModel 
                 | Details LoadedModel
 
 type alias LoadedModel =
@@ -25,34 +24,38 @@ type alias LoadedModel =
          currentShows: List String
         , walletAddress :  String
         , amount : Maybe Int
-        , networks:  List NetworkInfo
+        , networks:  List (NetworkInfo)
         , selectedNetwork:  Maybe NetworkInfo
        
     }
 
 
-init : String  -> ( Model, Cmd Msg )
-init username = 
-    (Loading username, makeUserInfoRequest username )
 
-makeUserInfoRequest : String -> Cmd Msg
-makeUserInfoRequest username =
-    queryUserInfo username
-        |> Graphql.Http.queryRequest "https://graphql.fauna.com/graphql"
-        |> Graphql.Http.withHeader "Authorization" ("Bearer fnADbMd3RLACEpjT90hoJSn6SXhN281PIgIZg375" )
-        |> Graphql.Http.send (RemoteData.fromResult >> GotUserInfoResponse)
-
-
--- Subcriptions
-subscriptions : Model -> Sub Msg
-subscriptions model =
-    Sub.none
+-- Message
+type Msg =  GotUserInfoResponse (RemoteData (Graphql.Http.Error (Maybe UserInfo)) (Maybe UserInfo))
+            | NetworkChange String
+            | OnSelectNetwork
+            | NavigateShows 
+            | ChangeNetwork
+           
 
 -- Update
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
-    case msg of
-        GotUserInfoResponse response ->
+    case (msg, model) of
+        (ChangeNetwork, Details loadModel) ->
+             (SelectNetwork loadModel , Cmd.none)
+        (NavigateShows, _) ->
+            (model , Nav.load  Routes.showsPath)
+        (OnSelectNetwork, _) ->
+            (model, Cmd.none)
+        (NetworkChange newMet, SelectNetwork loadModel) ->
+            let
+                netWork = List.filter (\x -> x.name == newMet) loadModel.networks |> List.head
+            in
+                (SelectNetwork {loadModel | selectedNetwork = netWork  }, Cmd.none)
+
+        (GotUserInfoResponse response, _) ->
             case response of
                 RemoteData.Loading ->
                     (Loading "loading..." , Cmd.none)
@@ -61,10 +64,10 @@ update msg model =
                         Just data ->
                             -- TODOE: get networks
                             (
-                                Success {
+                                SelectNetwork {
                                      walletAddress = data.walletAddress
                                     , amount = data.amount
-                                    , networks = []
+                                    , networks = List.filterMap (\a -> a) data.networks
                                     , selectedNetwork = Nothing
                                     , currentShows = [] 
     
@@ -76,7 +79,8 @@ update msg model =
                     (LoadingProblem  "err", Cmd.none)
                 RemoteData.NotAsked ->
                     (LoadingProblem  "Not Asked", Cmd.none)
-            
+        (_, _) ->
+            (model, Cmd.none)    
 -- View
 view : Model -> Html Msg
 view model =
@@ -85,28 +89,63 @@ view model =
             loadingView lmessage
         LoadingProblem errMessage ->
             errorView errMessage
-        Success loadedModel ->
+        SelectNetwork loadedModel ->
             chooseNetworkView loadedModel
         Details loadedModel ->
             playGameView loadedModel
     
 loadingView : String -> Html Msg
 loadingView  message =
-    div[][]
+    div[][text message]
 
 errorView : String -> Html Msg
 errorView  errMessage =
-    div[][]
+    div[][text errMessage]
 
 
 chooseNetworkView : LoadedModel -> Html Msg
 chooseNetworkView  model =
-    div[][]
+         div[][
+         Form.form []
+        [   
+             Form.group []
+             [ Form.label [ for "mynetworks" ] [ text "Avaliable Networks" ]
+             , Select.select [ Select.id "mynetworks", Select.onChange NetworkChange  ]
+                 (List.map (\x ->  Select.item [] [ text x.name ]) model.networks) 
+                           
+             ]
+         ]
+         ,    
+         Button.button [ Button.primary,  Button.onClick OnSelectNetwork ] [ text "Select" ]
+         , Button.button [ Button.secondary,  Button.onClick NavigateShows ] [ text "Add Network" ]
+         , Button.button [ Button.secondary ] [ text "Cancel" ]
+     ]
+
 
 
 playGameView : LoadedModel -> Html Msg
-playGameView  model =
-    div[][]
+playGameView model = 
+    div [] [
+        ListGroup.ul
+            (List.map (\x ->  ListGroup.li [] [ text x ]) model.currentShows)
+        , Button.button [ Button.primary,  Button.onClick NavigateShows ] [ text "Choose Available Shows" ]
+        , Button.button [Button.secondary, Button.onClick ChangeNetwork][ text "Change Network"]
+    ]
+
+-- Subcriptions
+subscriptions : Model -> Sub Msg
+subscriptions model =
+    Sub.none
 
 
+-- Helpers
+makeUserInfoRequest : String -> Cmd Msg
+makeUserInfoRequest username =
+    queryUserInfo username
+        |> Graphql.Http.queryRequest "https://graphql.fauna.com/graphql"
+        |> Graphql.Http.withHeader "Authorization" ("Bearer fnADbMd3RLACEpjT90hoJSn6SXhN281PIgIZg375" )
+        |> Graphql.Http.send (RemoteData.fromResult >> GotUserInfoResponse)
 
+init : String  -> ( Model, Cmd Msg )
+init username = 
+    (Loading username, makeUserInfoRequest username )

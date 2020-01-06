@@ -1,38 +1,53 @@
-module Page.Show exposing (Model, view, Msg(..), update, subscriptions, init, ShowInfo)
+module Page.Show exposing (Model, Msg(..), ShowInfo, init, subscriptions, update, view)
 
-import Browser
 import Browser.Navigation as Nav
 import Html exposing (..)
 import Html.Attributes exposing (..)
-import Html.Events exposing (onClick, onInput)
+import Html.Events exposing (onClick)
 import Http exposing (..)
-import Loading exposing (LoadingState)
-import Shared exposing (..)
-import Routes exposing (gamePath)
 import Json.Decode as D
-import Json.Encode as E
+import Routes exposing (gamePath)
+import Shared exposing (..)
+import Bootstrap.Form.Checkbox exposing (checkbox, checked, onCheck)
 
-type Msg =  OnFetchShows (Result Http.Error (List ShowInfo))
-            | NavigateGame
-    
+type Msg
+    = OnFetchShows (Result Http.Error (List ShowInfo))
+    | NavigateGame
+    | SelectShow Bool String
 
 init : Flags -> ( Model, Cmd Msg )
 init flags =
-    ( { showInfos = Loading }, fetchShows flags )
+    (LoadingData  { showInfosLoading = Loading }, fetchShows flags )
 
 -- Model
-type alias Model =
-    { showInfos : RemoteDataMsg (List ShowInfo)
+type alias LoadingModel =
+     { showInfosLoading: RemoteDataMsg (List RemoteShowInfo) }
+
+type alias LoadedModel = 
+    { showInfos: List ShowInfo }
+
+
+type  Model =   LoadingData LoadingModel
+                |   LoadedData LoadedModel
+    
+-- type alias Model =
+--     { showInfos : RemoteDataMsg (List ShowInfo)
+     
+--     }
+
+type alias RemoteShowInfo =
+    { name : String
+    , overview : String
+    , firstAirDate : String
+     , voteAverage : Float    
     }
 
 type alias ShowInfo =
     { name : String
     , overview : String
     , firstAirDate : String
-    , voteAverage : Float
+    , voteAverage : Float    
     }
-
-
 
 fetchShows : Flags -> Cmd Msg
 fetchShows flags =
@@ -41,21 +56,35 @@ fetchShows flags =
         , expect = Http.expectJson OnFetchShows listOfShowsDecoder
         }
 
+updateShowSelection : List ShowInfo -> List ShowInfo
+updateShowSelection shows = 
+    shows
+
 -- Update
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
-    case msg of
-        OnFetchShows (Ok shows) ->
-            Debug.log "ok shows .."
-            ( { model | showInfos = Loaded shows }, Cmd.none )
-        OnFetchShows (Err err) ->
-            Debug.log "error .."
-            ( { model | showInfos = Failure }, Cmd.none )
-        NavigateGame ->
-            (model, (Nav.load  Routes.gamePath) )
-       
+    case model of
+        LoadedData mdl ->
+            case msg of
+                SelectShow isCheck name ->
+                    ( model, Cmd.none )
+                _ ->
+                     ( model, Cmd.none )
+        LoadingData mdl ->
+            case msg of
+                OnFetchShows (Ok shows) ->
+                    Debug.log "ok shows .."
+                    (LoadedData { showInfos =  shows}, Cmd.none )
 
-       
+                OnFetchShows (Err err) ->
+                    Debug.log "error .."
+                    (LoadingData { showInfosLoading =  Failure}, Cmd.none )
+
+                NavigateGame ->
+                    ( model, Nav.load Routes.gamePath )
+                _ ->
+                     ( model, Cmd.none )
+
 -- Subscriptions
 subscriptions : Model -> Sub Msg
 subscriptions model =
@@ -64,26 +93,38 @@ subscriptions model =
 -- Views
 view : Model -> Html Msg
 view model =
-    let
-        content =
-            case model.showInfos of
-                NotAsked ->
-                    text "not asked"
+    case model of
+        LoadingData mdl1 ->
+            loadingView mdl1
+        LoadedData mdl2 ->
+            loadedView mdl2
+            
 
-                Loading ->
-                    text "Page is Loading "
+loadingView : LoadingModel -> Html Msg
+loadingView  model  =
+   let
+        content =
+            case model.showInfosLoading of
+                NotAsked  ->
+                    text "not asked"
+                Loading  ->
+                    text "Loading"
 
                 Loaded players ->
-                    viewWithData players
+                    text "Loaded"
 
                 Failure ->
                     text "Error"
     in
-    section [ class "p-4" ]
-        [ content ]
+        section [ class "p-4" ]
+            [ content ]
 
-viewWithData : List ShowInfo -> Html Msg
-viewWithData shows =
+showRow : ShowInfo -> Html Msg
+showRow show =
+    tr [] []
+        
+loadedView : LoadedModel -> Html Msg
+loadedView model =
     let
         showDetails =
             \x ->
@@ -98,32 +139,33 @@ viewWithData shows =
     in
     div [ class "message" ]
         [ h1 [] [ text "These are available shows:" ]
-        , table []
-            (tr []
-                [ th [] [ text "Name" ]
+        , div [ id "wrapper" ]
+            [ table []
+                (tr []
+                    [ th [] [ text "Name" ]
 
-                -- ,th[][text "Country"]
-                , th [] [ text "Description" ]
-                , th [] [ text "First Aired" ]
-                , th [] [ text "Vote Average" ]
-                ]
-                :: List.map showDetails shows
-            )
-        , div [ class "button",  onClick  NavigateGame ] [ text "Back to Your Tv Game" ]
+                    -- ,th[][text "Country"]
+                    , th [] [ text "Description" ]
+                    , th [] [ text "First Aired" ]
+                    , th [] [ text "Vote Average" ]
+                    ]
+                    :: List.map showDetails model.showInfos
+                )
+            ]
+        , div [ class "button", onClick NavigateGame ] [ text "Back to Your Tv Game" ]
         ]
 
-
 -- Decoders
-showDecoder : D.Decoder ShowInfo
+showDecoder : D.Decoder RemoteShowInfo
 showDecoder =
     D.map4
-        ShowInfo
+        RemoteShowInfo
         (D.field "name" D.string)
         -- (D.field "country" D.string))
         (D.field "overview" D.string)
         (D.field "first_air_date" D.string)
         (D.field "vote_average" D.float)
-
+        
 
 listOfShowsDecoder : D.Decoder (List ShowInfo)
 listOfShowsDecoder =
