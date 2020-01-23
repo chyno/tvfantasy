@@ -8,7 +8,7 @@ type User   {
  
 }
 
-type Show  {
+type Show  {  
   name: String!
   rating: Int!
   description: String!

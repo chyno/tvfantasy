@@ -13,7 +13,8 @@ import Bootstrap.Form.Checkbox exposing (checkbox, checked, onCheck)
 type Msg
     = OnFetchShows (Result Http.Error (List ShowInfo))
     | NavigateGame
-    | SelectShow Bool String
+    | SelectShow String Bool 
+    
 
 init : Flags -> ( Model, Cmd Msg )
 init flags =
@@ -24,7 +25,9 @@ type alias LoadingModel =
      { showInfosLoading: RemoteDataMsg (List RemoteShowInfo) }
 
 type alias LoadedModel = 
-    { showInfos: List ShowInfo }
+    { showInfos: List ShowInfo,
+      selectedShowInfos: Maybe ShowInfo
+     }
 
 
 type  Model =   LoadingData LoadingModel
@@ -56,9 +59,14 @@ fetchShows flags =
         , expect = Http.expectJson OnFetchShows listOfShowsDecoder
         }
 
-updateShowSelection : List ShowInfo -> List ShowInfo
-updateShowSelection shows = 
-    shows
+makeUserInfoRequest : String -> Cmd Msg
+makeUserInfoRequest username =
+    queryUserInfo username
+        |> Graphql.Http.queryRequest "https://graphql.fauna.com/graphql"
+        |> Graphql.Http.withHeader "Authorization" ("Bearer fnADbMd3RLACEpjT90hoJSn6SXhN281PIgIZg375" )
+        |> Graphql.Http.send (RemoteData.fromResult >> GotUserInfoResponse)
+
+   
 
 -- Update
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -66,7 +74,7 @@ update msg model =
     case model of
         LoadedData mdl ->
             case msg of
-                SelectShow isCheck name ->
+                SelectShow  name isCheck ->
                     ( model, Cmd.none )
                 _ ->
                      ( model, Cmd.none )
@@ -74,7 +82,7 @@ update msg model =
             case msg of
                 OnFetchShows (Ok shows) ->
                     Debug.log "ok shows .."
-                    (LoadedData { showInfos =  shows}, Cmd.none )
+                    (LoadedData { showInfos =  shows, selectedShowInfos = Nothing}, LoadSelectedShows )
 
                 OnFetchShows (Err err) ->
                     Debug.log "error .."
@@ -97,7 +105,7 @@ view model =
         LoadingData mdl1 ->
             loadingView mdl1
         LoadedData mdl2 ->
-            loadedView mdl2
+        loadedView mdl2
             
 
 loadingView : LoadingModel -> Html Msg
@@ -119,37 +127,33 @@ loadingView  model  =
         section [ class "p-4" ]
             [ content ]
 
+
+
 showRow : ShowInfo -> Html Msg
 showRow show =
-    tr [] []
+    tr  []
+        [ 
+            td [] [ checkbox[ checked False, SelectShow show.name |> onCheck ] "" ]
+            , td [] [ text show.name ]
+            , td [] [ text show.overview ]
+            , td [] [ text show.firstAirDate ]
+            , td [] [ text (String.fromFloat show.voteAverage) ]
+        ]
         
 loadedView : LoadedModel -> Html Msg
 loadedView model =
-    let
-        showDetails =
-            \x ->
-                tr []
-                    [ td [] [ text x.name ]
-
-                    -- ,td[][text x.country]
-                    , td [] [ text x.overview ]
-                    , td [] [ text x.firstAirDate ]
-                    , td [] [ text (String.fromFloat x.voteAverage) ]
-                    ]
-    in
     div [ class "message" ]
         [ h1 [] [ text "These are available shows:" ]
         , div [ id "wrapper" ]
             [ table []
                 (tr []
-                    [ th [] [ text "Name" ]
-
-                    -- ,th[][text "Country"]
-                    , th [] [ text "Description" ]
-                    , th [] [ text "First Aired" ]
-                    , th [] [ text "Vote Average" ]
+                    [   th [] [ ]
+                        , th [] [ text "Name" ]
+                        , th [] [ text "Description" ]
+                        , th [] [ text "First Aired" ]
+                        , th [] [ text "Vote Average" ]
                     ]
-                    :: List.map showDetails model.showInfos
+                    :: List.map showRow model.showInfos
                 )
             ]
         , div [ class "button", onClick NavigateGame ] [ text "Back to Your Tv Game" ]
