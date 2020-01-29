@@ -61,10 +61,11 @@ fetchShows flags =
 
 makeUserInfoRequest : String -> Cmd Msg
 makeUserInfoRequest username =
-    queryUserInfo username
-        |> Graphql.Http.queryRequest "https://graphql.fauna.com/graphql"
-        |> Graphql.Http.withHeader "Authorization" ("Bearer fnADbMd3RLACEpjT90hoJSn6SXhN281PIgIZg375" )
-        |> Graphql.Http.send (RemoteData.fromResult >> GotUserInfoResponse)
+    Cmd.none
+    -- queryUserInfo username
+    --     |> Graphql.Http.queryRequest "https://graphql.fauna.com/graphql"
+    --     |> Graphql.Http.withHeader "Authorization" ("Bearer fnADbMd3RLACEpjT90hoJSn6SXhN281PIgIZg375" )
+    --     |> Graphql.Http.send (RemoteData.fromResult >> GotUserInfoResponse)
 
    
 
@@ -82,7 +83,8 @@ update msg model =
             case msg of
                 OnFetchShows (Ok shows) ->
                     Debug.log "ok shows .."
-                    (LoadedData { showInfos =  shows, selectedShowInfos = Nothing}, LoadSelectedShows )
+                    (LoadedData { showInfos =  shows, selectedShowInfos = Nothing}, Cmd.none )
+                    -- (LoadedData { showInfos =  shows, selectedShowInfos = Nothing}, LoadSelectedShows )
 
                 OnFetchShows (Err err) ->
                     Debug.log "error .."
@@ -105,7 +107,7 @@ view model =
         LoadingData mdl1 ->
             loadingView mdl1
         LoadedData mdl2 ->
-        loadedView mdl2
+            loadedView mdl2
             
 
 loadingView : LoadingModel -> Html Msg
