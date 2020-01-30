@@ -12,21 +12,20 @@ type Game {
   start: Date
   end: Date
   user: User @relation
-  shows: [Show!] @relation
+  shows: [Show!]
 }
 
 type Show  {  
   name: String!
   rating: Int!
   description: String!
-  game: Game!
+  game: Game! @relation
 }
 
 
 
 type Query {
   allUsers: [User]
-  userByUser(userName: String!): User
-
+  userByUserName(userName: String!): User
 }
 

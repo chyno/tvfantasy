@@ -13,20 +13,8 @@ type GamePage
     = GamePage
 
 
-type Network
-    = Network
-
-
-type NetworkPage
-    = NetworkPage
-
-
 type Show
     = Show
-
-
-type ShowPage
-    = ShowPage
 
 
 type User
