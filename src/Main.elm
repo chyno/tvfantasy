@@ -6,7 +6,6 @@ import Browser.Navigation as Nav exposing (Key)
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (onClick, onInput)
-import Page.Game as Game
 import Page.Login as Login
 import Page.PlayGame as PlayGame
 import Page.Show as Show
@@ -93,21 +92,7 @@ loadCurrentPage ( model, cmd ) =
             ( { model | page = PageLogin pageModel }, Cmd.batch [ cmd, Cmd.map LoginMsg pageCmd ] )
 
         -- ( PageLogin pageModel, Cmd.map LoginMsg pageCmd )
-        Routes.GameRoute maybeVal ->
-            let
-                mdl =
-                    case maybeVal of
-                        Just val ->
-                            { model | username = val }
-
-                        Nothing ->
-                            model
-
-                ( pageModel, pageCmd ) =
-                    Game.init mdl.username
-            in
-                ( { mdl | page = PageNone }, Cmd.none)
-
+        
         -- ( PageGame pageModel, Cmd.map GameMsg pageCmd )
         Routes.ShowRoute showId ->
             ( { model | page = PageNone }, Cmd.none )

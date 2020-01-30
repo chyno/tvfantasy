@@ -28,7 +28,6 @@ import Loading
         , render
         )
 import RemoteData exposing (RemoteData)
-import Routes exposing (gamePath)
 import Shared exposing (..)
 
 
@@ -201,7 +200,8 @@ update msg model =
         DoneLogin data ->
             if data.isLoggedIn then
                 Debug.log "Success  .."
-                    ( model, Nav.pushUrl model.navKey (Routes.gamePathLogin model.username) )
+                    ( model, Cmd.none )
+                    -- ( model, Nav.pushUrl model.navKey (Routes.gamePathLogin model.username) )
 
             else
                 Debug.log "Fail  .."

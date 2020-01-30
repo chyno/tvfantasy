@@ -1,4 +1,4 @@
-module Routes exposing (Route(..), parseUrl, showPath, showsPath, loginPath, gamePath, gamePathLogin)
+module Routes exposing (Route(..), parseUrl, showPath, showsPath, loginPath)
 
 import Url exposing (Url)
 import Url.Parser exposing (..)
@@ -8,7 +8,6 @@ type Route
     = ShowsRoute
     | ShowRoute String
     | LoginRoute
-    | GameRoute  (Maybe String)
     | NotFoundRoute
 
 
@@ -17,7 +16,6 @@ matchers =
     oneOf
         [ map LoginRoute top
        , map ShowsRoute (s "shows")
-       , map GameRoute (s "game" <?> Query.string "q")
         , map ShowRoute (s "show" </> string)
         , map LoginRoute (s "login")
         ]
@@ -39,17 +37,7 @@ pathFor route =
         ShowsRoute ->
             "/shows"
         LoginRoute ->
-            "/login"
-        GameRoute un ->
-            let
-              rtPth = case un of
-                  Just val ->
-                      "/game?" ++ val
-                  option2 ->
-                        "/game"
-            in
-                rtPth
-                
+            "/login"         
         ShowRoute id ->
             "/show/" ++ id
 
@@ -61,13 +49,6 @@ loginPath =
 
 showsPath =
     pathFor ShowsRoute
-
-gamePath =
-    pathFor (GameRoute Nothing)
-
-gamePathLogin: String -> String
-gamePathLogin val =
-    pathFor (GameRoute  (Just  ("q=" ++  val)))
 
 
 showPath id =

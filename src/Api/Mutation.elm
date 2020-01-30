@@ -106,6 +106,37 @@ deleteUser requiredArgs object_ =
     Object.selectionForCompositeField "deleteUser" [ Argument.required "id" requiredArgs.id (Api.ScalarCodecs.codecs |> Api.Scalar.unwrapEncoder .codecId) ] object_ (identity >> Decode.nullable)
 
 
+type alias DeleteGameRequiredArguments =
+    { id : Api.ScalarCodecs.Id }
+
+
+{-| Delete an existing document in the collection of 'Game'
+
+  - id - The 'Game' document's ID
+
+-}
+deleteGame : DeleteGameRequiredArguments -> SelectionSet decodesTo Api.Object.Game -> SelectionSet (Maybe decodesTo) RootMutation
+deleteGame requiredArgs object_ =
+    Object.selectionForCompositeField "deleteGame" [ Argument.required "id" requiredArgs.id (Api.ScalarCodecs.codecs |> Api.Scalar.unwrapEncoder .codecId) ] object_ (identity >> Decode.nullable)
+
+
+type alias UpdateGameRequiredArguments =
+    { id : Api.ScalarCodecs.Id
+    , data : Api.InputObject.GameInput
+    }
+
+
+{-| Update an existing document in the collection of 'Game'
+
+  - id - The 'Game' document's ID
+  - data - 'Game' input values
+
+-}
+updateGame : UpdateGameRequiredArguments -> SelectionSet decodesTo Api.Object.Game -> SelectionSet (Maybe decodesTo) RootMutation
+updateGame requiredArgs object_ =
+    Object.selectionForCompositeField "updateGame" [ Argument.required "id" requiredArgs.id (Api.ScalarCodecs.codecs |> Api.Scalar.unwrapEncoder .codecId), Argument.required "data" requiredArgs.data Api.InputObject.encodeGameInput ] object_ (identity >> Decode.nullable)
+
+
 type alias UpdateShowRequiredArguments =
     { id : Api.ScalarCodecs.Id
     , data : Api.InputObject.ShowInput
@@ -152,3 +183,17 @@ type alias CreateNetworkRequiredArguments =
 createNetwork : CreateNetworkRequiredArguments -> SelectionSet decodesTo Api.Object.Network -> SelectionSet decodesTo RootMutation
 createNetwork requiredArgs object_ =
     Object.selectionForCompositeField "createNetwork" [ Argument.required "data" requiredArgs.data Api.InputObject.encodeNetworkInput ] object_ identity
+
+
+type alias CreateGameRequiredArguments =
+    { data : Api.InputObject.GameInput }
+
+
+{-| Create a new document in the collection of 'Game'
+
+  - data - 'Game' input values
+
+-}
+createGame : CreateGameRequiredArguments -> SelectionSet decodesTo Api.Object.Game -> SelectionSet decodesTo RootMutation
+createGame requiredArgs object_ =
+    Object.selectionForCompositeField "createGame" [ Argument.required "data" requiredArgs.data Api.InputObject.encodeGameInput ] object_ identity

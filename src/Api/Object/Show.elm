@@ -19,11 +19,6 @@ import Graphql.SelectionSet exposing (SelectionSet)
 import Json.Decode as Decode
 
 
-network : SelectionSet decodesTo Api.Object.Network -> SelectionSet decodesTo Api.Object.Show
-network object_ =
-    Object.selectionForCompositeField "network" [] object_ identity
-
-
 name : SelectionSet String Api.Object.Show
 name =
     Object.selectionForField "String" "name" [] Decode.string
@@ -44,6 +39,11 @@ id_ =
 rating : SelectionSet Int Api.Object.Show
 rating =
     Object.selectionForField "Int" "rating" [] Decode.int
+
+
+game : SelectionSet decodesTo Api.Object.Game -> SelectionSet decodesTo Api.Object.Show
+game object_ =
+    Object.selectionForCompositeField "game" [] object_ identity
 
 
 {-| The document's timestamp.

@@ -28,6 +28,20 @@ userByUserName requiredArgs object_ =
     Object.selectionForCompositeField "userByUserName" [ Argument.required "username" requiredArgs.username (Api.ScalarCodecs.codecs |> Api.Scalar.unwrapEncoder .codecId) ] object_ (identity >> Decode.nullable)
 
 
+type alias FindGameByIDRequiredArguments =
+    { id : Api.ScalarCodecs.Id }
+
+
+{-| Find a document from the collection of 'Game' by its id.
+
+  - id - The 'Game' document's ID
+
+-}
+findGameByID : FindGameByIDRequiredArguments -> SelectionSet decodesTo Api.Object.Game -> SelectionSet (Maybe decodesTo) RootQuery
+findGameByID requiredArgs object_ =
+    Object.selectionForCompositeField "findGameByID" [ Argument.required "id" requiredArgs.id (Api.ScalarCodecs.codecs |> Api.Scalar.unwrapEncoder .codecId) ] object_ (identity >> Decode.nullable)
+
+
 type alias FindShowByIDRequiredArguments =
     { id : Api.ScalarCodecs.Id }
 
@@ -104,6 +118,15 @@ allNetworks fillInOptionals object_ =
                 |> List.filterMap identity
     in
     Object.selectionForCompositeField "allNetworks" optionalArgs object_ identity
+
+
+type alias UserByUserRequiredArguments =
+    { userName : String }
+
+
+userByUser : UserByUserRequiredArguments -> SelectionSet decodesTo Api.Object.User -> SelectionSet (Maybe decodesTo) RootQuery
+userByUser requiredArgs object_ =
+    Object.selectionForCompositeField "userByUser" [ Argument.required "userName" requiredArgs.userName Encode.string ] object_ (identity >> Decode.nullable)
 
 
 type alias AllShowsOptionalArguments =

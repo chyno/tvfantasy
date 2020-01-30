@@ -81,3 +81,5 @@ query {
 }
 
 
+## Create scheme.gql
+### https://fauna.com/blog/abac-graphql

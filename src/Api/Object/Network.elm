@@ -41,29 +41,9 @@ rating =
     Object.selectionForField "Int" "rating" [] Decode.int
 
 
-type alias ShowsOptionalArguments =
-    { size_ : OptionalArgument Int
-    , cursor_ : OptionalArgument String
-    }
-
-
-{-|
-
-  - size\_ - The number of items to return per page.
-  - cursor\_ - The pagination cursor.
-
--}
-shows : (ShowsOptionalArguments -> ShowsOptionalArguments) -> SelectionSet decodesTo Api.Object.ShowPage -> SelectionSet decodesTo Api.Object.Network
-shows fillInOptionals object_ =
-    let
-        filledInOptionals =
-            fillInOptionals { size_ = Absent, cursor_ = Absent }
-
-        optionalArgs =
-            [ Argument.optional "_size" filledInOptionals.size_ Encode.int, Argument.optional "_cursor" filledInOptionals.cursor_ Encode.string ]
-                |> List.filterMap identity
-    in
-    Object.selectionForCompositeField "shows" optionalArgs object_ identity
+shows : SelectionSet decodesTo Api.Object.Show -> SelectionSet (Maybe (List decodesTo)) Api.Object.Network
+shows object_ =
+    Object.selectionForCompositeField "shows" [] object_ (identity >> Decode.list >> Decode.nullable)
 
 
 user : SelectionSet decodesTo Api.Object.User -> SelectionSet decodesTo Api.Object.Network

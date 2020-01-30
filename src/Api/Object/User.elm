@@ -19,36 +19,6 @@ import Graphql.SelectionSet exposing (SelectionSet)
 import Json.Decode as Decode
 
 
-type alias NetworksOptionalArguments =
-    { size_ : OptionalArgument Int
-    , cursor_ : OptionalArgument String
-    }
-
-
-{-|
-
-  - size\_ - The number of items to return per page.
-  - cursor\_ - The pagination cursor.
-
--}
-networks : (NetworksOptionalArguments -> NetworksOptionalArguments) -> SelectionSet decodesTo Api.Object.NetworkPage -> SelectionSet decodesTo Api.Object.User
-networks fillInOptionals object_ =
-    let
-        filledInOptionals =
-            fillInOptionals { size_ = Absent, cursor_ = Absent }
-
-        optionalArgs =
-            [ Argument.optional "_size" filledInOptionals.size_ Encode.int, Argument.optional "_cursor" filledInOptionals.cursor_ Encode.string ]
-                |> List.filterMap identity
-    in
-    Object.selectionForCompositeField "networks" optionalArgs object_ identity
-
-
-username : SelectionSet Api.ScalarCodecs.Id Api.Object.User
-username =
-    Object.selectionForField "ScalarCodecs.Id" "username" [] (Api.ScalarCodecs.codecs |> Api.Scalar.unwrapCodecs |> .codecId |> .decoder)
-
-
 {-| The document's ID.
 -}
 id_ : SelectionSet Api.ScalarCodecs.Id Api.Object.User
@@ -61,19 +31,34 @@ walletAddress =
     Object.selectionForField "String" "walletAddress" [] Decode.string
 
 
-amount : SelectionSet (Maybe Int) Api.Object.User
-amount =
-    Object.selectionForField "(Maybe Int)" "amount" [] (Decode.int |> Decode.nullable)
+type alias GamesOptionalArguments =
+    { size_ : OptionalArgument Int
+    , cursor_ : OptionalArgument String
+    }
 
 
-end : SelectionSet (Maybe Api.ScalarCodecs.Date) Api.Object.User
-end =
-    Object.selectionForField "(Maybe ScalarCodecs.Date)" "end" [] (Api.ScalarCodecs.codecs |> Api.Scalar.unwrapCodecs |> .codecDate |> .decoder |> Decode.nullable)
+{-|
+
+  - size\_ - The number of items to return per page.
+  - cursor\_ - The pagination cursor.
+
+-}
+games : (GamesOptionalArguments -> GamesOptionalArguments) -> SelectionSet decodesTo Api.Object.GamePage -> SelectionSet decodesTo Api.Object.User
+games fillInOptionals object_ =
+    let
+        filledInOptionals =
+            fillInOptionals { size_ = Absent, cursor_ = Absent }
+
+        optionalArgs =
+            [ Argument.optional "_size" filledInOptionals.size_ Encode.int, Argument.optional "_cursor" filledInOptionals.cursor_ Encode.string ]
+                |> List.filterMap identity
+    in
+    Object.selectionForCompositeField "games" optionalArgs object_ identity
 
 
-start : SelectionSet (Maybe Api.ScalarCodecs.Date) Api.Object.User
-start =
-    Object.selectionForField "(Maybe ScalarCodecs.Date)" "start" [] (Api.ScalarCodecs.codecs |> Api.Scalar.unwrapCodecs |> .codecDate |> .decoder |> Decode.nullable)
+userName : SelectionSet String Api.Object.User
+userName =
+    Object.selectionForField "String" "userName" [] Decode.string
 
 
 {-| The document's timestamp.
