@@ -4,11 +4,7 @@ import Html exposing (Html, div, h1, label, text)
 import Html.Events exposing (onClick)
 import Shared exposing (NetworkInfo, ShowInfo)
 
-
-
 --  Model
-
-
 type alias GameModel =
     { userName : String
     , selectedNetwork : Maybe NetworkInfo
@@ -22,14 +18,12 @@ newNetwork =
         , rating = 0
         , description = "" 
         , shows = []
-
     }
 
 type Model
     = LoadingExistingNetworks String
     | DisplayGame GameModel
-    | EditNetwork GameModel
-
+    
 
 type Msg
     = AddNewNetwork
@@ -38,44 +32,30 @@ type Msg
 -- View
 view : Model -> Html Msg
 view model =
-    case model of
-        LoadingExistingNetworks mdl ->
-            loadingView
-
-        DisplayGame mdl ->
-            displayGameView mdl
-        EditNetwork mdl ->
-            editNetworkView mdl
-
+    let
+        vw =
+            case model of
+                LoadingExistingNetworks mdl ->
+                    loadingView
+                DisplayGame mdl ->
+                    case mdl.selectedNetwork of
+                        Nothing ->
+                            div [][ text "Create a Network to start a game"]  
+                        Just sel ->
+                            gameView sel
+    in
+    div [] [
+        vw,
+        Html.button [ onClick AddNewNetwork ] [ text "Add New Network " ]
+    ]
+    
 loadingView : Html Msg
 loadingView =
     div [] [ text "... Loading" ]
 
-displayGameView : GameModel -> Html Msg
-displayGameView model =
-    let
-        vw =
-            case model.selectedNetwork of
-                Just mdl ->
-                    gameDetailsView mdl
 
-                Nothing ->
-                    div [] [ text "No Data" ]
-    in
-    div []
-        [ h1 [] [ text "Playing Game" ]
-        , vw
-        , Html.button [ onClick AddNewNetwork ] [ text "Add New Network " ]
-        ]
-
-
-editNetworkView : GameModel -> Html Msg
-editNetworkView model =
-    div [] [ text "edit netwok" ]
-
-
-gameDetailsView : NetworkInfo -> Html Msg
-gameDetailsView netInfo =
+gameView : NetworkInfo -> Html Msg
+gameView netInfo =
     div []
         [ label [] [ text "Name: " ]
         , div [] [ text netInfo.name ]
@@ -84,7 +64,7 @@ gameDetailsView netInfo =
         , label [] [ text "Description: " ]
         , div [] [ text netInfo.description ]
         ]
-
+-- 
 -- Subscriptions
 subscriptions : Model -> Sub Msg
 subscriptions model =
@@ -95,10 +75,10 @@ update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case ( msg, model ) of
         ( AddNewNetwork, DisplayGame mdl ) ->
-            ( EditNetwork { mdl | selectedNetwork = Just newNetwork }, Cmd.none )
-
-        ( EditExistingNetwork, EditNetwork mdl ) ->
-            ( EditNetwork mdl, Cmd.none )
+            Debug.log "Adding newwork"
+            ( DisplayGame { mdl | selectedNetwork = Just newNetwork }, Cmd.none )
+        ( EditExistingNetwork, DisplayGame mdl ) ->
+            ( DisplayGame mdl, Cmd.none )
         _ ->
             ( model, Cmd.none )
  

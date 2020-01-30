@@ -28,7 +28,6 @@ type Page
     = PageNone
     | PageLogin Login.Model
     | PageShow Show.Model
-    | PageGame Game.Model
     | PagePlayGame PlayGame.Model
 
 
@@ -37,7 +36,6 @@ type Msg
     | LinkClicked UrlRequest
     | LoginMsg Login.Msg
     | ShowMsg Show.Msg
-    | GameMsg Game.Msg
     | PlayGameMsg PlayGame.Msg
     | Logout
 
@@ -108,7 +106,7 @@ loadCurrentPage ( model, cmd ) =
                 ( pageModel, pageCmd ) =
                     Game.init mdl.username
             in
-            ( { mdl | page = PageGame pageModel }, Cmd.batch [ cmd, Cmd.map GameMsg pageCmd ] )
+                ( { mdl | page = PageNone }, Cmd.none)
 
         -- ( PageGame pageModel, Cmd.map GameMsg pageCmd )
         Routes.ShowRoute showId ->
@@ -139,8 +137,8 @@ subscriptions model =
                 PageShow pageModel ->
                     Sub.map ShowMsg (Show.subscriptions pageModel)
 
-                PageGame pageModel ->
-                    Sub.map GameMsg (Game.subscriptions pageModel)
+                -- PageGame pageModel ->
+                --     Sub.map GameMsg (Game.subscriptions pageModel)
 
                 PageNone ->
                     Sub.none
@@ -155,7 +153,6 @@ update msg model =
             case urlRequest of
                 Browser.Internal url ->
                     ( model, Nav.pushUrl model.navKey (Url.toString url) )
-
                 Browser.External url ->
                     ( model, Nav.load url )
 
@@ -185,13 +182,13 @@ update msg model =
             , Cmd.map ShowMsg newCmd
             )
 
-        ( GameMsg subMsg, PageGame pageModel ) ->
+        ( PlayGameMsg subMsg, PagePlayGame pageModel ) ->
             let
                 ( newPageModel, newCmd ) =
-                    Game.update subMsg pageModel
+                    PlayGame.update subMsg pageModel
             in
-            ( { model | page = PageGame newPageModel }
-            , Cmd.map GameMsg newCmd
+            ( { model | page = PagePlayGame newPageModel }
+            , Cmd.map PlayGameMsg newCmd
             )
 
         ( Logout, _ ) ->
@@ -252,11 +249,6 @@ currentPage model =
         PageShow pageModel ->
             Show.view pageModel
                 |> Html.map ShowMsg
-
-        PageGame pageModel ->
-            Game.view pageModel
-                |> Html.map GameMsg
-
         PageNone ->
             notFoundView
 
