@@ -1,71 +1,90 @@
-module Page.PlayGame exposing (Model, Msg(.. ), init, subscriptions, update, view)
+module Page.PlayGame exposing (Model, Msg(..), init, subscriptions, update, view)
 
-import Html exposing (label,h1, div, Html, text)
-import  Shared exposing  ( NetworkInfo, ShowInfo)
--- import Html.Attributes exposing (text)
--- import Html.Events exposing (onClick)
+import Html exposing (Html, div, h1, label, text)
+import Html.Events exposing (onClick)
+import Shared exposing (NetworkInfo, ShowInfo)
+
+
 
 --  Model
 
+
 type alias GameModel =
-    { 
-     userName : String
-     , selectedNetwork : Maybe NetworkInfo
-     , availableNetworks : (List String)
+    { userName : String
+    , selectedNetwork : Maybe NetworkInfo
+    , availableNetworks : List String
     }
-type  Model =   LoadingExistingNetworks GameModel
-                | DisplayGame GameModel
-                | EditNetwork GameModel
+
+newNetwork : NetworkInfo
+newNetwork = 
+    {
+        name = ""
+        , rating = 0
+        , description = "" 
+        , shows = []
+
+    }
+
+type Model
+    = LoadingExistingNetworks String
+    | DisplayGame GameModel
+    | EditNetwork GameModel
 
 
-type Msg = AddNewNetworkMsg String
+type Msg
+    = AddNewNetwork
+    | EditExistingNetwork
 
 -- View
 view : Model -> Html Msg
 view model =
-   case model of
+    case model of
         LoadingExistingNetworks mdl ->
-           loadingView
+            loadingView
+
         DisplayGame mdl ->
-           displayGameView mdl
+            displayGameView mdl
         EditNetwork mdl ->
             editNetworkView mdl
 
-loadingView :  Html Msg
+loadingView : Html Msg
 loadingView =
-    div [][text "... Loading"]
+    div [] [ text "... Loading" ]
 
-displayGameView : GameModel ->  Html Msg
+displayGameView : GameModel -> Html Msg
 displayGameView model =
     let
-        vw = case model.selectedNetwork of
-            Just mdl ->
-                gameDetailsView mdl
-            Nothing ->
-                div[][text "No Data"]
-    in
-    
-    div [][
-        h1[][text "Playing Game"]
-        , vw
-         
-    ]
-    
+        vw =
+            case model.selectedNetwork of
+                Just mdl ->
+                    gameDetailsView mdl
 
-editNetworkView : GameModel ->  Html Msg
+                Nothing ->
+                    div [] [ text "No Data" ]
+    in
+    div []
+        [ h1 [] [ text "Playing Game" ]
+        , vw
+        , Html.button [ onClick AddNewNetwork ] [ text "Add New Network " ]
+        ]
+
+
+editNetworkView : GameModel -> Html Msg
 editNetworkView model =
-    div [][text "edit netwok"]
+    div [] [ text "edit netwok" ]
+
 
 gameDetailsView : NetworkInfo -> Html Msg
 gameDetailsView netInfo =
-    div[][
-        label[][text "Name: "]
-        , div[][ text netInfo.name]
-        , label[][text "Rating: "]
-        , div[][text  "netInfo.rating"]
-        , label[][text "Description: "]
-        , div[][text netInfo.description]
-    ]
+    div []
+        [ label [] [ text "Name: " ]
+        , div [] [ text netInfo.name ]
+        , label [] [ text "Rating: " ]
+        , div [] [ text "netInfo.rating" ]
+        , label [] [ text "Description: " ]
+        , div [] [ text netInfo.description ]
+        ]
+
 -- Subscriptions
 subscriptions : Model -> Sub Msg
 subscriptions model =
@@ -74,19 +93,25 @@ subscriptions model =
 -- Update
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
- case msg of
-     AddNewNetworkMsg user ->
-         (model, Cmd.none)
+    case ( msg, model ) of
+        ( AddNewNetwork, DisplayGame mdl ) ->
+            ( EditNetwork { mdl | selectedNetwork = Just newNetwork }, Cmd.none )
 
-initModel : String  -> Model
-initModel userName = 
-    DisplayGame {
-                    userName = userName
-                    , selectedNetwork = Nothing
-                    , availableNetworks = []
-                }
+        ( EditExistingNetwork, EditNetwork mdl ) ->
+            ( EditNetwork mdl, Cmd.none )
+        _ ->
+            ( model, Cmd.none )
+ 
+initModel : String -> Model
+initModel userName =
+    DisplayGame
+        { userName = userName
+        , selectedNetwork = Nothing
+        , availableNetworks = []
+        }
+
 -- Helpers
-init : String  -> ( Model, Cmd Msg )
-init userName = 
-    (initModel userName, Cmd.none )
-        
+
+init : String -> ( Model, Cmd Msg )
+init userName =
+    ( initModel userName, Cmd.none )
