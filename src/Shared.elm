@@ -106,5 +106,5 @@ type alias NetworkInfo =
 type alias UserInfo =
     { userName : String
     , walletAddress : String
-    , games : List (Maybe GameInfo)
+    , games : List  GameInfo
     }

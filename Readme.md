@@ -34,7 +34,7 @@
   }
   
 }
-# "_id": "256085179511079444"
+# "_id": "256087277788201490"
 
 mutation createGame {
   createGame(data: {
@@ -43,7 +43,7 @@ mutation createGame {
   networkName: "network 2"
   networkDescription: "network descr 2"
     user: {
-      connect : 256085179511079444
+      connect : 256087277788201490
     }
   }) {
     _id
@@ -65,14 +65,34 @@ query {
           gameName
           networkName
           networkDescription
-          shows {
-            name
-            
+           shows {
+            data {
+              showName
+              showDescription
+              rating
+            }
           }
+         
         }
       }
     }
   }
+}
+
+
+mutation createShow {
+  createShow( data : {
+    showName: "new show 2"
+    showDescription : "sown description 2"
+    rating : 1
+    game: {
+      connect : 256087327657427476
+    }
+  })
+  {
+    _id 
+  }
+  
 }
 ## Create scheme.gql
 ### https://fauna.com/blog/abac-graphql

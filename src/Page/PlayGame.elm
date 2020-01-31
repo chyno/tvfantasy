@@ -3,19 +3,17 @@ module Page.PlayGame exposing (Model, Msg(..), init, subscriptions, update, view
 import Api.Object
 import Api.Object.Game as Game
 import Api.Object.GamePage as GamePage
-import Api.Object.Show as Show
 import Api.Object.User as User
 import Api.Query as Query
 import Api.Scalar exposing (Id(..))
-import Graphql.Document as Document
-import Graphql.Http
-import Graphql.Operation exposing (RootQuery)
+import Graphql.Http exposing (..)
 import Graphql.OptionalArgument exposing (OptionalArgument(..))
 import Graphql.SelectionSet as SelectionSet exposing (SelectionSet)
-import Html exposing (Html, div, h1, label, text)
+import Html exposing (Html, div, h1, label, li, text, ul)
 import Html.Events exposing (onClick)
-import Shared exposing (GameInfo, NetworkInfo, ShowInfo, UserInfo)
-
+import RemoteData exposing (RemoteData)
+import Shared exposing (GameInfo, UserInfo)
+import Json.Decode as Json
 
 
 --  Model
@@ -26,30 +24,24 @@ type alias GameData =
     }
 
 
-gameDataParser : GameData -> List (Maybe GameInfo)
+gameDataParser : GameData -> List GameInfo
 gameDataParser ndata =
-    ndata.data
+    List.foldr foldrValues [] ndata.data
+
+
+foldrValues : Maybe a -> List a -> List a
+foldrValues item list =
+    case item of
+        Nothing ->
+            list
+
+        Just v ->
+            v :: list
 
 
 fillArgs : User.GamesOptionalArguments -> User.GamesOptionalArguments
 fillArgs x =
     x
-
-
-type alias GameModel =
-    { userName : String
-    , selectedNetwork : Maybe NetworkInfo
-    , availableNetworks : List String
-    }
-
-
-showSelection : SelectionSet ShowInfo Api.Object.Show
-showSelection =
-    SelectionSet.map3 ShowInfo
-        Show.showName
-        Show.rating
-        Show.showDescription
-
 
 
 userSelection : SelectionSet UserInfo Api.Object.User
@@ -70,7 +62,6 @@ gamePageSelection =
         (GamePage.data gameSelection)
 
 
-
 gameSelection : SelectionSet GameInfo Api.Object.Game
 gameSelection =
     SelectionSet.map4 GameInfo
@@ -80,39 +71,31 @@ gameSelection =
         Game.networkDescription
 
 
-
--- queryShow : SelectionSet (Maybe ShowInfo) RootQuery
--- queryShow =
---     Query.findShowByID { id = Id "256015281662460435" } showSelection
-
-
-queryUser : String -> SelectionSet (Maybe UserInfo) RootQuery
-queryUser userName =
-    Query.userByUserName { userName = userName } userSelection
-
-
-queryGame : String -> SelectionSet (Maybe GameInfo) RootQuery
-queryGame gameId =
-    Query.findGameByID { id = Id gameId } gameSelection
-
-
-newNetwork : NetworkInfo
-newNetwork =
-    { name = ""
-    , rating = 0
-    , description = ""
-    , shows = []
-    }
+makeUserInfoRequest : Cmd Msg
+makeUserInfoRequest =
+    Query.userByUserName { userName = "user123" } userSelection
+        |> Graphql.Http.queryRequest "https://graphql.fauna.com/graphql"
+        |> Graphql.Http.withHeader "Authorization" "Bearer fnADjdPeERACE6LuJpjFEH5lcERpbGXr2S_0-Ptb"
+        |> Graphql.Http.send (RemoteData.fromResult >> GotUserInfoResponse)
 
 
 type Model
     = LoadingExistingNetworks String
-    | DisplayGame GameModel
+    | DisplayGame UserInfo
+
+
+type alias Response =
+    Maybe UserInfo
+
+
+type alias Foo =
+    RemoteData (Graphql.Http.Error Response) Response
 
 
 type Msg
     = AddNewNetwork
     | EditExistingNetwork
+    | GotUserInfoResponse Foo
 
 
 
@@ -121,44 +104,62 @@ type Msg
 
 view : Model -> Html Msg
 view model =
-    let
-        vw =
-            case model of
-                LoadingExistingNetworks mdl ->
-                    loadingView
+    case model of
+        LoadingExistingNetworks mdl ->
+            loadingView mdl
 
-                DisplayGame mdl ->
-                    case mdl.selectedNetwork of
-                        Nothing ->
-                            div [] [ text "Create a Network to start a game" ]
+        DisplayGame mdl ->
+            gameView mdl
 
-                        Just sel ->
-                            gameView sel
-    in
+
+gameView : UserInfo -> Html Msg
+gameView model =
     div []
-        [ vw
-        , Html.button [ onClick AddNewNetwork ] [ text "Add New Network " ]
-        ]
-
-
-loadingView : Html Msg
-loadingView =
-    div [] [ text "... Loading" ]
-
-
-gameView : NetworkInfo -> Html Msg
-gameView netInfo =
-    div []
-        [ label [] [ text "Name: " ]
-        , div [] [ text netInfo.name ]
-        , label [] [ text "Rating: " ]
-        , div [] [ text "netInfo.rating" ]
-        , label [] [ text "Description: " ]
-        , div [] [ text netInfo.description ]
+        [ label [] [ text model.userName ]
+        , ul [] (List.map (\x -> li [] [ text x.gameName ]) model.games)
         ]
 
 
 
+-- view : Model -> Html Msg
+-- view model =
+--     let
+--         vw =
+--             case model of
+--                 LoadingExistingNetworks mdl ->
+--                     loadingView
+--                 DisplayGame mdl ->
+--                     case mdl.games of
+--                         Nothing ->
+--                             div [] [ text "Create a Network to start a game" ]
+--                         Just sel ->
+--                             gameView sel
+--     in
+--     div []
+--         [ vw
+--         , Html.button [ onClick AddNewNetwork ] [ text "Add New Network " ]
+--         ]
+
+
+loadingView : String -> Html Msg
+loadingView msg =
+    div []
+        [ div [] [ text msg ]
+        , Html.button [ onClick AddNewNetwork ] [ text "Reload" ]
+        ]
+
+
+
+-- gameView : NetworkInfo -> Html Msg
+-- gameView netInfo =
+--     div []
+--         [ label [] [ text "Name: " ]
+--         , div [] [ text netInfo.name ]
+--         , label [] [ text "Rating: " ]
+--         , div [] [ text "netInfo.rating" ]
+--         , label [] [ text "Description: " ]
+--         , div [] [ text netInfo.description ]
+--         ]
 --
 -- Subscriptions
 
@@ -175,30 +176,61 @@ subscriptions model =
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case ( msg, model ) of
-        ( AddNewNetwork, DisplayGame mdl ) ->
-            Debug.log "Adding newwork"
-                ( DisplayGame { mdl | selectedNetwork = Just newNetwork }, Cmd.none )
+        ( EditExistingNetwork, LoadingExistingNetworks _ ) ->
+            ( LoadingExistingNetworks "Load ? ...", Cmd.none )
+
+        ( AddNewNetwork, _ ) ->
+            ( model, makeUserInfoRequest )
 
         ( EditExistingNetwork, DisplayGame mdl ) ->
-            ( DisplayGame mdl, Cmd.none )
-
-        _ ->
             ( model, Cmd.none )
 
+        ( GotUserInfoResponse response, _ ) ->
+            case response of
+                RemoteData.Loading ->
+                    ( LoadingExistingNetworks "starting to make reuest...", Cmd.none )
 
-initModel : String -> Model
-initModel userName =
-    DisplayGame
-        { userName = userName
-        , selectedNetwork = Nothing
-        , availableNetworks = []
-        }
+                RemoteData.Success maybeData ->
+                    case maybeData of
+                        Just data ->
+                            ( LoadingExistingNetworks "HAS DATA", Cmd.none )
 
+                        Nothing ->
+                            ( LoadingExistingNetworks "Can not get data", Cmd.none )
+                RemoteData.Failure err ->
+                   ( LoadingExistingNetworks  (errorToString err), Cmd.none )
+                RemoteData.NotAsked ->
+                    ( LoadingExistingNetworks "Not Asked", Cmd.none )
 
 
 -- Helpers
 
+errorToString : Error Response -> String
+errorToString err =
+    "Error Response. Error: "
+    -- case err of
+    --     Timeout ->
+    --         "Timeout exceeded"
+
+    --     NetworkError ->
+    --         "Network error"
+    --     BadStatus meta resp ->
+    --          resp
+    --     BadPayload jsonErro  ->
+    --         "Unexpected response from api: "
+
+    --     BadUrl url ->
+    --         "Malformed url: " ++ url
+    
+        
+
+     
+        
+    
+       
+            
+    
 
 init : String -> ( Model, Cmd Msg )
-init userName =
-    ( initModel userName, Cmd.none )
+init username =
+    ( LoadingExistingNetworks "loading page foo ...", makeUserInfoRequest )
