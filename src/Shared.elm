@@ -74,6 +74,11 @@ toString err =
 
 
 -- Shared data
+-- { #description# : String
+--                 , #name# : String
+--                 , #rating# : Int
+--                 , #shows# : List ShowInfo
+--                 }
 
 
 type alias GameInfo =
@@ -81,7 +86,6 @@ type alias GameInfo =
     , walletAmount : Maybe Int
     , networkName : String
     , networkDescription : String
-   
     }
 
 
@@ -101,8 +105,7 @@ type alias NetworkInfo =
 
 
 type alias UserInfo =
-    { 
-     userName: String   
+    { userName : String
     , walletAddress : String
-    -- , networks:  List (Maybe NetworkInfo)
+    , games : List (Maybe GameInfo)
     }
