@@ -12,13 +12,13 @@ type Game {
   start: Date
   end: Date
   user: User @relation
-  shows: [Show!]
+  shows: [Show!] @relation
 }
 
 type Show  {  
-  name: String!
+  showName: String!
   rating: Int!
-  description: String!
+  showDescription: String!
   game: Game! @relation
 }
 

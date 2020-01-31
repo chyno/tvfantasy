@@ -103,7 +103,6 @@ type alias NetworkInfo =
     , shows : List ShowInfo
     }
 
-
 type alias UserInfo =
     { userName : String
     , walletAddress : String

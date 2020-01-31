@@ -17,6 +17,10 @@ type Show
     = Show
 
 
+type ShowPage
+    = ShowPage
+
+
 type User
     = User
 

@@ -19,14 +19,9 @@ import Graphql.SelectionSet exposing (SelectionSet)
 import Json.Decode as Decode
 
 
-name : SelectionSet String Api.Object.Show
-name =
-    Object.selectionForField "String" "name" [] Decode.string
-
-
-description : SelectionSet String Api.Object.Show
-description =
-    Object.selectionForField "String" "description" [] Decode.string
+showDescription : SelectionSet String Api.Object.Show
+showDescription =
+    Object.selectionForField "String" "showDescription" [] Decode.string
 
 
 {-| The document's ID.
@@ -34,6 +29,11 @@ description =
 id_ : SelectionSet Api.ScalarCodecs.Id Api.Object.Show
 id_ =
     Object.selectionForField "ScalarCodecs.Id" "_id" [] (Api.ScalarCodecs.codecs |> Api.Scalar.unwrapCodecs |> .codecId |> .decoder)
+
+
+showName : SelectionSet String Api.Object.Show
+showName =
+    Object.selectionForField "String" "showName" [] Decode.string
 
 
 rating : SelectionSet Int Api.Object.Show

@@ -51,9 +51,29 @@ networkName =
     Object.selectionForField "String" "networkName" [] Decode.string
 
 
-shows : SelectionSet decodesTo Api.Object.Show -> SelectionSet (Maybe (List decodesTo)) Api.Object.Game
-shows object_ =
-    Object.selectionForCompositeField "shows" [] object_ (identity >> Decode.list >> Decode.nullable)
+type alias ShowsOptionalArguments =
+    { size_ : OptionalArgument Int
+    , cursor_ : OptionalArgument String
+    }
+
+
+{-|
+
+  - size\_ - The number of items to return per page.
+  - cursor\_ - The pagination cursor.
+
+-}
+shows : (ShowsOptionalArguments -> ShowsOptionalArguments) -> SelectionSet decodesTo Api.Object.ShowPage -> SelectionSet decodesTo Api.Object.Game
+shows fillInOptionals object_ =
+    let
+        filledInOptionals =
+            fillInOptionals { size_ = Absent, cursor_ = Absent }
+
+        optionalArgs =
+            [ Argument.optional "_size" filledInOptionals.size_ Encode.int, Argument.optional "_cursor" filledInOptionals.cursor_ Encode.string ]
+                |> List.filterMap identity
+    in
+    Object.selectionForCompositeField "shows" optionalArgs object_ identity
 
 
 start : SelectionSet (Maybe Api.ScalarCodecs.Date) Api.Object.Game

@@ -46,9 +46,9 @@ type alias GameModel =
 showSelection : SelectionSet ShowInfo Api.Object.Show
 showSelection =
     SelectionSet.map3 ShowInfo
-        Show.name
+        Show.showName
         Show.rating
-        Show.description
+        Show.showDescription
 
 
 

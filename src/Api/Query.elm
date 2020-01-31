@@ -93,12 +93,3 @@ type alias FindUserByIDRequiredArguments =
 findUserByID : FindUserByIDRequiredArguments -> SelectionSet decodesTo Api.Object.User -> SelectionSet (Maybe decodesTo) RootQuery
 findUserByID requiredArgs object_ =
     Object.selectionForCompositeField "findUserByID" [ Argument.required "id" requiredArgs.id (Api.ScalarCodecs.codecs |> Api.Scalar.unwrapEncoder .codecId) ] object_ (identity >> Decode.nullable)
-
-
-type alias UserByUserRequiredArguments =
-    { userName : String }
-
-
-userByUser : UserByUserRequiredArguments -> SelectionSet decodesTo Api.Object.User -> SelectionSet (Maybe decodesTo) RootQuery
-userByUser requiredArgs object_ =
-    Object.selectionForCompositeField "userByUser" [ Argument.required "userName" requiredArgs.userName Encode.string ] object_ (identity >> Decode.nullable)
