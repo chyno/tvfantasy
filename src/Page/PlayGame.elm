@@ -118,25 +118,6 @@ gameView model =
 
 
 
--- view : Model -> Html Msg
--- view model =
---     let
---         vw =
---             case model of
---                 ErrorLoading mdl ->
---                     loadingView
---                 DisplayGame mdl ->
---                     case mdl.games of
---                         Nothing ->
---                             div [] [ text "Create a Network to start a game" ]
---                         Just sel ->
---                             gameView sel
---     in
---     div []
---         [ vw
---         , Html.button [ onClick AddNewNetwork ] [ text "Add New Network " ]
---         ]
-
 
 loadingView : String -> Html Msg
 loadingView msg =
