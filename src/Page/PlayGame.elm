@@ -73,9 +73,9 @@ gameSelection =
 
 makeUserInfoRequest : Cmd Msg
 makeUserInfoRequest =
-    Query.userByUserName { userName = "user123" } userSelection
+    Query.findUserByID { id = Id "256087277788201490" } userSelection
         |> Graphql.Http.queryRequest "https://graphql.fauna.com/graphql"
-        |> Graphql.Http.withHeader "Authorization" "Bearer fnADjdPeERACE6LuJpjFEH5lcERpbGXr2S_0-Ptb"
+        |> Graphql.Http.withHeader "Authorization" " Basic Zm5BRGprSEpKa0FDRkNvZThnamFsMC13bWJEVDZPZkdBWXpORVo1UDp0dmZhbnRhc3k6c2VydmVy"
         |> Graphql.Http.send (RemoteData.fromResult >> GotUserInfoResponse)
 
 
@@ -193,7 +193,7 @@ update msg model =
                 RemoteData.Success maybeData ->
                     case maybeData of
                         Just data ->
-                            ( LoadingExistingNetworks "HAS DATA", Cmd.none )
+                            ( DisplayGame data, Cmd.none )
 
                         Nothing ->
                             ( LoadingExistingNetworks "Can not get data", Cmd.none )
