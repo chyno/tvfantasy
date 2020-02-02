@@ -43,7 +43,7 @@ inittest : Flags -> Url -> Key -> ( Model, Cmd Msg )
 inittest flags url navKey =
     let
         ( lgModel, lgCmd ) =
-            PlayGame.init "hello world"
+            PlayGame.init "user123"
 
         model =
             { flags = flags
@@ -53,7 +53,7 @@ inittest flags url navKey =
             , username = ""
             }
     in
-        ( model, Cmd.none )
+    ( model, Cmd.map PlayGameMsg lgCmd )
 
 
 init : Flags -> Url -> Key -> ( Model, Cmd Msg )
@@ -92,7 +92,6 @@ loadCurrentPage ( model, cmd ) =
             ( { model | page = PageLogin pageModel }, Cmd.batch [ cmd, Cmd.map LoginMsg pageCmd ] )
 
         -- ( PageLogin pageModel, Cmd.map LoginMsg pageCmd )
-        
         -- ( PageGame pageModel, Cmd.map GameMsg pageCmd )
         Routes.ShowRoute showId ->
             ( { model | page = PageNone }, Cmd.none )
@@ -124,7 +123,6 @@ subscriptions model =
 
                 -- PageGame pageModel ->
                 --     Sub.map GameMsg (Game.subscriptions pageModel)
-
                 PageNone ->
                     Sub.none
     in
@@ -138,6 +136,7 @@ update msg model =
             case urlRequest of
                 Browser.Internal url ->
                     ( model, Nav.pushUrl model.navKey (Url.toString url) )
+
                 Browser.External url ->
                     ( model, Nav.load url )
 
@@ -234,6 +233,7 @@ currentPage model =
         PageShow pageModel ->
             Show.view pageModel
                 |> Html.map ShowMsg
+
         PageNone ->
             notFoundView
 

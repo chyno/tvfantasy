@@ -17,8 +17,6 @@ import Json.Decode as Json
 
 
 --  Model
-
-
 type alias GameData =
     { data : List (Maybe GameInfo)
     }
@@ -53,9 +51,6 @@ userSelection =
 
 
 
--- ((User.games fillArgs gamePageSelection) |> SelectionSet.map gameDataParser)
-
-
 gamePageSelection : SelectionSet GameData Api.Object.GamePage
 gamePageSelection =
     SelectionSet.map GameData
@@ -71,31 +66,32 @@ gameSelection =
         Game.networkDescription
 
 
-makeUserInfoRequest : Cmd Msg
-makeUserInfoRequest =
-    Query.findUserByID { id = Id "256087277788201490" } userSelection
+makeUserInfoRequest : String -> Cmd Msg
+makeUserInfoRequest  userName =
+    Query.userByUserName { userName = userName } userSelection
         |> Graphql.Http.queryRequest "https://graphql.fauna.com/graphql"
         |> Graphql.Http.withHeader "Authorization" " Basic Zm5BRGprSEpKa0FDRkNvZThnamFsMC13bWJEVDZPZkdBWXpORVo1UDp0dmZhbnRhc3k6c2VydmVy"
         |> Graphql.Http.send (RemoteData.fromResult >> GotUserInfoResponse)
 
 
 type Model
-    = LoadingExistingNetworks String
+    = ErrorLoading String
     | DisplayGame UserInfo
-
+    | LoadingExistingNetworks 
 
 type alias Response =
     Maybe UserInfo
 
 
-type alias Foo =
+type alias GameResponse =
     RemoteData (Graphql.Http.Error Response) Response
 
 
 type Msg
-    = AddNewNetwork
+    = LoadingData String
+    | AddNewNetwork
     | EditExistingNetwork
-    | GotUserInfoResponse Foo
+    | GotUserInfoResponse GameResponse
 
 
 
@@ -105,9 +101,10 @@ type Msg
 view : Model -> Html Msg
 view model =
     case model of
-        LoadingExistingNetworks mdl ->
+        LoadingExistingNetworks ->
+            loadingView ("Loading Data for user ")
+        ErrorLoading mdl ->
             loadingView mdl
-
         DisplayGame mdl ->
             gameView mdl
 
@@ -126,7 +123,7 @@ gameView model =
 --     let
 --         vw =
 --             case model of
---                 LoadingExistingNetworks mdl ->
+--                 ErrorLoading mdl ->
 --                     loadingView
 --                 DisplayGame mdl ->
 --                     case mdl.games of
@@ -175,20 +172,19 @@ subscriptions model =
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
-    case ( msg, model ) of
-        ( EditExistingNetwork, LoadingExistingNetworks _ ) ->
-            ( LoadingExistingNetworks "Load ? ...", Cmd.none )
+    case msg of
+        LoadingData userName->
+            ( model, makeUserInfoRequest userName)
+        EditExistingNetwork ->
+            ( ErrorLoading "Load ? ...", Cmd.none )
 
-        ( AddNewNetwork, _ ) ->
-            ( model, makeUserInfoRequest )
+        AddNewNetwork ->
+            ( model, makeUserInfoRequest "user123")
 
-        ( EditExistingNetwork, DisplayGame mdl ) ->
-            ( model, Cmd.none )
-
-        ( GotUserInfoResponse response, _ ) ->
+        GotUserInfoResponse response ->
             case response of
                 RemoteData.Loading ->
-                    ( LoadingExistingNetworks "starting to make reuest...", Cmd.none )
+                    ( ErrorLoading "starting to make reuest...", Cmd.none )
 
                 RemoteData.Success maybeData ->
                     case maybeData of
@@ -196,11 +192,11 @@ update msg model =
                             ( DisplayGame data, Cmd.none )
 
                         Nothing ->
-                            ( LoadingExistingNetworks "Can not get data", Cmd.none )
+                            ( ErrorLoading "Can not get data", Cmd.none )
                 RemoteData.Failure err ->
-                   ( LoadingExistingNetworks  (errorToString err), Cmd.none )
+                   ( ErrorLoading  (errorToString err), Cmd.none )
                 RemoteData.NotAsked ->
-                    ( LoadingExistingNetworks "Not Asked", Cmd.none )
+                    ( ErrorLoading "Not Asked", Cmd.none )
 
 
 -- Helpers
@@ -208,29 +204,8 @@ update msg model =
 errorToString : Error Response -> String
 errorToString err =
     "Error Response. Error: "
-    -- case err of
-    --     Timeout ->
-    --         "Timeout exceeded"
-
-    --     NetworkError ->
-    --         "Network error"
-    --     BadStatus meta resp ->
-    --          resp
-    --     BadPayload jsonErro  ->
-    --         "Unexpected response from api: "
-
-    --     BadUrl url ->
-    --         "Malformed url: " ++ url
-    
-        
-
-     
-        
-    
-       
-            
-    
-
+   
+   
 init : String -> ( Model, Cmd Msg )
 init username =
-    ( LoadingExistingNetworks "loading page foo ...", makeUserInfoRequest )
+    ( LoadingExistingNetworks, makeUserInfoRequest username )
