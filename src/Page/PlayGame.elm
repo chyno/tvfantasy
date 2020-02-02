@@ -1,83 +1,23 @@
 module Page.PlayGame exposing (Model, Msg(..), init, subscriptions, update, view)
 
-import Api.Object
-import Api.Object.Game as Game
-import Api.Object.GamePage as GamePage
-import Api.Object.User as User
 import Api.Query as Query
-import Api.Scalar exposing (Id(..))
-import Graphql.Http exposing (..)
-import Graphql.OptionalArgument exposing (OptionalArgument(..))
-import Graphql.SelectionSet as SelectionSet exposing (SelectionSet)
+import Graphql.Http exposing (Error)
 import Html exposing (Html, div, h1, label, li, text, ul)
 import Html.Events exposing (onClick)
 import RemoteData exposing (RemoteData)
 import Shared exposing (GameInfo, UserInfo)
-import Json.Decode as Json
+import TvApi exposing (userSelection)
+
 
 
 --  Model
-type alias GameData =
-    { data : List (Maybe GameInfo)
-    }
-
-
-gameDataParser : GameData -> List GameInfo
-gameDataParser ndata =
-    List.foldr foldrValues [] ndata.data
-
-
-foldrValues : Maybe a -> List a -> List a
-foldrValues item list =
-    case item of
-        Nothing ->
-            list
-
-        Just v ->
-            v :: list
-
-
-fillArgs : User.GamesOptionalArguments -> User.GamesOptionalArguments
-fillArgs x =
-    x
-
-
-userSelection : SelectionSet UserInfo Api.Object.User
-userSelection =
-    SelectionSet.map3 UserInfo
-        User.userName
-        User.walletAddress
-        (User.games fillArgs gamePageSelection |> SelectionSet.map gameDataParser)
-
-
-
-gamePageSelection : SelectionSet GameData Api.Object.GamePage
-gamePageSelection =
-    SelectionSet.map GameData
-        (GamePage.data gameSelection)
-
-
-gameSelection : SelectionSet GameInfo Api.Object.Game
-gameSelection =
-    SelectionSet.map4 GameInfo
-        Game.gameName
-        Game.walletAmount
-        Game.networkName
-        Game.networkDescription
-
-
-makeUserInfoRequest : String -> Cmd Msg
-makeUserInfoRequest  userName =
-    Query.userByUserName { userName = userName } userSelection
-        |> Graphql.Http.queryRequest "https://graphql.fauna.com/graphql"
-        |> Graphql.Http.withHeader "Authorization" " Basic Zm5BRGprSEpKa0FDRkNvZThnamFsMC13bWJEVDZPZkdBWXpORVo1UDp0dmZhbnRhc3k6c2VydmVy"
-        |> Graphql.Http.send (RemoteData.fromResult >> GotUserInfoResponse)
 
 
 type Model
     = ErrorLoading String
     | DisplayGame UserInfo
-    | LoadingExistingNetworks 
+    | LoadingExistingNetworks
+
 
 type alias Response =
     Maybe UserInfo
@@ -102,9 +42,11 @@ view : Model -> Html Msg
 view model =
     case model of
         LoadingExistingNetworks ->
-            loadingView ("Loading Data for user ")
+            loadingView "Loading Data for user "
+
         ErrorLoading mdl ->
             loadingView mdl
+
         DisplayGame mdl ->
             gameView mdl
 
@@ -115,8 +57,6 @@ gameView model =
         [ label [] [ text model.userName ]
         , ul [] (List.map (\x -> li [] [ text x.gameName ]) model.games)
         ]
-
-
 
 
 loadingView : String -> Html Msg
@@ -154,13 +94,14 @@ subscriptions model =
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
-        LoadingData userName->
-            ( model, makeUserInfoRequest userName)
+        LoadingData userName ->
+            ( model, makeUserInfoRequest userName )
+
         EditExistingNetwork ->
             ( ErrorLoading "Load ? ...", Cmd.none )
 
         AddNewNetwork ->
-            ( model, makeUserInfoRequest "user123")
+            ( model, makeUserInfoRequest "user123" )
 
         GotUserInfoResponse response ->
             case response of
@@ -174,19 +115,31 @@ update msg model =
 
                         Nothing ->
                             ( ErrorLoading "Can not get data", Cmd.none )
+
                 RemoteData.Failure err ->
-                   ( ErrorLoading  (errorToString err), Cmd.none )
+                    ( ErrorLoading (errorToString err), Cmd.none )
+
                 RemoteData.NotAsked ->
                     ( ErrorLoading "Not Asked", Cmd.none )
 
 
+
 -- Helpers
+
 
 errorToString : Error Response -> String
 errorToString err =
     "Error Response. Error: "
-   
-   
+
+
 init : String -> ( Model, Cmd Msg )
 init username =
     ( LoadingExistingNetworks, makeUserInfoRequest username )
+
+
+makeUserInfoRequest : String -> Cmd Msg
+makeUserInfoRequest userName =
+    Query.userByUserName { userName = userName } userSelection
+        |> Graphql.Http.queryRequest "https://graphql.fauna.com/graphql"
+        |> Graphql.Http.withHeader "Authorization" " Basic Zm5BRGprSEpKa0FDRkNvZThnamFsMC13bWJEVDZPZkdBWXpORVo1UDp0dmZhbnRhc3k6c2VydmVy"
+        |> Graphql.Http.send (RemoteData.fromResult >> GotUserInfoResponse)
