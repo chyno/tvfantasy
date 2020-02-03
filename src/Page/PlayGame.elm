@@ -21,7 +21,7 @@ import Html.Events exposing (onClick)
 import RemoteData exposing (RemoteData)
 import Shared exposing (GameInfo, UserInfo)
 import TvApi exposing (GameQueryResponse, Response, gameSelection, userSelection)
-import RemoteData exposing (RemoteData)
+
 
 
 --  Model
@@ -45,6 +45,7 @@ type GameEditMsg
     | UpdateNetworkName String
     | UpdateDescription String
     | CancelEdit
+    | SaveGame
 
 
 type Msg
@@ -53,7 +54,7 @@ type Msg
     | GameEdit GameEditMsg
     | GameChange String
     | GotUserInfoResponse GameQueryResponse
-    | GotGameUpdateResponse  (RemoteData (Graphql.Http.Error (Maybe GameInfo)) (Maybe GameInfo))
+    | GotGameUpdateResponse (RemoteData (Graphql.Http.Error (Maybe GameInfo)) (Maybe GameInfo))
 
 
 
@@ -123,8 +124,8 @@ playGame model =
                 ]
             ]
         , div [ class "button-group" ]
-            [ -- Button.button [ Button.primary   ] [ text "Save Changes" ]
-              Button.button [ Button.secondary, Button.onClick CancelEdit ] [ text "Cancel" ]
+            [ Button.button [ Button.primary, Button.onClick SaveGame ] [ text "Save Changes" ]
+            , Button.button [ Button.secondary, Button.onClick CancelEdit ] [ text "Cancel" ]
             ]
         ]
 
@@ -143,26 +144,32 @@ updateGame msg maybeModel =
         Just model ->
             case msg of
                 UpdateGameName newName ->
-                    ( Just model, Cmd.none )
+                    ( Just { model | gameName = newName }, Cmd.none )
 
                 UpdateWalletAmount val ->
-                    ( Just model, Cmd.none )
+                    ( Just { model | walletAmount = String.toInt val }, Cmd.none )
 
                 UpdateNetworkName val ->
-                    ( Just model, Cmd.none )
+                    ( Just { model | networkName = val }, Cmd.none )
 
                 UpdateDescription val ->
-                    ( Just model, Cmd.none )
+                    ( Just { model | networkDescription = val }, Cmd.none )
 
                 CancelEdit ->
                     ( Nothing, Cmd.none )
 
+                SaveGame ->
+                    ( Just model, updateGameCmd model )
+
 
 
 -- Update
-updateNewGame: List GameInfo -> GameInfo -> List GameInfo
-updateNewGame lstGames game = 
+
+
+updateNewGame : List GameInfo -> GameInfo -> List GameInfo
+updateNewGame lstGames game =
     lstGames
+
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
@@ -182,28 +189,37 @@ update msg model =
 
         ( GameChange newGame, HasGame gcmdl ) ->
             ( HasGame { gcmdl | selectedGame = newGame }, Cmd.none )
-        (GotGameUpdateResponse response, HasGame gmmdl) ->
+
+        ( GotGameUpdateResponse response, HasGame gmmdl ) ->
             case response of
                 RemoteData.Loading ->
                     ( model, Cmd.none )
+
                 RemoteData.Success maybeData ->
                     case maybeData of
                         Just data ->
                             let
-                                updatedGames = updateNewGame gmmdl.userInfo.games data
-                                userInf = gmmdl.userInfo
-                                updatedUser = { gmmdl |  userInfo = { userInf | games =updatedGames  }}
+                                updatedGames =
+                                    updateNewGame gmmdl.userInfo.games data
+
+                                userInf =
+                                    gmmdl.userInfo
+
+                                updatedUser =
+                                    { gmmdl | userInfo = { userInf | games = updatedGames } }
                             in
-                            
-                            ( HasGame  updatedUser , Cmd.none )
+                            ( HasGame updatedUser, Cmd.none )
+
                         Nothing ->
                             ( LoadingResults "Can not get data", Cmd.none )
 
                 RemoteData.Failure err ->
-                    ( LoadingResults "error", Cmd.none) --(errorToString err), Cmd.none )
+                    ( LoadingResults "error", Cmd.none )
 
+                --(errorToString err), Cmd.none )
                 RemoteData.NotAsked ->
                     ( LoadingResults "Not Asked", Cmd.none )
+
         ( GotUserInfoResponse response, LoadingResults message ) ->
             case response of
                 RemoteData.Loading ->
@@ -270,25 +286,20 @@ makeUserInfoRequest userName =
         |> Graphql.Http.send (RemoteData.fromResult >> GotUserInfoResponse)
 
 
-fooGame : GameInput
-fooGame =
+gameIntputData : GameInfo -> GameInput
+gameIntputData gameData =
     let
         funOp =
             \x -> { walletAmount = Absent, end = Absent, shows = Absent, start = Absent, user = Absent }
     in
     buildGameInput
-        { gameName = "String", networkDescription = "String", networkName = "String" }
+        { gameName = gameData.gameName, networkDescription = gameData.networkDescription, networkName = gameData.networkName }
         funOp
 
 
-foodata : Mutation.UpdateGameRequiredArguments
-foodata =
-    { data = fooGame, id = Id "ss" }
-
-
-foo : Cmd Msg
-foo =
-    Mutation.updateGame foodata gameSelection
+updateGameCmd : GameInfo -> Cmd Msg
+updateGameCmd gmData =
+    Mutation.updateGame { data = gameIntputData gmData, id = Id gmData.id } gameSelection
         |> Graphql.Http.mutationRequest "https://graphql.fauna.com/graphql"
         |> Graphql.Http.withHeader "Authorization" " Basic Zm5BRGprSEpKa0FDRkNvZThnamFsMC13bWJEVDZPZkdBWXpORVo1UDp0dmZhbnRhc3k6c2VydmVy"
         |> Graphql.Http.send (RemoteData.fromResult >> GotGameUpdateResponse)
