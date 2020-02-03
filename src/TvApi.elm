@@ -1,4 +1,4 @@
-module TvApi exposing (userSelection, GameResponse, Response)
+module TvApi exposing (userSelection, GameQueryResponse, Response, gameSelection)
 
 import Shared exposing (GameInfo, UserInfo)
 import Api.Object
@@ -59,11 +59,14 @@ gameSelection =
         Game.networkName
         Game.networkDescription
 
+    
+        
+
 type alias Response =
     Maybe UserInfo
 
 
-type alias GameResponse =
+type alias GameQueryResponse =
     RemoteData (Graphql.Http.Error Response) Response
 
 
