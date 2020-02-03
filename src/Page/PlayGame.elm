@@ -23,7 +23,8 @@ import Bootstrap.ListGroup as ListGroup
 type alias GameModel =
     { 
         userInfo : UserInfo
-       , selectedGame : Maybe GameInfo
+       , editGame : Maybe GameInfo
+       , selectedGame : String
     } 
 
 
@@ -33,15 +34,19 @@ type Model
     | HasGame GameModel
    
 
+type GameEditMsg
+    =   UpdateGameName String
+    | UpdateWalletAmount String
+    | UpdateNetworkName String
+    | UpdateDescription String
+    | CancelEdit
+
 
 type Msg 
-    =  AddNewGameMsg
-    | EditExistingGameMsg
-    | UpdateGameNameMsg String
-    | UpdateWalletAmountMsg String
-    | UpdateNetworkNameMsg String
-    | UpdateDescriptionMsg String
-    | GameChangeMsg String
+    =  AddNewGame
+    | EditExistingGame
+    | GameEdit GameEditMsg
+    | GameChange String
     | GotUserInfoResponse GameResponse
 
 
@@ -53,9 +58,12 @@ view model =
         LoadingResults mdl ->
             loadingView mdl
         HasGame mdl ->
-            viewChooseGame mdl
-
-
+            case mdl.editGame of
+                Nothing ->
+                    viewChooseGame mdl        
+                Just selGame ->
+                    Html.map  GameEdit (playGame selGame)
+    
 loadingView : String -> Html Msg
 loadingView msg =
     div []
@@ -70,51 +78,51 @@ viewChooseGame model =
         [   
             Form.group []
             [ Form.label [ for "mygmes" ] [ text "Avaliable Games" ]
-            , Select.select [ Select.id "mygmes", Select.onChange GameChangeMsg  ]
+            , Select.select [ Select.id "mygmes", Select.onChange GameChange  ]
                 (
                     List.map (\x ->  Select.item [] [ text x.gameName ]) model.userInfo.games
                 ) 
                            
             ]
-            , Button.button [ Button.primary,  Button.onClick ( EditExistingGameMsg) ] [ text "Select" ]
-            , Button.button [ Button.primary,  Button.onClick ( EditExistingGameMsg) ] [ text "Select" ]
+            , Button.button [ Button.primary,  Button.onClick  EditExistingGame ] [ text "Select" ]
+           
 
         ]
         
     ]
 
-playGame : GameInfo -> Html Msg
+playGame : GameInfo -> Html GameEditMsg
 playGame model =
          div []
     [ 
         Form.form []
         [   Form.group []
                 [ Form.label [for "gameName"] [ text "Game Name"]
-                , Input.text [ Input.id "gameName", Input.onInput  UpdateGameNameMsg, Input.value model.gameName ]
+                , Input.text [ Input.id "gameName", Input.onInput  UpdateGameName, Input.value model.gameName ]
                 , Form.help [] [ text "Enter Game Name" ]
                 ]
             
             , Form.group []
                 [ Form.label [for "myrating"] [ text "Amount"]
-                , Input.password [ Input.id "myrating", Input.onInput   UpdateWalletAmountMsg, Input.value "0" ]
+                , Input.text [ Input.id "myrating", Input.onInput   UpdateWalletAmount, Input.value "0" ]
                 , Form.help [] [ text "Enter Wallet Amount" ]
                 ]
              , Form.group []
                 [ Form.label [for "networkName"] [ text "Network Name"]
-                , Input.password [ Input.id "networkName", Input.onInput   UpdateNetworkNameMsg, Input.value  model.networkName ]
+                , Input.text [ Input.id "networkName", Input.onInput   UpdateNetworkName, Input.value  model.networkName ]
                 , Form.help [] [ text "Enter Network Name" ]
                 ]
             , Form.group []
                 [ Form.label [for "mydescription"] [ text "Description"]
-                , Input.password [ Input.id "mydescription", Input.onInput  UpdateDescriptionMsg, Input.value model.networkDescription ]
+                , Input.text [ Input.id "mydescription", Input.onInput  UpdateDescription, Input.value model.networkDescription ]
                 , Form.help [] [ text "Enter Description" ]
 
                 ]
             
         ]
         , div[class "button-group"][
-                Button.button [ Button.primary   ] [ text "Add Network" ]
-                , Button.button [ Button.secondary ] [ text "Cancel" ]
+                -- Button.button [ Button.primary   ] [ text "Save Changes" ]
+                Button.button [ Button.secondary, Button.onClick  CancelEdit ] [ text "Cancel" ]
             ]
     ]
 
@@ -125,17 +133,40 @@ subscriptions model =
     Sub.none
 
 
+updateGame : GameEditMsg ->  (Maybe GameInfo) -> ( (Maybe GameInfo), Cmd Msg )
+updateGame msg maybeModel  =
+    case maybeModel of
+        Nothing ->
+            (maybeModel, Cmd.none)
+        Just model ->
+            case msg of
+                UpdateGameName newName ->
+                    (Just model, Cmd.none)
+                UpdateWalletAmount val->
+                    (Just model, Cmd.none)
+                UpdateNetworkName  val->
+                    (Just model, Cmd.none)
+                UpdateDescription val ->
+                    (Just model, Cmd.none)
+                CancelEdit ->
+                   (Nothing, Cmd.none)
 
 -- Update
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case (msg, model) of
-        (AddNewGameMsg, HasGame mdl)  ->
+        (EditExistingGame, HasGame gcmdl) ->
+             ( HasGame { gcmdl |  editGame = getGame gcmdl.selectedGame gcmdl.userInfo.games }, Cmd.none )
+        (AddNewGame, HasGame mdl)  ->
             ( model, makeUserInfoRequest "user123" )
-        (UpdateGameNameMsg newName, HasGame mdl) ->
-           (model, Cmd.none)
-        (GameChangeMsg newGame, HasGame gcmdl) ->
-             ( HasGame { gcmdl |  selectedGame = getGame (Just newGame) gcmdl.userInfo.games }, Cmd.none )
+        (GameEdit gmsg, HasGame mdl) ->
+            let
+                (newSelectedGameModel, cmd) = (updateGame gmsg mdl.editGame)
+            in
+                (HasGame {mdl | editGame = newSelectedGameModel }, cmd)
+          
+        (GameChange newGame, HasGame gcmdl) ->
+             ( HasGame { gcmdl |  selectedGame = newGame }, Cmd.none )
         (GotUserInfoResponse response, LoadingResults message) ->
             case response of
                 RemoteData.Loading ->
@@ -144,7 +175,7 @@ update msg model =
                 RemoteData.Success maybeData ->
                     case maybeData of
                         Just data ->
-                            ( HasGame {userInfo = data, selectedGame = getGame Nothing data.games }, Cmd.none )
+                            ( HasGame {userInfo = data, editGame = Nothing, selectedGame = "" }, Cmd.none )
                         Nothing ->
                             ( LoadingResults "Can not get data", Cmd.none )
 
@@ -157,20 +188,16 @@ update msg model =
              ( LoadingResults "Loaded Game with Unandled message. This state should not happen", Cmd.none )
         (_,  LoadingResults loadingResults) ->
              ( LoadingResults ("Loaded Game with Unandled message. This state should not happen. Loading Results: " ++ loadingResults), Cmd.none )
-        (_, _) ->
-             ( LoadingResults ("Loaded Game with Unandled message. This state should not happen. Loading Results: "), Cmd.none )
+        -- (_, _) ->
+        --      ( LoadingResults ("Loaded Game with Unandled message. This state should not happen. Loading Results: "), Cmd.none )
         
         
 -- Helpers
-getGame : Maybe String ->   List  GameInfo -> Maybe GameInfo
-getGame maybeGameName games =
-    case maybeGameName of
-        Nothing ->
-           List.head games
-        Just gameName ->
-           List.filter ( \x -> x.gameName == gameName ) games
-            |> List.head
-
+getGame :  String ->   List  GameInfo -> Maybe GameInfo
+getGame gameName games =
+    List.filter ( \x -> x.gameName == gameName ) games
+    |> List.head
+    
 
 errorToString : Error Response -> String
 errorToString err =
