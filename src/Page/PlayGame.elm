@@ -175,7 +175,7 @@ update msg model =
                 RemoteData.Success maybeData ->
                     case maybeData of
                         Just data ->
-                            ( HasGame {userInfo = data, editGame = Nothing, selectedGame = "" }, Cmd.none )
+                            ( HasGame {userInfo = data, editGame = Nothing, selectedGame = getFirstGameName  data.games }, Cmd.none )
                         Nothing ->
                             ( LoadingResults "Can not get data", Cmd.none )
 
@@ -198,7 +198,17 @@ getGame gameName games =
     List.filter ( \x -> x.gameName == gameName ) games
     |> List.head
     
-
+getFirstGameName :    List  GameInfo -> String
+getFirstGameName  games =
+ case List.head games  of
+     Nothing ->
+         ""
+     Just gm ->
+         gm.gameName
+ 
+       
+    
+    
 errorToString : Error Response -> String
 errorToString err =
     "Error Response. Error: "
