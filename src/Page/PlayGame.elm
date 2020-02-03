@@ -2,84 +2,122 @@ module Page.PlayGame exposing (Model, Msg(..), init, subscriptions, update, view
 
 import Api.Query as Query
 import Graphql.Http exposing (Error)
-import Html exposing (Html, div, h1, label, li, text, ul)
+import Html.Attributes exposing (for, class)
+import Html exposing (Html,  div, h1, label, li, text, ul)
 import Html.Events exposing (onClick)
 import RemoteData exposing (RemoteData)
-import Shared exposing (GameInfo, UserInfo)
-import TvApi exposing (userSelection)
-
+import Shared exposing ( UserInfo, GameInfo)
+import TvApi exposing (userSelection, GameResponse, Response)
+import Bootstrap.Form as Form
+import Bootstrap.Form.Input as Input
+import Bootstrap.Form.Select as Select
+import Bootstrap.Form.Checkbox as Checkbox
+import Bootstrap.Form.Radio as Radio
+import Bootstrap.Form.Textarea as Textarea
+import Bootstrap.Form.Fieldset as Fieldset
+import Bootstrap.Button as Button
+import Bootstrap.ListGroup as ListGroup
 
 
 --  Model
+type alias GameModel =
+    { 
+        userInfo : UserInfo
+       , selectedGame : Maybe GameInfo
+    } 
+
 
 
 type Model
-    = ErrorLoading String
-    | DisplayGame UserInfo
-    | LoadingExistingNetworks
+    = LoadingResults String
+    | HasGame GameModel
+   
 
 
-type alias Response =
-    Maybe UserInfo
-
-
-type alias GameResponse =
-    RemoteData (Graphql.Http.Error Response) Response
-
-
-type Msg
-    = LoadingData String
-    | AddNewNetwork
-    | EditExistingNetwork
+type Msg 
+    =  AddNewGameMsg
+    | EditExistingGameMsg
+    | UpdateGameNameMsg String
+    | UpdateWalletAmountMsg String
+    | UpdateNetworkNameMsg String
+    | UpdateDescriptionMsg String
+    | GameChangeMsg String
     | GotUserInfoResponse GameResponse
 
 
 
 -- View
-
-
 view : Model -> Html Msg
 view model =
     case model of
-        LoadingExistingNetworks ->
-            loadingView "Loading Data for user "
-
-        ErrorLoading mdl ->
+        LoadingResults mdl ->
             loadingView mdl
-
-        DisplayGame mdl ->
-            gameView mdl
-
-
-gameView : UserInfo -> Html Msg
-gameView model =
-    div []
-        [ label [] [ text model.userName ]
-        , ul [] (List.map (\x -> li [] [ text x.gameName ]) model.games)
-        ]
+        HasGame mdl ->
+            viewChooseGame mdl
 
 
 loadingView : String -> Html Msg
 loadingView msg =
     div []
         [ div [] [ text msg ]
-        , Html.button [ onClick AddNewNetwork ] [ text "Reload" ]
+        , Html.button [  ] [ text "Reload" ]
         ]
 
+viewChooseGame : GameModel -> Html Msg
+viewChooseGame model =
+    div[][
+        Form.form []
+        [   
+            Form.group []
+            [ Form.label [ for "mygmes" ] [ text "Avaliable Games" ]
+            , Select.select [ Select.id "mygmes", Select.onChange GameChangeMsg  ]
+                (
+                    List.map (\x ->  Select.item [] [ text x.gameName ]) model.userInfo.games
+                ) 
+                           
+            ]
+            , Button.button [ Button.primary,  Button.onClick ( EditExistingGameMsg) ] [ text "Select" ]
+            , Button.button [ Button.primary,  Button.onClick ( EditExistingGameMsg) ] [ text "Select" ]
 
+        ]
+        
+    ]
 
--- gameView : NetworkInfo -> Html Msg
--- gameView netInfo =
---     div []
---         [ label [] [ text "Name: " ]
---         , div [] [ text netInfo.name ]
---         , label [] [ text "Rating: " ]
---         , div [] [ text "netInfo.rating" ]
---         , label [] [ text "Description: " ]
---         , div [] [ text netInfo.description ]
---         ]
---
--- Subscriptions
+playGame : GameInfo -> Html Msg
+playGame model =
+         div []
+    [ 
+        Form.form []
+        [   Form.group []
+                [ Form.label [for "gameName"] [ text "Game Name"]
+                , Input.text [ Input.id "gameName", Input.onInput  UpdateGameNameMsg, Input.value model.gameName ]
+                , Form.help [] [ text "Enter Game Name" ]
+                ]
+            
+            , Form.group []
+                [ Form.label [for "myrating"] [ text "Amount"]
+                , Input.password [ Input.id "myrating", Input.onInput   UpdateWalletAmountMsg, Input.value "0" ]
+                , Form.help [] [ text "Enter Wallet Amount" ]
+                ]
+             , Form.group []
+                [ Form.label [for "networkName"] [ text "Network Name"]
+                , Input.password [ Input.id "networkName", Input.onInput   UpdateNetworkNameMsg, Input.value  model.networkName ]
+                , Form.help [] [ text "Enter Network Name" ]
+                ]
+            , Form.group []
+                [ Form.label [for "mydescription"] [ text "Description"]
+                , Input.password [ Input.id "mydescription", Input.onInput  UpdateDescriptionMsg, Input.value model.networkDescription ]
+                , Form.help [] [ text "Enter Description" ]
+
+                ]
+            
+        ]
+        , div[class "button-group"][
+                Button.button [ Button.primary   ] [ text "Add Network" ]
+                , Button.button [ Button.secondary ] [ text "Cancel" ]
+            ]
+    ]
+
 
 
 subscriptions : Model -> Sub Msg
@@ -89,42 +127,49 @@ subscriptions model =
 
 
 -- Update
-
-
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
-    case msg of
-        LoadingData userName ->
-            ( model, makeUserInfoRequest userName )
-
-        EditExistingNetwork ->
-            ( ErrorLoading "Load ? ...", Cmd.none )
-
-        AddNewNetwork ->
+    case (msg, model) of
+        (AddNewGameMsg, HasGame mdl)  ->
             ( model, makeUserInfoRequest "user123" )
-
-        GotUserInfoResponse response ->
+        (UpdateGameNameMsg newName, HasGame mdl) ->
+           (model, Cmd.none)
+        (GameChangeMsg newGame, HasGame gcmdl) ->
+             ( HasGame { gcmdl |  selectedGame = getGame (Just newGame) gcmdl.userInfo.games }, Cmd.none )
+        (GotUserInfoResponse response, LoadingResults message) ->
             case response of
                 RemoteData.Loading ->
-                    ( ErrorLoading "starting to make reuest...", Cmd.none )
+                    ( LoadingResults message, Cmd.none )
 
                 RemoteData.Success maybeData ->
                     case maybeData of
                         Just data ->
-                            ( DisplayGame data, Cmd.none )
-
+                            ( HasGame {userInfo = data, selectedGame = getGame Nothing data.games }, Cmd.none )
                         Nothing ->
-                            ( ErrorLoading "Can not get data", Cmd.none )
+                            ( LoadingResults "Can not get data", Cmd.none )
 
                 RemoteData.Failure err ->
-                    ( ErrorLoading (errorToString err), Cmd.none )
+                    ( LoadingResults (errorToString err), Cmd.none )
 
                 RemoteData.NotAsked ->
-                    ( ErrorLoading "Not Asked", Cmd.none )
-
-
-
+                    ( LoadingResults "Not Asked", Cmd.none )
+        (GotUserInfoResponse response,  HasGame mdl) ->
+             ( LoadingResults "Loaded Game with Unandled message. This state should not happen", Cmd.none )
+        (_,  LoadingResults loadingResults) ->
+             ( LoadingResults ("Loaded Game with Unandled message. This state should not happen. Loading Results: " ++ loadingResults), Cmd.none )
+        (_, _) ->
+             ( LoadingResults ("Loaded Game with Unandled message. This state should not happen. Loading Results: "), Cmd.none )
+        
+        
 -- Helpers
+getGame : Maybe String ->   List  GameInfo -> Maybe GameInfo
+getGame maybeGameName games =
+    case maybeGameName of
+        Nothing ->
+           List.head games
+        Just gameName ->
+           List.filter ( \x -> x.gameName == gameName ) games
+            |> List.head
 
 
 errorToString : Error Response -> String
@@ -134,7 +179,7 @@ errorToString err =
 
 init : String -> ( Model, Cmd Msg )
 init username =
-    ( LoadingExistingNetworks, makeUserInfoRequest username )
+    ( LoadingResults "Making Remote Call", makeUserInfoRequest username )
 
 
 makeUserInfoRequest : String -> Cmd Msg

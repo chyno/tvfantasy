@@ -1,4 +1,4 @@
-module TvApi exposing (userSelection)
+module TvApi exposing (userSelection, GameResponse, Response)
 
 import Shared exposing (GameInfo, UserInfo)
 import Api.Object
@@ -8,6 +8,8 @@ import Api.Object.User as User
 import Api.Scalar exposing (Id(..))
 import Graphql.OptionalArgument exposing (OptionalArgument(..))
 import Graphql.SelectionSet as SelectionSet exposing (SelectionSet)
+import RemoteData exposing (RemoteData)
+import Graphql.Http exposing (Error)
 
 type alias GameData =
     { data : List (Maybe GameInfo)
@@ -56,6 +58,13 @@ gameSelection =
         Game.walletAmount
         Game.networkName
         Game.networkDescription
+
+type alias Response =
+    Maybe UserInfo
+
+
+type alias GameResponse =
+    RemoteData (Graphql.Http.Error Response) Response
 
 
 -- (Result (Error decodesTo) decodesTo -> msg) -> Request decodesTo -> Cmd msg
