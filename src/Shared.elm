@@ -1,11 +1,12 @@
-module Shared exposing (Flags, GameInfo, NetworkInfo, RemoteDataMsg(..), ShowInfo, UserInfo, mapRemoteData, toString)
+module Shared exposing (Flags, GameInfo, NetworkInfo, RemoteDataMsg(..), ShowInfo, UserInfo, mapRemoteData, toString, faunaEndpoint, faunaAuth)
 
 import Date exposing (Date)
 import Graphql.Http exposing (..)
 import Graphql.Http.GraphqlError as GraphqlError exposing (..)
 import RemoteData exposing (RemoteData)
-
-
+import Graphql.OptionalArgument exposing (..)
+import Graphql.SelectionSet exposing (SelectionSet)
+import Graphql.Operation exposing (RootQuery)
 type alias Flags =
     { api : String
     }
@@ -86,7 +87,7 @@ type alias GameInfo =
     , walletAmount : Maybe Int
     , networkName : String
     , networkDescription : String
-    , id : String
+    -- , id : String
     }
 
 
@@ -109,3 +110,12 @@ type alias UserInfo =
     , walletAddress : String
     , games : List  GameInfo
     }
+
+faunaEndpoint : String
+faunaEndpoint = "https://graphql.fauna.com/graphql"
+
+faunaAuth : String 
+faunaAuth =  "Basic Zm5BRGp4Z2R5OUFDRW5ZeGlyTVBRdkhLTV91djFXT3pUb0ZfTXhfUTp0dmZhbnRhc3k6c2VydmVy"
+
+-- fnADjxgmCnACEtcVYQpT4hYzOwJB7iJBhV86zdb9
+ 

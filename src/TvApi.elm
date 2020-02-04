@@ -10,7 +10,11 @@ import Graphql.OptionalArgument exposing (OptionalArgument(..))
 import Graphql.SelectionSet as SelectionSet exposing (SelectionSet)
 import RemoteData exposing (RemoteData)
 import Graphql.Http exposing (Error)
-
+import Graphql.Codec exposing (Codec)
+import Graphql.Internal.Builder.Object as Object
+import Graphql.Internal.Encode
+import Json.Decode as Decode exposing (Decoder)
+import Json.Encode as Encode
 type alias GameData =
     { data : List (Maybe GameInfo)
     }
@@ -58,9 +62,12 @@ gameSelection =
         Game.walletAmount
         Game.networkName
         Game.networkDescription
+        -- (SelectionSet.map fromId  Game.id_)
 
-    
-        
+fromId: Id -> String
+fromId (Id idStr) =
+    idStr
+ 
 
 type alias Response =
     Maybe UserInfo

@@ -19,7 +19,7 @@ import Html exposing (Html, div, h1, label, li, text, ul)
 import Html.Attributes exposing (class, for)
 import Html.Events exposing (onClick)
 import RemoteData exposing (RemoteData)
-import Shared exposing (GameInfo, UserInfo)
+import Shared exposing (GameInfo, UserInfo, faunaEndpoint, faunaAuth)
 import TvApi exposing (GameQueryResponse, Response, gameSelection, userSelection)
 
 
@@ -204,7 +204,6 @@ update msg model =
 
                                 userInf =
                                     gmmdl.userInfo
-
                                 updatedUser =
                                     { gmmdl | userInfo = { userInf | games = updatedGames } }
                             in
@@ -263,7 +262,6 @@ getFirstGameName games =
     case List.head games of
         Nothing ->
             ""
-
         Just gm ->
             gm.gameName
 
@@ -281,8 +279,8 @@ init username =
 makeUserInfoRequest : String -> Cmd Msg
 makeUserInfoRequest userName =
     Query.userByUserName { userName = userName } userSelection
-        |> Graphql.Http.queryRequest "https://graphql.fauna.com/graphql"
-        |> Graphql.Http.withHeader "Authorization" " Basic Zm5BRGprSEpKa0FDRkNvZThnamFsMC13bWJEVDZPZkdBWXpORVo1UDp0dmZhbnRhc3k6c2VydmVy"
+        |> Graphql.Http.queryRequest faunaEndpoint
+        |> Graphql.Http.withHeader "Authorization" faunaAuth
         |> Graphql.Http.send (RemoteData.fromResult >> GotUserInfoResponse)
 
 
@@ -290,18 +288,19 @@ gameIntputData : GameInfo -> GameInput
 gameIntputData gameData =
     let
         funOp =
-            \x -> { walletAmount = Absent, end = Absent, shows = Absent, start = Absent, user = Absent }
+            \_ -> { walletAmount = Absent, end = Absent, shows = Absent, start = Absent, user = Absent }
     in
     buildGameInput
         { gameName = gameData.gameName, networkDescription = gameData.networkDescription, networkName = gameData.networkName }
         funOp
 
 
+
 updateGameCmd : GameInfo -> Cmd Msg
 updateGameCmd gmData =
-    Mutation.updateGame { data = gameIntputData gmData, id = Id gmData.id } gameSelection
-        |> Graphql.Http.mutationRequest "https://graphql.fauna.com/graphql"
-        |> Graphql.Http.withHeader "Authorization" " Basic Zm5BRGprSEpKa0FDRkNvZThnamFsMC13bWJEVDZPZkdBWXpORVo1UDp0dmZhbnRhc3k6c2VydmVy"
+    Mutation.updateGame { data = gameIntputData gmData, id = Id "gmData.id" } gameSelection
+        |> Graphql.Http.mutationRequest faunaEndpoint
+        |> Graphql.Http.withHeader "Authorization" faunaAuth
         |> Graphql.Http.send (RemoteData.fromResult >> GotGameUpdateResponse)
 
 
