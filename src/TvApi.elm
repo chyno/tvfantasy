@@ -10,11 +10,8 @@ import Graphql.OptionalArgument exposing (OptionalArgument(..))
 import Graphql.SelectionSet as SelectionSet exposing (SelectionSet)
 import RemoteData exposing (RemoteData)
 import Graphql.Http exposing (Error)
-import Graphql.Codec exposing (Codec)
-import Graphql.Internal.Builder.Object as Object
-import Graphql.Internal.Encode
-import Json.Decode as Decode exposing (Decoder)
-import Json.Encode as Encode
+import Api.Scalar exposing (defaultCodecs)
+import Json.Decode as  Decode
 type alias GameData =
     { data : List (Maybe GameInfo)
     }
@@ -57,16 +54,27 @@ gamePageSelection =
 
 gameSelection : SelectionSet GameInfo Api.Object.Game
 gameSelection =
-    SelectionSet.map4 GameInfo
+    SelectionSet.map5 GameInfo
         Game.gameName
         Game.walletAmount
         Game.networkName
         Game.networkDescription
-        -- (SelectionSet.map fromId  Game.id_)
+        (SelectionSet.map fromId  Game.id_)
 
+-- Result Decode.Error String
 fromId: Id -> String
-fromId (Id idStr) =
-    idStr
+fromId idVal =
+    let 
+        encval = defaultCodecs.codecId.encoder idVal |>
+                 Decode.decodeValue Decode.string
+    in
+        case encval of
+            (Ok val) ->
+                val
+            Err err->
+                "err"
+
+  
  
 
 type alias Response =

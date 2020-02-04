@@ -87,7 +87,7 @@ type alias GameInfo =
     , walletAmount : Maybe Int
     , networkName : String
     , networkDescription : String
-    -- , id : String
+    , id : String
     }
 
 

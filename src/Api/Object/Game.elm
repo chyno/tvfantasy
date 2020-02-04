@@ -8,6 +8,7 @@ import Api.InputObject
 import Api.Interface
 import Api.Object
 import Api.Scalar
+import Api.ScalarCodecs
 import Api.Union
 import Graphql.Internal.Builder.Argument as Argument exposing (Argument)
 import Graphql.Internal.Builder.Object as Object
@@ -16,7 +17,6 @@ import Graphql.Operation exposing (RootMutation, RootQuery, RootSubscription)
 import Graphql.OptionalArgument exposing (OptionalArgument(..))
 import Graphql.SelectionSet exposing (SelectionSet)
 import Json.Decode as Decode
-import ScalarCodecs
 
 
 networkDescription : SelectionSet String Api.Object.Game
@@ -31,9 +31,9 @@ gameName =
 
 {-| The document's ID.
 -}
-id_ : SelectionSet ScalarCodecs.Id Api.Object.Game
+id_ : SelectionSet Api.ScalarCodecs.Id Api.Object.Game
 id_ =
-    Object.selectionForField "ScalarCodecs.Id" "_id" [] (ScalarCodecs.codecs |> Api.Scalar.unwrapCodecs |> .codecId |> .decoder)
+    Object.selectionForField "ScalarCodecs.Id" "_id" [] (Api.ScalarCodecs.codecs |> Api.Scalar.unwrapCodecs |> .codecId |> .decoder)
 
 
 walletAmount : SelectionSet (Maybe Int) Api.Object.Game
@@ -41,9 +41,9 @@ walletAmount =
     Object.selectionForField "(Maybe Int)" "walletAmount" [] (Decode.int |> Decode.nullable)
 
 
-end : SelectionSet (Maybe ScalarCodecs.Date) Api.Object.Game
+end : SelectionSet (Maybe Api.ScalarCodecs.Date) Api.Object.Game
 end =
-    Object.selectionForField "(Maybe ScalarCodecs.Date)" "end" [] (ScalarCodecs.codecs |> Api.Scalar.unwrapCodecs |> .codecDate |> .decoder |> Decode.nullable)
+    Object.selectionForField "(Maybe ScalarCodecs.Date)" "end" [] (Api.ScalarCodecs.codecs |> Api.Scalar.unwrapCodecs |> .codecDate |> .decoder |> Decode.nullable)
 
 
 networkName : SelectionSet String Api.Object.Game
@@ -76,9 +76,9 @@ shows fillInOptionals object_ =
     Object.selectionForCompositeField "shows" optionalArgs object_ identity
 
 
-start : SelectionSet (Maybe ScalarCodecs.Date) Api.Object.Game
+start : SelectionSet (Maybe Api.ScalarCodecs.Date) Api.Object.Game
 start =
-    Object.selectionForField "(Maybe ScalarCodecs.Date)" "start" [] (ScalarCodecs.codecs |> Api.Scalar.unwrapCodecs |> .codecDate |> .decoder |> Decode.nullable)
+    Object.selectionForField "(Maybe ScalarCodecs.Date)" "start" [] (Api.ScalarCodecs.codecs |> Api.Scalar.unwrapCodecs |> .codecDate |> .decoder |> Decode.nullable)
 
 
 user : SelectionSet decodesTo Api.Object.User -> SelectionSet (Maybe decodesTo) Api.Object.Game
@@ -88,6 +88,6 @@ user object_ =
 
 {-| The document's timestamp.
 -}
-ts_ : SelectionSet ScalarCodecs.Long Api.Object.Game
+ts_ : SelectionSet Api.ScalarCodecs.Long Api.Object.Game
 ts_ =
-    Object.selectionForField "ScalarCodecs.Long" "_ts" [] (ScalarCodecs.codecs |> Api.Scalar.unwrapCodecs |> .codecLong |> .decoder)
+    Object.selectionForField "ScalarCodecs.Long" "_ts" [] (Api.ScalarCodecs.codecs |> Api.Scalar.unwrapCodecs |> .codecLong |> .decoder)

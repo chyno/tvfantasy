@@ -8,6 +8,7 @@ import Api.InputObject
 import Api.Interface
 import Api.Object
 import Api.Scalar
+import Api.ScalarCodecs
 import Api.Union
 import Graphql.Internal.Builder.Argument as Argument exposing (Argument)
 import Graphql.Internal.Builder.Object as Object
@@ -16,7 +17,6 @@ import Graphql.Operation exposing (RootMutation, RootQuery, RootSubscription)
 import Graphql.OptionalArgument exposing (OptionalArgument(..))
 import Graphql.SelectionSet exposing (SelectionSet)
 import Json.Decode as Decode
-import ScalarCodecs
 
 
 showDescription : SelectionSet String Api.Object.Show
@@ -26,9 +26,9 @@ showDescription =
 
 {-| The document's ID.
 -}
-id_ : SelectionSet ScalarCodecs.Id Api.Object.Show
+id_ : SelectionSet Api.ScalarCodecs.Id Api.Object.Show
 id_ =
-    Object.selectionForField "ScalarCodecs.Id" "_id" [] (ScalarCodecs.codecs |> Api.Scalar.unwrapCodecs |> .codecId |> .decoder)
+    Object.selectionForField "ScalarCodecs.Id" "_id" [] (Api.ScalarCodecs.codecs |> Api.Scalar.unwrapCodecs |> .codecId |> .decoder)
 
 
 showName : SelectionSet String Api.Object.Show
@@ -48,6 +48,6 @@ game object_ =
 
 {-| The document's timestamp.
 -}
-ts_ : SelectionSet ScalarCodecs.Long Api.Object.Show
+ts_ : SelectionSet Api.ScalarCodecs.Long Api.Object.Show
 ts_ =
-    Object.selectionForField "ScalarCodecs.Long" "_ts" [] (ScalarCodecs.codecs |> Api.Scalar.unwrapCodecs |> .codecLong |> .decoder)
+    Object.selectionForField "ScalarCodecs.Long" "_ts" [] (Api.ScalarCodecs.codecs |> Api.Scalar.unwrapCodecs |> .codecLong |> .decoder)
