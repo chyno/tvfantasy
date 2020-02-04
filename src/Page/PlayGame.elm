@@ -21,8 +21,8 @@ import Html.Events exposing (onClick)
 import RemoteData exposing (RemoteData)
 import Shared exposing (GameInfo, UserInfo, faunaEndpoint, faunaAuth)
 import TvApi exposing (GameQueryResponse, Response, gameSelection, userSelection)
-
-
+import Browser.Navigation as Nav
+import Routes exposing (showsPath)
 
 --  Model
 
@@ -46,6 +46,7 @@ type GameEditMsg
     | UpdateDescription String
     | CancelEdit
     | SaveGame
+    | NavigateShows
 
 
 type Msg
@@ -125,7 +126,8 @@ playGame model =
             ]
         , div [ class "button-group" ]
             [ Button.button [ Button.primary, Button.onClick SaveGame ] [ text "Save Changes" ]
-            , Button.button [ Button.secondary, Button.onClick CancelEdit ] [ text "Cancel" ]
+            ,  Button.button [ Button.secondary, Button.onClick NavigateShows ] [ text "Manage Shows" ]
+            , Button.button [ Button.secondary, Button.onClick CancelEdit ] [ text "Done" ]
             ]
         ]
 
@@ -143,6 +145,8 @@ updateGame msg maybeModel =
 
         Just model ->
             case msg of
+                NavigateShows ->
+                    (Just model, (Nav.load  Routes.showsPath) )
                 UpdateGameName newName ->
                     ( Just { model | gameName = newName }, Cmd.none )
 
@@ -178,7 +182,7 @@ update msg model =
             ( HasGame { gcmdl | editGame = getGame gcmdl.selectedGame gcmdl.userInfo.games }, Cmd.none )
 
         ( AddNewGame, HasGame mdl ) ->
-            ( model, makeUserInfoRequest "user123" )
+            ( model, makeUserInfoRequest mdl.userInfo.userName )
 
         ( GameEdit gmsg, HasGame mdl ) ->
             let

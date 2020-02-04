@@ -1,4 +1,4 @@
-module Routes exposing (Route(..), parseUrl, showPath, showsPath, loginPath)
+module Routes exposing (Route(..), parseUrl, showsPath, loginPath, playGamePath)
 
 import Url exposing (Url)
 import Url.Parser exposing (..)
@@ -6,8 +6,8 @@ import Url.Parser.Query as Query
 
 type Route
     = ShowsRoute
-    | ShowRoute String
     | LoginRoute
+    | PlayGameRoute String
     | NotFoundRoute
 
 
@@ -16,7 +16,7 @@ matchers =
     oneOf
         [ map LoginRoute top
        , map ShowsRoute (s "shows")
-        , map ShowRoute (s "show" </> string)
+        , map PlayGameRoute (s "playgame" </> string)
         , map LoginRoute (s "login")
         ]
 
@@ -38,9 +38,8 @@ pathFor route =
             "/shows"
         LoginRoute ->
             "/login"         
-        ShowRoute id ->
-            "/show/" ++ id
-
+        PlayGameRoute userName ->
+            "/playgame/" ++ userName
         NotFoundRoute ->
             "/"
 
@@ -51,5 +50,5 @@ showsPath =
     pathFor ShowsRoute
 
 
-showPath id =
-    pathFor (ShowRoute id)
+playGamePath userName =
+    pathFor (PlayGameRoute userName)

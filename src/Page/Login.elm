@@ -29,7 +29,7 @@ import Loading
         )
 import RemoteData exposing (RemoteData)
 import Shared exposing (..)
-
+import Routes exposing(playGamePath)
 
 type alias Response = { id : Id }
 
@@ -200,9 +200,7 @@ update msg model =
         DoneLogin data ->
             if data.isLoggedIn then
                 Debug.log "Success  .."
-                    ( model, Cmd.none )
-                    -- ( model, Nav.pushUrl model.navKey (Routes.gamePathLogin model.username) )
-
+                ( model, Nav.pushUrl model.navKey (Routes.playGamePath model.username) )
             else
                 Debug.log "Fail  .."
                     ( { model | walletAddress = "-", message = data.message, loadState = Loading.Off }

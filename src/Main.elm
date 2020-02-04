@@ -40,21 +40,21 @@ type Msg
     | Logout
 
 
-inittest : Flags -> Url -> Key -> ( Model, Cmd Msg )
-inittest flags url navKey =
-    let
-        ( lgModel, lgCmd ) =
-            PlayGame.init "user123"
+-- inittest : Flags -> Url -> Key -> ( Model, Cmd Msg )
+-- inittest flags url navKey =
+--     let
+--         ( lgModel, lgCmd ) =
+--             PlayGame.init "user123"
 
-        model =
-            { flags = flags
-            , navKey = navKey
-            , route = Routes.parseUrl url
-            , page = PagePlayGame lgModel
-            , username = ""
-            }
-    in
-    ( model, Cmd.map PlayGameMsg lgCmd )
+--         model =
+--             { flags = flags
+--             , navKey = navKey
+--             , route = Routes.parseUrl url
+--             , page = PagePlayGame lgModel
+--             , username = ""
+--             }
+--     in
+--     ( model, Cmd.map PlayGameMsg lgCmd )
 
 
 init : Flags -> Url -> Key -> ( Model, Cmd Msg )
@@ -71,7 +71,7 @@ init flags url navKey =
             , username = ""
             }
     in
-    loadCurrentPage ( model, Cmd.none )
+        loadCurrentPage ( model, Cmd.none )
 
 
 loadCurrentPage : ( Model, Cmd Msg ) -> ( Model, Cmd Msg )
@@ -84,7 +84,7 @@ loadCurrentPage ( model, cmd ) =
             in
             ( { model | page = PageShow pageModel }, Cmd.batch [ cmd, Cmd.map ShowMsg pageCmd ] )
 
-        -- ( PageShow pageModel, Cmd.map ShowMsg pageCmd )
+        
         Routes.LoginRoute ->
             let
                 ( pageModel, pageCmd ) =
@@ -92,12 +92,15 @@ loadCurrentPage ( model, cmd ) =
             in
             ( { model | page = PageLogin pageModel }, Cmd.batch [ cmd, Cmd.map LoginMsg pageCmd ] )
 
-        -- ( PageLogin pageModel, Cmd.map LoginMsg pageCmd )
-        -- ( PageGame pageModel, Cmd.map GameMsg pageCmd )
-        Routes.ShowRoute showId ->
-            ( { model | page = PageNone }, Cmd.none )
+        Routes.PlayGameRoute userName->
+             let
+                ( pageModel, pageCmd ) =
+                    PlayGame.init "user123"
+            in
+                ( { model | page = PagePlayGame pageModel }, Cmd.batch [ cmd, Cmd.map PlayGameMsg pageCmd ] )
 
-        -- ( PageNone, Cmd.none )
+           
+
         Routes.NotFoundRoute ->
             ( { model | page = PageNone }, Cmd.none )
 
@@ -186,7 +189,7 @@ update msg model =
 main : Program Flags Model Msg
 main =
     Browser.application
-        { init = inittest
+        { init = init
         , view = view
         , update = update
         , subscriptions = subscriptions
@@ -233,7 +236,6 @@ currentPage model =
         PageShow pageModel ->
             Show.view pageModel
                 |> Html.map ShowMsg
-
         PageNone ->
             notFoundView
 
