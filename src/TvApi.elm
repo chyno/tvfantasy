@@ -12,6 +12,8 @@ import RemoteData exposing (RemoteData)
 import Graphql.Http exposing (Error)
 import Api.Scalar exposing (defaultCodecs)
 import Json.Decode as  Decode
+import Json.Decode exposing (Error)
+
 type alias GameData =
     { data : List (Maybe GameInfo)
     }
@@ -72,14 +74,15 @@ fromId idVal =
             (Ok val) ->
                 val
             Err err->
-                "err"
+                case err of
+                    Decode.Field errMessage cholderr ->
+                        errMessage
+                    _ ->
+                        "Some unhandled error occured"
 
-  
  
-
 type alias Response =
     Maybe UserInfo
-
 
 type alias GameQueryResponse =
     RemoteData (Graphql.Http.Error Response) Response
