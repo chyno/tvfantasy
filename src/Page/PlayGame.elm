@@ -298,7 +298,7 @@ gameIntputData gameData =
 
 updateGameCmd : GameInfo -> Cmd Msg
 updateGameCmd gmData =
-    Mutation.updateGame { data = gameIntputData gmData, id = Id "gmData.id" } gameSelection
+    Mutation.updateGame { data = gameIntputData gmData, id = Id gmData.id } gameSelection
         |> Graphql.Http.mutationRequest faunaEndpoint
         |> Graphql.Http.withHeader "Authorization" faunaAuth
         |> Graphql.Http.send (RemoteData.fromResult >> GotGameUpdateResponse)

@@ -12,6 +12,7 @@ import Page.Show as Show
 import Routes exposing (Route)
 import Shared exposing (..)
 import Url exposing (Url)
+import Spinner
 
 
 type alias Model =
@@ -196,7 +197,6 @@ main =
 
 
 -- VIEWS
-
 
 view : Model -> Browser.Document Msg
 view model =
