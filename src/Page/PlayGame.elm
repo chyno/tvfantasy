@@ -297,9 +297,9 @@ gameIntputData gameData =
         funOp =
             \_ -> { walletAmount = Absent, end = Absent, shows = Absent, start = Absent, user = Absent }
     in
-    buildGameInput
-        { gameName = gameData.gameName, networkDescription = gameData.networkDescription, networkName = gameData.networkName }
-        funOp
+        buildGameInput
+            { gameName = gameData.gameName, networkDescription = gameData.networkDescription, networkName = gameData.networkName }
+            funOp
 
 
 

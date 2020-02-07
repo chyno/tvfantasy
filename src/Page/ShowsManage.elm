@@ -1,4 +1,4 @@
-module Page.Show exposing (Model, Msg(..), ShowInfo, init, subscriptions, update, view)
+module Page.ShowsManage exposing (Model, Msg(..), TvApiShowInfo, init, subscriptions, update, view)
 
 import Bootstrap.Form.Checkbox exposing (checkbox, checked, onCheck)
 import Browser.Navigation as Nav
@@ -8,13 +8,20 @@ import Html.Events exposing (onClick)
 import Http exposing (..)
 import Json.Decode as D
 import Shared exposing (..)
-
+import Graphql.Http exposing (Error)
+import Graphql.OptionalArgument exposing (..)
+import Api.InputObject exposing (GameInput, GameInputRaw, buildGameInput)
+import Api.Mutation as Mutation
+import Api.InputObject exposing (buildShowInput, ShowInput)
+import TvApi exposing (showSelection)
+import RemoteData exposing (RemoteData)
 
 type Msg
-    = OnFetchShows (Result Http.Error (List ShowInfo))
+    = OnFetchShows (Result Http.Error (List TvApiShowInfo))
     | NavigateGame
     | AddShows
     | SelectShow String Bool
+    | GotShowAddResponse (RemoteData (Graphql.Http.Error  ShowInfo)   ShowInfo)
 
 
 init : Flags -> ( Model, Cmd Msg )
@@ -31,8 +38,8 @@ type alias LoadingModel =
 
 
 type alias LoadedModel =
-    { showInfos : List ShowInfo
-    , selectedShowInfos : Maybe ShowInfo
+    { showInfos : List TvApiShowInfo
+    , selectedShowInfos : Maybe TvApiShowInfo
     }
 
 
@@ -43,7 +50,7 @@ type Model
 
 
 -- type alias Model =
---     { showInfos : RemoteDataMsg (List ShowInfo)
+--     { showInfos : RemoteDataMsg (List TvApiShowInfo)
 --     }
 
 
@@ -55,7 +62,7 @@ type alias RemoteShowInfo =
     }
 
 
-type alias ShowInfo =
+type alias TvApiShowInfo =
     { name : String
     , overview : String
     , firstAirDate : String
@@ -82,6 +89,29 @@ makeUserInfoRequest username =
 --     |> Graphql.Http.withHeader "Authorization" ("Bearer fnADbMd3RLACEpjT90hoJSn6SXhN281PIgIZg375" )
 --     |> Graphql.Http.send (RemoteData.fromResult >> GotUserInfoResponse)
 -- Update
+
+
+
+
+showAddData : TvApiShowInfo -> ShowInput
+showAddData gameData =
+    let
+        funOp =
+            \_ -> { game = Absent }
+    in
+        buildShowInput
+             { showName =""
+                , rating = 0
+                , showDescription = ""
+            }
+            funOp
+
+createShowCmd : TvApiShowInfo -> Cmd Msg
+createShowCmd showData =
+    Mutation.createShow { data = showAddData showData } showSelection
+        |> Graphql.Http.mutationRequest faunaEndpoint
+        |> Graphql.Http.withHeader "Authorization" faunaAuth
+        |> Graphql.Http.send (RemoteData.fromResult >> GotShowAddResponse)
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -161,7 +191,7 @@ loadingView model =
         [ content ]
 
 
-showRow : ShowInfo -> Html Msg
+showRow : TvApiShowInfo -> Html Msg
 showRow show =
     tr []
         [ td [] [ checkbox [ SelectShow show.name |> onCheck ] "" ]
@@ -206,7 +236,7 @@ showDecoder =
         (D.field "vote_average" D.float)
 
 
-listOfShowsDecoder : D.Decoder (List ShowInfo)
+listOfShowsDecoder : D.Decoder (List TvApiShowInfo)
 listOfShowsDecoder =
     D.field "results" (D.list showDecoder)
 

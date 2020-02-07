@@ -29,3 +29,6 @@ type Query {
   userByUserName(userName: String!): User
 }
 
+type Mutation {
+  addShowsToGame()
+}

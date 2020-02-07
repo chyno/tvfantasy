@@ -1,4 +1,4 @@
-module TvApi exposing (userSelection, GameQueryResponse, Response, gameSelection)
+module TvApi exposing (userSelection, GameQueryResponse, Response, gameSelection, showSelection)
 
 import Shared exposing (GameInfo, UserInfo, ShowInfo)
 import Api.Object

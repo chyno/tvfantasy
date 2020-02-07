@@ -8,7 +8,7 @@ import Html.Attributes exposing (..)
 import Html.Events exposing (onClick, onInput)
 import Page.Login as Login
 import Page.PlayGame as PlayGame
-import Page.Show as Show
+import Page.ShowsManage as ShowsManage
 import Routes exposing (Route)
 import Shared exposing (..)
 import Url exposing (Url)
@@ -27,7 +27,7 @@ type alias Model =
 type Page
     = PageNone
     | PageLogin Login.Model
-    | PageShow Show.Model
+    | PageShow ShowsManage.Model
     | PagePlayGame PlayGame.Model
 
 
@@ -35,7 +35,7 @@ type Msg
     = OnUrlChange Url
     | LinkClicked UrlRequest
     | LoginMsg Login.Msg
-    | ShowMsg Show.Msg
+    | ShowMsg ShowsManage.Msg
     | PlayGameMsg PlayGame.Msg
     | Logout
 
@@ -64,7 +64,7 @@ loadCurrentPage ( model, cmd ) =
         Routes.ShowsRoute ->
             let
                 ( pageModel, pageCmd ) =
-                    Show.init model.flags
+                    ShowsManage.init model.flags
             in
             ( { model | page = PageShow pageModel }, Cmd.batch [ cmd, Cmd.map ShowMsg pageCmd ] )
 
@@ -107,7 +107,7 @@ subscriptions model =
                     Sub.map LoginMsg (Login.subscriptions pageModel)
 
                 PageShow pageModel ->
-                    Sub.map ShowMsg (Show.subscriptions pageModel)
+                    Sub.map ShowMsg (ShowsManage.subscriptions pageModel)
 
                 -- PageGame pageModel ->
                 --     Sub.map GameMsg (Game.subscriptions pageModel)
@@ -148,7 +148,7 @@ update msg model =
         ( ShowMsg subMsg, PageShow pageModel ) ->
             let
                 ( newPageModel, newCmd ) =
-                    Show.update subMsg pageModel
+                    ShowsManage.update subMsg pageModel
             in
             ( { model | page = PageShow newPageModel }
             , Cmd.map ShowMsg newCmd
@@ -218,7 +218,7 @@ currentPage model =
                 |> Html.map LoginMsg
 
         PageShow pageModel ->
-            Show.view pageModel
+            ShowsManage.view pageModel
                 |> Html.map ShowMsg
         PageNone ->
             notFoundView

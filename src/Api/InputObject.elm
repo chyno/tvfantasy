@@ -24,7 +24,7 @@ buildGameInput required fillOptionals =
             fillOptionals
                 { walletAmount = Absent, start = Absent, end = Absent, user = Absent, shows = Absent }
     in
-    GameInput { gameName = required.gameName, walletAmount = optionals.walletAmount, networkName = required.networkName, networkDescription = required.networkDescription, start = optionals.start, end = optionals.end, user = optionals.user, shows = optionals.shows }
+        GameInput { gameName = required.gameName, walletAmount = optionals.walletAmount, networkName = required.networkName, networkDescription = required.networkDescription, start = optionals.start, end = optionals.end, user = optionals.user, shows = optionals.shows }
 
 
 type alias GameInputRequiredFields =
