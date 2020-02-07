@@ -88,6 +88,7 @@ type alias GameInfo =
     , networkName : String
     , networkDescription : String
     , id : String
+    , shows: List ShowInfo
     }
 
 
@@ -95,6 +96,7 @@ type alias ShowInfo =
     { name : String
     , rating : Int
     , description : String
+     , id : String
     }
 
 

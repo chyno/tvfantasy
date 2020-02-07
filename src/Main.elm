@@ -40,22 +40,6 @@ type Msg
     | Logout
 
 
--- inittest : Flags -> Url -> Key -> ( Model, Cmd Msg )
--- inittest flags url navKey =
---     let
---         ( lgModel, lgCmd ) =
---             PlayGame.init "user123"
-
---         model =
---             { flags = flags
---             , navKey = navKey
---             , route = Routes.parseUrl url
---             , page = PagePlayGame lgModel
---             , username = ""
---             }
---     in
---     ( model, Cmd.map PlayGameMsg lgCmd )
-
 
 init : Flags -> Url -> Key -> ( Model, Cmd Msg )
 init flags url navKey =

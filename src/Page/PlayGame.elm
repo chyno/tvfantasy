@@ -10,6 +10,8 @@ import Bootstrap.Form.Checkbox as Checkbox
 import Bootstrap.Form.Fieldset as Fieldset
 import Bootstrap.Form.Input as Input
 import Bootstrap.Form.Radio as Radio
+import Bootstrap.Table as Table
+
 import Bootstrap.Form.Select as Select
 import Bootstrap.Form.Textarea as Textarea
 import Bootstrap.ListGroup as ListGroup
@@ -102,7 +104,7 @@ viewChooseGame model =
 playGame : GameInfo -> Html GameEditMsg
 playGame model =
     div []
-        [ Form.form []
+        [ Form.form [Html.Events.onSubmit SaveGame]
             [ Form.group []
                 [ Form.label [ for "gameName" ] [ text "Game Name" ]
                 , Input.text [ Input.id "gameName", Input.onInput UpdateGameName, Input.value model.gameName ]
@@ -125,12 +127,15 @@ playGame model =
                 ]
             ]
         , div [ class "button-group" ]
-            [ Button.button [ Button.primary, Button.onClick SaveGame ] [ text "Save Changes" ]
+            [ Button.submitButton [ Button.primary ] [ text "Save Changes" ]
             ,  Button.button [ Button.secondary, Button.onClick NavigateShows ] [ text "Manage Shows" ]
-            , Button.button [ Button.secondary, Button.onClick CancelEdit ] [ text "Done" ]
+            , Button.linkButton [ Button.secondary, Button.onClick CancelEdit ] [ text "Done" ]
             ]
         ]
 
+showsTable : List Shared.ShowInfo -> Html Msg
+showsTable shows = 
+ div [] []
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
@@ -168,8 +173,6 @@ updateGame msg maybeModel =
 
 
 -- Update
-
-
 updateNewGame : List GameInfo -> GameInfo -> List GameInfo
 updateNewGame lstGames game =
     lstGames

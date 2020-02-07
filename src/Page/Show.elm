@@ -13,6 +13,7 @@ import Shared exposing (..)
 type Msg
     = OnFetchShows (Result Http.Error (List ShowInfo))
     | NavigateGame
+    | AddShows
     | SelectShow String Bool
 
 
@@ -89,11 +90,15 @@ update msg model =
         LoadedData mdl ->
             case msg of
                 SelectShow name isCheck ->
-                    ( model, Cmd.none )
-
+                   if isCheck then
+                        ( model, Cmd.none )
+                    else
+                        ( model, Cmd.none )
+                AddShows ->
+                    (model, Cmd.none )
                 _ ->
-                    ( model, Cmd.none )
-
+                    Debug.todo "Handle messge"
+                     
         LoadingData mdl ->
             case msg of
                 OnFetchShows (Ok shows) ->
@@ -110,7 +115,7 @@ update msg model =
                     -- ( model, Nav.load Routes.gamePath )
 
                 _ ->
-                    ( model, Cmd.none )
+                    Debug.todo "Handle messge"
 
 
 
@@ -131,7 +136,6 @@ view model =
     case model of
         LoadingData mdl1 ->
             loadingView mdl1
-
         LoadedData mdl2 ->
             loadedView mdl2
 
@@ -184,14 +188,13 @@ loadedView model =
                     :: List.map showRow model.showInfos
                 )
             ]
+         , div [ class "button", onClick AddShows ] [ text "Add Shows" ]
         , div [ class "button", onClick NavigateGame ] [ text "Back to Your Tv Game" ]
         ]
 
 
 
 -- Decoders
-
-
 showDecoder : D.Decoder RemoteShowInfo
 showDecoder =
     D.map4
