@@ -5,7 +5,7 @@ import Url.Parser exposing (..)
 import Url.Parser.Query as Query
 
 type Route
-    = ShowsRoute
+    = ShowsRoute String
     | LoginRoute
     | PlayGameRoute String
     | NotFoundRoute
@@ -15,7 +15,7 @@ matchers : Parser (Route -> a) a
 matchers =
     oneOf
         [ map LoginRoute top
-       , map ShowsRoute (s "shows")
+       , map ShowsRoute (s "shows" </> string)
         , map PlayGameRoute (s "playgame" </> string)
         , map LoginRoute (s "login")
         ]
@@ -34,8 +34,8 @@ parseUrl url =
 pathFor : Route -> String
 pathFor route =
     case route of
-        ShowsRoute ->
-            "/shows"
+        ShowsRoute gameId ->
+            "/shows/" ++ gameId
         LoginRoute ->
             "/login"         
         PlayGameRoute userName ->
@@ -46,8 +46,8 @@ pathFor route =
 loginPath =
     pathFor LoginRoute
 
-showsPath =
-    pathFor ShowsRoute
+showsPath gameId =
+    pathFor (ShowsRoute gameId)
 
 
 playGamePath userName =

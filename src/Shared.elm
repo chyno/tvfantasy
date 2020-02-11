@@ -1,12 +1,14 @@
-module Shared exposing (Flags, GameInfo, NetworkInfo, RemoteDataMsg(..), ShowInfo, UserInfo, mapRemoteData, toString, faunaEndpoint, faunaAuth)
+module Shared exposing (Flags, GameInfo, NetworkInfo, RemoteDataMsg(..), ShowInfo, UserInfo, faunaAuth, faunaEndpoint, mapRemoteData, toString)
 
 import Date exposing (Date)
 import Graphql.Http exposing (..)
 import Graphql.Http.GraphqlError as GraphqlError exposing (..)
-import RemoteData exposing (RemoteData)
+import Graphql.Operation exposing (RootQuery)
 import Graphql.OptionalArgument exposing (..)
 import Graphql.SelectionSet exposing (SelectionSet)
-import Graphql.Operation exposing (RootQuery)
+import RemoteData exposing (RemoteData)
+
+
 type alias Flags =
     { api : String
     }
@@ -88,7 +90,7 @@ type alias GameInfo =
     , networkName : String
     , networkDescription : String
     , id : String
-    , shows: List ShowInfo
+    , shows : List ShowInfo
     }
 
 
@@ -96,7 +98,7 @@ type alias ShowInfo =
     { name : String
     , rating : Int
     , description : String
-     , id : String
+    , id : String
     }
 
 
@@ -107,17 +109,23 @@ type alias NetworkInfo =
     , shows : List ShowInfo
     }
 
+
 type alias UserInfo =
     { userName : String
     , walletAddress : String
-    , games : List  GameInfo
+    , games : List GameInfo
     }
 
-faunaEndpoint : String
-faunaEndpoint = "https://graphql.fauna.com/graphql"
 
-faunaAuth : String 
-faunaAuth =  "Basic Zm5BRGp4Z2R5OUFDRW5ZeGlyTVBRdkhLTV91djFXT3pUb0ZfTXhfUTp0dmZhbnRhc3k6c2VydmVy"
+faunaEndpoint : String
+faunaEndpoint =
+    "https://graphql.fauna.com/graphql"
+
+
+faunaAuth : String
+faunaAuth =
+    "Basic Zm5BRGtRVnpDZkFDRXNFYWp1b2E1YzlSYnNGSU5BWkF5akpxSWVuOTo="
+
+
 
 -- fnADjxgmCnACEtcVYQpT4hYzOwJB7iJBhV86zdb9
- 

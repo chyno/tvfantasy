@@ -61,8 +61,6 @@ userSelection =
         User.walletAddress
         (User.games fillGameArgs gamePageSelection |> SelectionSet.map gameDataParser)
 
-
-
 gamePageSelection : SelectionSet GameData Api.Object.GamePage
 gamePageSelection =
     SelectionSet.map GameData

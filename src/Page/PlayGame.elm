@@ -1,6 +1,6 @@
 module Page.PlayGame exposing (Model, Msg(..), init, subscriptions, update, view)
 
-import Api.InputObject exposing (GameInput, GameInputRaw, buildGameInput)
+import Api.InputObject exposing (GameInput, buildGameInput)
 import Api.Mutation as Mutation
 import Api.Query as Query
 import Api.Scalar exposing (Id(..))
@@ -17,7 +17,7 @@ import Bootstrap.Form.Textarea as Textarea
 import Bootstrap.ListGroup as ListGroup
 import Graphql.Http exposing (Error)
 import Graphql.OptionalArgument exposing (..)
-import Html exposing (Html, div, h1, label, li, text, ul)
+import Html exposing (Html, div, label,  text, ul)
 import Html.Attributes exposing (class, for)
 import Html.Events exposing (onClick)
 import RemoteData exposing (RemoteData)
@@ -151,7 +151,7 @@ updateGame msg maybeModel =
         Just model ->
             case msg of
                 NavigateShows ->
-                    (Just model, (Nav.load  Routes.showsPath) )
+                    (Just model, Nav.load  (Routes.showsPath model.id) )
                 UpdateGameName newName ->
                     ( Just { model | gameName = newName }, Cmd.none )
 
@@ -301,8 +301,6 @@ gameIntputData gameData =
             { gameName = gameData.gameName, networkDescription = gameData.networkDescription, networkName = gameData.networkName }
             funOp
 
-
-
 updateGameCmd : GameInfo -> Cmd Msg
 updateGameCmd gmData =
     Mutation.updateGame { data = gameIntputData gmData, id = Id gmData.id } gameSelection
@@ -310,16 +308,3 @@ updateGameCmd gmData =
         |> Graphql.Http.withHeader "Authorization" faunaAuth
         |> Graphql.Http.send (RemoteData.fromResult >> GotGameUpdateResponse)
 
-
-
--- mutation {
---   updateGame (id: 256087318276866580, data: {
---     gameName: "new gamename"
---     networkName: "new Network"
---     walletAmount: 2
---     networkDescription: "new dec"
---   }) {
---    gameName
---     networkName
---   }
--- }
