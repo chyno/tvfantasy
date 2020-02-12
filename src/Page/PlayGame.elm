@@ -97,6 +97,7 @@ viewChooseGame model =
                     (List.map (\x -> Select.item [] [ text x.gameName ]) model.userInfo.games)
                 ]
             , Button.button [ Button.primary, Button.onClick EditExistingGame ] [ text "Select" ]
+            , Button.button [ Button.primary, Button.onClick AddNewGame ] [ text "Add New" ]
             ]
         ]
 
@@ -120,7 +121,7 @@ playGame model =
                 , Input.text [ Input.id "networkName", Input.onInput UpdateNetworkName, Input.value model.networkName ]
                 , Form.help [] [ text "Enter Network Name" ]
                 ]
-            , Form.group []
+        , Form.group []
                 [ Form.label [ for "mydescription" ] [ text "Description" ]
                 , Input.text [ Input.id "mydescription", Input.onInput UpdateDescription, Input.value model.networkDescription ]
                 , Form.help [] [ text "Enter Description" ]
@@ -206,6 +207,8 @@ update msg model =
 
         ( AddNewGame, HasGame mdl ) ->
             ( model, makeUserInfoRequest mdl.userInfo.userName )
+        ( AddNewGame, LoadingResults loadMessage ) ->
+            ( LoadingResults loadMessage, Cmd.none )
 
         ( GameEdit gmsg, HasGame mdl ) ->
             let
@@ -257,7 +260,7 @@ update msg model =
                             ( HasGame { userInfo = data, editGame = Nothing, selectedGame = getFirstGameName data.games }, Cmd.none )
 
                         Nothing ->
-                            ( LoadingResults "Can not get data", Cmd.none )
+                            ( LoadingResults "User has no games", Cmd.none )
 
                 RemoteData.Failure err ->
                     ( LoadingResults (errorToString err), Cmd.none )

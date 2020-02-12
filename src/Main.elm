@@ -11,8 +11,8 @@ import Page.PlayGame as PlayGame
 import Page.ShowsManage as ShowsManage
 import Routes exposing (Route)
 import Shared exposing (..)
-import Url exposing (Url)
 import Spinner
+import Url exposing (Url)
 
 
 type alias Model =
@@ -40,7 +40,6 @@ type Msg
     | Logout
 
 
-
 init : Flags -> Url -> Key -> ( Model, Cmd Msg )
 init flags url navKey =
     let
@@ -55,20 +54,19 @@ init flags url navKey =
             , username = ""
             }
     in
-        loadCurrentPage ( model, Cmd.none )
+    loadCurrentPage ( model, Cmd.none )
 
 
 loadCurrentPage : ( Model, Cmd Msg ) -> ( Model, Cmd Msg )
 loadCurrentPage ( model, cmd ) =
     case model.route of
-        Routes.ShowsRoute gameId->
+        Routes.ShowsRoute gameId ->
             let
                 ( pageModel, pageCmd ) =
                     ShowsManage.init model.flags gameId
             in
             ( { model | page = PageShow pageModel }, Cmd.batch [ cmd, Cmd.map ShowMsg pageCmd ] )
 
-        
         Routes.LoginRoute ->
             let
                 ( pageModel, pageCmd ) =
@@ -76,14 +74,12 @@ loadCurrentPage ( model, cmd ) =
             in
             ( { model | page = PageLogin pageModel }, Cmd.batch [ cmd, Cmd.map LoginMsg pageCmd ] )
 
-        Routes.PlayGameRoute userName->
-             let
+        Routes.PlayGameRoute userName ->
+            let
                 ( pageModel, pageCmd ) =
-                    PlayGame.init "user123"
+                    PlayGame.init userName
             in
-                ( { model | page = PagePlayGame pageModel }, Cmd.batch [ cmd, Cmd.map PlayGameMsg pageCmd ] )
-
-           
+            ( { model | page = PagePlayGame pageModel }, Cmd.batch [ cmd, Cmd.map PlayGameMsg pageCmd ] )
 
         Routes.NotFoundRoute ->
             ( { model | page = PageNone }, Cmd.none )
@@ -185,6 +181,7 @@ main =
 
 -- VIEWS
 
+
 view : Model -> Browser.Document Msg
 view model =
     let
@@ -220,6 +217,7 @@ currentPage model =
         PageShow pageModel ->
             ShowsManage.view pageModel
                 |> Html.map ShowMsg
+
         PageNone ->
             notFoundView
 
