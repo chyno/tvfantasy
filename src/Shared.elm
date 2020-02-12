@@ -89,7 +89,7 @@ type alias GameInfo =
     , walletAmount : Maybe Int
     , networkName : String
     , networkDescription : String
-    , id : String
+    , id :  Maybe String
     , shows : List ShowInfo
     }
 
@@ -111,7 +111,9 @@ type alias NetworkInfo =
 
 
 type alias UserInfo =
-    { userName : String
+    { 
+    id :  String
+    , userName : String
     , walletAddress : String
     , games : List GameInfo
     }
