@@ -17,8 +17,8 @@ import Bootstrap.Form.Textarea as Textarea
 import Bootstrap.ListGroup as ListGroup
 import Graphql.Http exposing (Error)
 import Graphql.OptionalArgument exposing (..)
-import Html exposing (Html, div, label,  text, ul)
-import Html.Attributes exposing (class, for)
+import Html exposing (Html, div, label,  text, ul, table, th, tr, td)
+import Html.Attributes exposing (class, for, id)
 import Html.Events exposing (onClick)
 import RemoteData exposing (RemoteData)
 import Shared exposing (GameInfo, UserInfo, faunaEndpoint, faunaAuth)
@@ -131,11 +131,31 @@ playGame model =
             ,  Button.button [ Button.secondary, Button.onClick NavigateShows ] [ text "Manage Shows" ]
             , Button.linkButton [ Button.secondary, Button.onClick CancelEdit ] [ text "Done" ]
             ]
+        , (showsTable model.shows)
         ]
 
-showsTable : List Shared.ShowInfo -> Html Msg
+showRow : Shared.ShowInfo   -> Html GameEditMsg
+showRow show  =
+    tr []
+        [ 
+         td [] [ text show.name ]
+        , td [] [ text   (String.fromInt show.rating) ]
+        , td [] [ text show.description ]
+        ]
+
+showsTable : List Shared.ShowInfo -> Html GameEditMsg
 showsTable shows = 
- div [] []
+    div [ id "wrapper" ]
+        [ table []
+                (tr []
+                    [ th [] [ text "Name" ]
+                    , th [] [ text "Rating" ]
+                    , th [] [ text "Description" ]
+                   
+                    ]
+                    :: List.map showRow  shows
+                )
+            ]
 
 subscriptions : Model -> Sub Msg
 subscriptions model =

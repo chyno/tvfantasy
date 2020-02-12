@@ -137,7 +137,7 @@ createAccountView model =
     div []
         [ Form.form []
             [ Form.group []
-                [ Form.label [ for "myusername" ] [ text "Username" ]
+                [ Form.label [ for "myusername" ] [ text "User Name" ]
                 , Input.text [ Input.id "myusername", Input.onInput UpdateUserName, Input.value model.username ]
                 , Form.help [] [ text "Enter User Name" ]
                 ]
@@ -210,28 +210,38 @@ update msg model =
 
 loginView : Model -> Html Msg
 loginView model =
-    div []
-        [ Form.form [ Html.Events.onSubmit StartLoginOrCancel]
-            [ Form.group []
-                [ Form.label [ for "myusername" ] [ text "Username" ]
-                , Input.text [ Input.id "myusername", Input.onInput UpdateUserName, Input.value model.username ]
-                , Form.help [] [ text "Enter User Name" ]
+    
+    div [class "flex-container-login"]
+        [
+        div[class "flex-item-login"]
+            [
+                Form.form [ Html.Events.onSubmit StartLoginOrCancel]
+                [ Form.group []
+                    [ Form.label [ for "myusername" ] [ text "User Name" ]
+                    , Input.text [ Input.id "myusername", Input.onInput UpdateUserName, Input.value model.username ]
+                    , Form.help [] [ text "Enter User Name" ]
                 ]
-            , Form.group []
-                [ Form.label [ for "mypwd" ] [ text "Password" ]
-                , Input.password [ Input.id "mypwd", Input.onInput UpdatePassword, Input.value model.password ]
-                , Form.help [] [ text "Enter Password" ]
-                ]
+                , Form.group []
+                    [ Form.label [ for "mypwd" ] [ text "Password" ]
+                    , Input.password [ Input.id "mypwd", Input.onInput UpdatePassword, Input.value model.password ]
+                    , Form.help [] [ text "Enter Password" ]
+                    ]
         
-            , div [ class "button-group" ]
+                ]
+            
+            ]
+        , div[class "flex-item-login"]
+            [
+              div [ class "button-group" ]
                 [ Button.submitButton [ Button.primary ] [ text "Login" ]
                 , Button.button [ Button.secondary ] [ text "Cancel" ]
                 ]
             ]
+
         ]
-
-
-
+        
+        
+       
 -- View
 view : Model -> Html Msg
 view model =

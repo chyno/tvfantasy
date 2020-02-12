@@ -207,8 +207,7 @@ isRowSeleted name items =
 showRow : List String -> TvApiShowInfo  -> Html Msg
 showRow selecteItems show  =
     tr []
-        [ td [] [ ]
-        , td [] [
+        [ td [] [
              checkbox [ Checkbox.checked (isRowSeleted show.name selecteItems)] show.name 
              ]
         , td [] [ text show.overview ]
