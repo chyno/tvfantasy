@@ -28,6 +28,8 @@ import TvApi exposing (GameQueryResponse, Response, gameSelection, userSelection
 
 
 --  Model
+
+
 type alias GameModel =
     { userInfo : UserInfo
     , editGame : Maybe GameInfo
@@ -63,6 +65,7 @@ type Msg
 
 --  Graphql.Http.Request #(Maybe GameInfo)
 
+
 initNewGame : GameInfo
 initNewGame =
     { gameName = ""
@@ -76,6 +79,8 @@ initNewGame =
 
 
 -- View
+
+
 view : Model -> Html Msg
 view model =
     case model of
@@ -85,10 +90,10 @@ view model =
         HasGame mdl ->
             case mdl.editGame of
                 Nothing ->
-                    viewChooseGame mdl
+                    chooseGameView mdl
 
                 Just selGame ->
-                    Html.map GameEdit (playGame selGame)
+                    Html.map GameEdit (playGameView selGame)
 
 
 loadingView : String -> Html Msg
@@ -99,52 +104,52 @@ loadingView msg =
         ]
 
 
-viewChooseGame : GameModel -> Html Msg
-viewChooseGame model =
+chooseGameView : GameModel -> Html Msg
+chooseGameView model =
     div []
-        [   div []
-                [   label [ style "margin-right" "2em" ] [ text "Wallet Address: " ] 
-                    , span [] [ text model.userInfo.walletAddress ]
-                ]
-            , div   []
-                    [   label [ for "mygmes" ] [ text "Avaliable Games" ]
-                        , Select.select [ Select.id "mygmes", Select.onChange GameChange ]
-                        (List.map (\x -> Select.item [] [ text x.gameName ]) model.userInfo.games)
-                    ]
-            , Button.button [ Button.primary, Button.onClick EditExistingGame ] [ text "Select" ]
+        [ div []
+            [ label [ style "margin-right" "2em" ] [ text "Wallet Address: " ]
+            , span [] [ text model.userInfo.walletAddress ]
+            ]
+        , div []
+            [ label [ for "mygmes" ] [ text "Avaliable Games" ]
+            , Select.select [ Select.id "mygmes", Select.onChange GameChange ]
+                (List.map (\x -> Select.item [] [ text x.gameName ]) model.userInfo.games)
+            ]
+        , div [ class "button-group" ] [
+            Button.button [ Button.primary, Button.onClick EditExistingGame ] [ text "Select" ]
             , Button.button [ Button.success, Button.onClick AddNewGame ] [ text "Add New" ]
+            ] 
         ]
 
 
-playGame : GameInfo -> Html GameEditMsg
-playGame model =
+playGameView : GameInfo -> Html GameEditMsg
+playGameView model =
     div []
-       
-            [ div []
-                [ Form.label [ for "gameName" ] [ text "Game Name" ]
-                , Input.text [ Input.id "gameName", Input.onInput UpdateGameName, Input.value model.gameName ]
-                , Form.help [] [ text "Enter Game Name" ]
-                ]
-            , div []
-                [ Form.label [ for "myrating" ] [ text "Amount" ]
-                , Input.text [ Input.id "myrating", Input.onInput UpdateWalletAmount, Input.value "0" ]
-                , Form.help [] [ text "Enter Wallet Amount" ]
-                ]
-            , div []
-                [ Form.label [ for "networkName" ] [ text "Network Name" ]
-                , Input.text [ Input.id "networkName", Input.onInput UpdateNetworkName, Input.value model.networkName ]
-                , Form.help [] [ text "Enter Network Name" ]
-                ]
-            , div []
-                [ Form.label [ for "mydescription" ] [ text "Description" ]
-                , Input.text [ Input.id "mydescription", Input.onInput UpdateDescription, Input.value model.networkDescription ]
-                , Form.help [] [ text "Enter Description" ]
-                ]
-            
-        , div [ ]
+        [ div []
+            [ Form.label [ for "gameName" ] [ text "Game Name" ]
+            , Input.text [ Input.id "gameName", Input.onInput UpdateGameName, Input.value model.gameName ]
+            , Form.help [] [ text "Enter Game Name" ]
+            ]
+        , div []
+            [ Form.label [ for "myrating" ] [ text "Amount" ]
+            , Input.text [ Input.id "myrating", Input.onInput UpdateWalletAmount, Input.value "0" ]
+            , Form.help [] [ text "Enter Wallet Amount" ]
+            ]
+        , div []
+            [ Form.label [ for "networkName" ] [ text "Network Name" ]
+            , Input.text [ Input.id "networkName", Input.onInput UpdateNetworkName, Input.value model.networkName ]
+            , Form.help [] [ text "Enter Network Name" ]
+            ]
+        , div []
+            [ Form.label [ for "mydescription" ] [ text "Description" ]
+            , Input.text [ Input.id "mydescription", Input.onInput UpdateDescription, Input.value model.networkDescription ]
+            , Form.help [] [ text "Enter Description" ]
+            ]
+        ,  div [ class "button-group" ] 
             [ Button.button [ Button.primary, Button.onClick SaveGame ] [ text "Save Changes" ]
             , Button.button [ Button.primary, Button.onClick NavigateShows ] [ text "Manage Shows" ]
-            , Button.linkButton [ Button.secondary, Button.onClick CancelEdit ] [ text "Cancel" ]
+            , Button.button [ Button.secondary, Button.onClick CancelEdit ] [ text "Cancel" ]
             ]
         , showsTable model.shows
         ]
@@ -172,7 +177,10 @@ showsTable shows =
             )
         ]
 
+
+
 -- Update
+
 
 updateGame : String -> GameEditMsg -> Maybe GameInfo -> ( Maybe GameInfo, Cmd Msg )
 updateGame userId msg maybeModel =
@@ -209,11 +217,9 @@ updateGame userId msg maybeModel =
                     ( Just model, saveGameCmd userId model )
 
 
-
 updateNewGame : List GameInfo -> GameInfo -> List GameInfo
 updateNewGame games game =
-   game :: List.filter(\x -> not (x.gameName == game.gameName)) games
-
+    game :: List.filter (\x -> not (x.gameName == game.gameName)) games
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -264,6 +270,7 @@ update msg model =
             case response of
                 RemoteData.Loading ->
                     ( model, Cmd.none )
+
                 RemoteData.Success maybeData ->
                     case maybeData of
                         Just data ->
@@ -317,6 +324,8 @@ update msg model =
 
 
 -- Helpers
+
+
 setDefaultEditGame : GameModel -> GameModel
 setDefaultEditGame model =
     { model | editGame = Just initNewGame }
@@ -352,7 +361,10 @@ subscriptions : Model -> Sub Msg
 subscriptions model =
     Sub.none
 
+
+
 --API Request - Query and Mytatutions
+
 
 unWrap : Api.InputObject.GameUserRelationRaw -> Api.InputObject.GameUserRelation
 unWrap x =
@@ -373,6 +385,7 @@ gameOptBuilder userId gStart =
         | user = Present (unWrap (getUserRelationData userId))
     }
 
+
 makeUserInfoRequest : String -> Cmd Msg
 makeUserInfoRequest userName =
     Query.userByUserName { userName = userName } userSelection
@@ -390,17 +403,21 @@ gameIntputData userId gameData =
 
 saveGameCmd : String -> GameInfo -> Cmd Msg
 saveGameCmd userId gmData =
-   case gmData.id of
+    case gmData.id of
         Just idVal ->
             Debug.log ("has id " ++ idVal)
-            Mutation.updateGame { data = gameIntputData userId gmData, id = Id idVal } gameSelection
+                Mutation.updateGame
+                { data = gameIntputData userId gmData, id = Id idVal }
+                gameSelection
                 |> Graphql.Http.mutationRequest faunaEndpoint
                 |> Graphql.Http.withHeader "Authorization" faunaAuth
                 |> Graphql.Http.send (RemoteData.fromResult >> GotGameUpdateResponse)
 
         Nothing ->
-            Debug.log ("no id should be an add ")
-            Mutation.createGame { data = gameIntputData userId gmData } gameSelection
+            Debug.log "no id should be an add "
+                Mutation.createGame
+                { data = gameIntputData userId gmData }
+                gameSelection
                 |> Graphql.Http.mutationRequest faunaEndpoint
                 |> Graphql.Http.withHeader "Authorization" faunaAuth
                 |> Graphql.Http.send (RemoteData.fromResult >> GotGameAddResponse)
