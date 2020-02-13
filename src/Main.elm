@@ -81,6 +81,7 @@ loadCurrentPage ( model, cmd ) =
             in
             ( { model | page = PagePlayGame pageModel }, Cmd.batch [ cmd, Cmd.map PlayGameMsg pageCmd ] )
 
+    
         Routes.NotFoundRoute ->
             ( { model | page = PageNone }, Cmd.none )
 
