@@ -28,8 +28,6 @@ import TvApi exposing (GameQueryResponse, Response, gameSelection, userSelection
 
 
 --  Model
-
-
 type alias GameModel =
     { userInfo : UserInfo
     , editGame : Maybe GameInfo
@@ -59,7 +57,10 @@ type Msg
     | GameChange String
     | GotUserInfoResponse GameQueryResponse
     | GotGameUpdateResponse (RemoteData (Graphql.Http.Error (Maybe GameInfo)) (Maybe GameInfo))
-    | GotGameAddResponse (RemoteData (Graphql.Http.Error  GameInfo)  GameInfo)
+    | GotGameAddResponse (RemoteData (Graphql.Http.Error GameInfo) GameInfo)
+
+
+
 --  Graphql.Http.Request #(Maybe GameInfo)
 
 initNewGame : GameInfo
@@ -75,8 +76,6 @@ initNewGame =
 
 
 -- View
-
-
 view : Model -> Html Msg
 view model =
     case model of
@@ -103,49 +102,49 @@ loadingView msg =
 viewChooseGame : GameModel -> Html Msg
 viewChooseGame model =
     div []
-        [ label [ style "margin-right" "2em" ] [ text "Wallet Address: " ]
-        , span [] [ text model.userInfo.walletAddress ]
-        , Form.form []
-            [ Form.group []
-                [ Form.label [ for "mygmes" ] [ text "Avaliable Games" ]
-                , Select.select [ Select.id "mygmes", Select.onChange GameChange ]
-                    (List.map (\x -> Select.item [] [ text x.gameName ]) model.userInfo.games)
+        [   div []
+                [   label [ style "margin-right" "2em" ] [ text "Wallet Address: " ] 
+                    , span [] [ text model.userInfo.walletAddress ]
                 ]
+            , div   []
+                    [   label [ for "mygmes" ] [ text "Avaliable Games" ]
+                        , Select.select [ Select.id "mygmes", Select.onChange GameChange ]
+                        (List.map (\x -> Select.item [] [ text x.gameName ]) model.userInfo.games)
+                    ]
             , Button.button [ Button.primary, Button.onClick EditExistingGame ] [ text "Select" ]
-            , Button.button [ Button.primary, Button.onClick AddNewGame ] [ text "Add New" ]
-            ]
+            , Button.button [ Button.success, Button.onClick AddNewGame ] [ text "Add New" ]
         ]
 
 
 playGame : GameInfo -> Html GameEditMsg
 playGame model =
     div []
-        [ Form.form [ Html.Events.onSubmit SaveGame ]
-            [ Form.group []
+       
+            [ div []
                 [ Form.label [ for "gameName" ] [ text "Game Name" ]
                 , Input.text [ Input.id "gameName", Input.onInput UpdateGameName, Input.value model.gameName ]
                 , Form.help [] [ text "Enter Game Name" ]
                 ]
-            , Form.group []
+            , div []
                 [ Form.label [ for "myrating" ] [ text "Amount" ]
                 , Input.text [ Input.id "myrating", Input.onInput UpdateWalletAmount, Input.value "0" ]
                 , Form.help [] [ text "Enter Wallet Amount" ]
                 ]
-            , Form.group []
+            , div []
                 [ Form.label [ for "networkName" ] [ text "Network Name" ]
                 , Input.text [ Input.id "networkName", Input.onInput UpdateNetworkName, Input.value model.networkName ]
                 , Form.help [] [ text "Enter Network Name" ]
                 ]
-            , Form.group []
+            , div []
                 [ Form.label [ for "mydescription" ] [ text "Description" ]
                 , Input.text [ Input.id "mydescription", Input.onInput UpdateDescription, Input.value model.networkDescription ]
                 , Form.help [] [ text "Enter Description" ]
                 ]
-            ]
-        , div [ class "button-group" ]
-            [ Button.submitButton [ Button.primary ] [ text "Save Changes" ]
-            , Button.button [ Button.secondary, Button.onClick NavigateShows ] [ text "Manage Shows" ]
-            , Button.linkButton [ Button.secondary, Button.onClick CancelEdit ] [ text "Done" ]
+            
+        , div [ ]
+            [ Button.button [ Button.primary, Button.onClick SaveGame ] [ text "Save Changes" ]
+            , Button.button [ Button.primary, Button.onClick NavigateShows ] [ text "Manage Shows" ]
+            , Button.linkButton [ Button.secondary, Button.onClick CancelEdit ] [ text "Cancel" ]
             ]
         , showsTable model.shows
         ]
@@ -173,13 +172,9 @@ showsTable shows =
             )
         ]
 
+-- Update
 
-subscriptions : Model -> Sub Msg
-subscriptions model =
-    Sub.none
-
-
-updateGame : String ->  GameEditMsg -> Maybe GameInfo -> ( Maybe GameInfo, Cmd Msg )
+updateGame : String -> GameEditMsg -> Maybe GameInfo -> ( Maybe GameInfo, Cmd Msg )
 updateGame userId msg maybeModel =
     case maybeModel of
         Nothing ->
@@ -191,6 +186,7 @@ updateGame userId msg maybeModel =
                     case model.id of
                         Nothing ->
                             ( maybeModel, Cmd.none )
+
                         Just idVal ->
                             ( Just model, Nav.load (Routes.showsPath idVal) )
 
@@ -210,21 +206,14 @@ updateGame userId msg maybeModel =
                     ( Nothing, Cmd.none )
 
                 SaveGame ->
-                    ( Just model, updateGameCmd userId model )
+                    ( Just model, saveGameCmd userId model )
 
-
-
--- Update
 
 
 updateNewGame : List GameInfo -> GameInfo -> List GameInfo
-updateNewGame lstGames game =
-    lstGames
+updateNewGame games game =
+   game :: List.filter(\x -> not (x.gameName == game.gameName)) games
 
-
-setDefaultEditGame : GameModel -> GameModel
-setDefaultEditGame model =
-    { model | editGame = Just initNewGame }
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -248,22 +237,22 @@ update msg model =
 
         ( GameChange newGame, HasGame gcmdl ) ->
             ( HasGame { gcmdl | selectedGame = newGame }, Cmd.none )
-        (GotGameAddResponse response,  HasGame gmmdl ) ->
-             case response of
+
+        ( GotGameAddResponse response, HasGame gmmdl ) ->
+            case response of
                 RemoteData.Loading ->
                     ( model, Cmd.none )
 
                 RemoteData.Success data ->
                     let
-                        updatedGames =
-                                    updateNewGame gmmdl.userInfo.games data
-                        userInf = gmmdl.userInfo
+                        userInf =
+                            gmmdl.userInfo
 
-                        updatedUser =  { gmmdl | userInfo = { userInf | games = updatedGames } }
+                        addeddUser =
+                            { gmmdl | editGame = Nothing, userInfo = { userInf | games = data :: gmmdl.userInfo.games } }
                     in
-                        ( HasGame updatedUser, Cmd.none )
+                    ( HasGame addeddUser, Cmd.none )
 
-                       
                 RemoteData.Failure err ->
                     ( LoadingResults "error", Cmd.none )
 
@@ -275,7 +264,6 @@ update msg model =
             case response of
                 RemoteData.Loading ->
                     ( model, Cmd.none )
-
                 RemoteData.Success maybeData ->
                     case maybeData of
                         Just data ->
@@ -328,9 +316,10 @@ update msg model =
 
 
 
--- (_, _) ->
---      ( LoadingResults ("Loaded Game with Unandled message. This state should not happen. Loading Results: "), Cmd.none )
 -- Helpers
+setDefaultEditGame : GameModel -> GameModel
+setDefaultEditGame model =
+    { model | editGame = Just initNewGame }
 
 
 getGame : String -> List GameInfo -> Maybe GameInfo
@@ -353,28 +342,36 @@ errorToString : Error Response -> String
 errorToString err =
     "Error Response. Error: "
 
-unWrap : Api.InputObject.GameUserRelationRaw -> Api.InputObject.GameUserRelation
-unWrap x = Api.InputObject.GameUserRelation x
-
-
-getUserRelationData : String -> Api.InputObject.GameUserRelationRaw
-getUserRelationData userId =
-    {
-     create =  Absent
-      , connect = Present (Id userId)
-      , disconnect = Absent
-    }
-
-gameOptBuilder: String -> GameInputOptionalFields -> GameInputOptionalFields
-gameOptBuilder userId gStart = 
-    { gStart | user = Present  (unWrap (getUserRelationData userId))
-
-    }
 
 init : String -> ( Model, Cmd Msg )
 init username =
     ( LoadingResults "Making Remote Call", makeUserInfoRequest username )
 
+
+subscriptions : Model -> Sub Msg
+subscriptions model =
+    Sub.none
+
+--API Request - Query and Mytatutions
+
+unWrap : Api.InputObject.GameUserRelationRaw -> Api.InputObject.GameUserRelation
+unWrap x =
+    Api.InputObject.GameUserRelation x
+
+
+getUserRelationData : String -> Api.InputObject.GameUserRelationRaw
+getUserRelationData userId =
+    { create = Absent
+    , connect = Present (Id userId)
+    , disconnect = Absent
+    }
+
+
+gameOptBuilder : String -> GameInputOptionalFields -> GameInputOptionalFields
+gameOptBuilder userId gStart =
+    { gStart
+        | user = Present (unWrap (getUserRelationData userId))
+    }
 
 makeUserInfoRequest : String -> Cmd Msg
 makeUserInfoRequest userName =
@@ -384,25 +381,26 @@ makeUserInfoRequest userName =
         |> Graphql.Http.send (RemoteData.fromResult >> GotUserInfoResponse)
 
 
-gameIntputData : String  ->  GameInfo -> GameInput
+gameIntputData : String -> GameInfo -> GameInput
 gameIntputData userId gameData =
-  buildGameInput
+    buildGameInput
         { gameName = gameData.gameName, networkDescription = gameData.networkDescription, networkName = gameData.networkName }
         (gameOptBuilder userId)
 
 
-updateGameCmd : String -> GameInfo -> Cmd Msg
-updateGameCmd userId  gmData =
-    case gmData.id of
+saveGameCmd : String -> GameInfo -> Cmd Msg
+saveGameCmd userId gmData =
+   case gmData.id of
         Just idVal ->
+            Debug.log ("has id " ++ idVal)
             Mutation.updateGame { data = gameIntputData userId gmData, id = Id idVal } gameSelection
-            |> Graphql.Http.mutationRequest faunaEndpoint
-            |> Graphql.Http.withHeader "Authorization" faunaAuth
-            |> Graphql.Http.send (RemoteData.fromResult >> GotGameUpdateResponse)
+                |> Graphql.Http.mutationRequest faunaEndpoint
+                |> Graphql.Http.withHeader "Authorization" faunaAuth
+                |> Graphql.Http.send (RemoteData.fromResult >> GotGameUpdateResponse)
+
         Nothing ->
+            Debug.log ("no id should be an add ")
             Mutation.createGame { data = gameIntputData userId gmData } gameSelection
-            |> Graphql.Http.mutationRequest faunaEndpoint
-            |> Graphql.Http.withHeader "Authorization" faunaAuth
-            |> Graphql.Http.send (RemoteData.fromResult >> GotGameAddResponse)
-    
-    
+                |> Graphql.Http.mutationRequest faunaEndpoint
+                |> Graphql.Http.withHeader "Authorization" faunaAuth
+                |> Graphql.Http.send (RemoteData.fromResult >> GotGameAddResponse)
