@@ -49,7 +49,8 @@ type alias Model =
     }
 
 type ModelData
-    = LoadingData LoadingModel
+    = StartLoad
+    | LoadingData LoadingModel
     | LoadedData LoadedModel
 
 type alias TvApiShowInfo =
@@ -72,6 +73,7 @@ fetchShows flags =
 
 getShowRelationData : String -> Api.InputObject.ShowGameRelationRaw
 getShowRelationData gameId =
+
     {
      create =  Absent
       , connect = Present (Id gameId)
@@ -129,6 +131,8 @@ toggleShowsSelected name items =
 updateData : String -> Msg -> ModelData -> ( ModelData, Cmd Msg )
 updateData gameId  msg model =
     case model of
+        StartLoad ->
+          (model, )
         LoadedData mdl ->
             case msg of
                 SelectShow  name   ->

@@ -52,7 +52,7 @@ type GameEditMsg
     | UpdateDescription String
     | CancelEdit
     | SaveGame
-    
+    | DisplayShow
 
 
 type Msg
@@ -63,7 +63,7 @@ type Msg
     | GotUserInfoResponse GameQueryResponse
     | GotGameUpdateResponse (RemoteData (Graphql.Http.Error (Maybe GameInfo)) (Maybe GameInfo))
     | GotGameAddResponse (RemoteData (Graphql.Http.Error GameInfo) GameInfo)
-
+    | ShowMsg ShowsManage.Msg
 
 
 --  Graphql.Http.Request #(Maybe GameInfo)
@@ -92,11 +92,14 @@ view model =
 
         UserInformation mdl ->
             case mdl.editGame of
-                Nothing ->
-                    chooseGameView mdl
-
-                Just selGame ->
-                    Html.map GameEdit (playGameView selGame)
+                GameManageMode maybeGameInfo ->
+                    case maybeGameInfo of
+                        Nothing ->
+                            chooseGameView mdl
+                        Just selGame ->
+                            Html.map GameEdit (playGameView selGame)
+                ShowManageMode showModel ->
+                    Html.map ShowMsg (ShowsManage.view showModel)
 
 
 loadingView : String -> Html Msg
@@ -185,40 +188,42 @@ showsTable shows =
 -- Update
 
 
-updateGame : String -> GameEditMsg -> Maybe GameInfo -> ( Maybe GameInfo, Cmd Msg )
-updateGame userId msg maybeModel =
-    case maybeModel of
-        Nothing ->
-            ( maybeModel, Cmd.none )
+updateGame : String -> GameEditMsg -> GameEditModes -> ( GameEditModes, Cmd Msg )
+updateGame userId msg model =
+    case model of
+        GameManageMode maybeModel ->
+            case maybeModel of
+                Nothing ->
+                    ( model, Cmd.none )
 
-        Just model ->
-            case msg of
-                -- NavigateShows ->
-                --     case model.id of
-                --         Nothing ->
-                --             ( maybeModel, Cmd.none )
+                Just gmModel ->
+                    case msg of
+                        DisplayShow ->
+                            
+                        UpdateGameName newName ->
+                            ( GameManageMode (Just { gmModel | gameName = newName }), Cmd.none )
 
-                --         Just idVal ->
-                --             ( Just model, Nav.load (Routes.showsPath idVal) )
+                        UpdateWalletAmount val ->
+                            ( GameManageMode (Just { gmModel | walletAmount = String.toInt val }), Cmd.none )
 
-                UpdateGameName newName ->
-                    ( Just { model | gameName = newName }, Cmd.none )
+                        UpdateNetworkName val ->
+                            ( GameManageMode (Just { gmModel | networkName = val }), Cmd.none )
 
-                UpdateWalletAmount val ->
-                    ( Just { model | walletAmount = String.toInt val }, Cmd.none )
+                        UpdateDescription val ->
+                            ( GameManageMode (Just { gmModel | networkDescription = val }), Cmd.none )
 
-                UpdateNetworkName val ->
-                    ( Just { model | networkName = val }, Cmd.none )
+                        CancelEdit ->
+                            ( GameManageMode Nothing, Cmd.none )
 
-                UpdateDescription val ->
-                    ( Just { model | networkDescription = val }, Cmd.none )
+                        SaveGame ->
+                            ( GameManageMode (Just gmModel), saveGameCmd userId gmModel )
 
-                CancelEdit ->
-                    ( Nothing, Cmd.none )
-
-                SaveGame ->
-                    ( Just model, saveGameCmd userId model )
-
+        ShowManageMode showModel ->
+            (model, Cmd.none) 
+    
+    
+    
+    
 
 updateNewGame : List GameInfo -> GameInfo -> List GameInfo
 updateNewGame games game =
@@ -258,7 +263,7 @@ update msg model =
                             gmmdl.userInfo
 
                         addeddUser =
-                            { gmmdl | editGame = Nothing, userInfo = { userInf | games = data :: gmmdl.userInfo.games } }
+                            { gmmdl | editGame = GameManageMode Nothing, userInfo = { userInf | games = data :: gmmdl.userInfo.games } }
                     in
                     ( UserInformation addeddUser, Cmd.none )
 
@@ -307,7 +312,7 @@ update msg model =
                 RemoteData.Success maybeData ->
                     case maybeData of
                         Just data ->
-                            ( UserInformation { userInfo = data, editGame = Nothing, selectedGame = getFirstGameName data.games }, Cmd.none )
+                            ( UserInformation { userInfo = data, editGame = GameManageMode Nothing, selectedGame = getFirstGameName data.games }, Cmd.none )
 
                         Nothing ->
                             ( LoadingUserResults "User has no games", Cmd.none )
@@ -323,6 +328,16 @@ update msg model =
 
         ( _, LoadingUserResults loadingResults ) ->
             ( LoadingUserResults ("Loaded Game with Unandled message. This state should not happen. Loading Results: " ++ loadingResults), Cmd.none )
+        ( ShowMsg yamsg, UserInformation gmModel ) ->
+            case gmModel.editGame of
+                GameManageMode mdl ->
+                    Debug.todo "Should not happen"
+                ShowManageMode shwModel ->
+                    let
+                        (smodel, smessage) = ShowsManage.update yamsg shwModel
+                    in
+                        (UserInformation {gmModel | editGame = ShowManageMode smodel }, Cmd.none)
+                        
 
 
 
@@ -331,13 +346,13 @@ update msg model =
 
 setDefaultEditGame : GameModel -> GameModel
 setDefaultEditGame model =
-    { model | editGame = Just initNewGame }
+    { model | editGame = GameManageMode (Just initNewGame) }
 
 
-getGame : String -> List GameInfo -> Maybe GameInfo
+getGame : String -> List GameInfo -> GameEditModes
 getGame gameName games =
-    List.filter (\x -> x.gameName == gameName) games
-        |> List.head
+   GameManageMode  (List.filter (\x -> x.gameName == gameName) games
+        |> List.head)
 
 
 getFirstGameName : List GameInfo -> String
