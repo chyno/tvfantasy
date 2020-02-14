@@ -1,4 +1,4 @@
-module Page.ShowsManage exposing (ModelData(..), Model, Msg(..), TvApiShowInfo, subscriptions, update, view)
+module Page.ShowsManage exposing (ModelData(..), Model, Msg(..), TvApiShowInfo, subscriptions, update, view, fetchShows)
 
 import Bootstrap.Form.Checkbox exposing (checkbox, checked)
 import Bootstrap.Button as Button
@@ -19,15 +19,10 @@ import RemoteData exposing (RemoteData)
 import Api.InputObject exposing (GameShowsRelation, ShowInputOptionalFields, ShowGameRelationRaw )
 type Msg
     = OnFetchShows (Result Http.Error (List TvApiShowInfo))
-    | NavigateGame
     | AddShows
     | SelectShow  String 
     | GotShowAddResponse (RemoteData (Graphql.Http.Error  ShowInfo)   ShowInfo)
-
-
--- init : Flags -> String -> ( Model, Cmd Msg )
--- init flags gameId =
---     ( { modelData =  LoadingData { showInfosLoading = Loading }, gameId = gameId }, fetchShows flags )
+    | DoneMsg
 
 
 -- Model
@@ -52,7 +47,7 @@ type ModelData
     = StartLoad Flags
     | LoadingData LoadingModel
     | LoadedData LoadedModel
-
+    | Done
 type alias TvApiShowInfo =
     { 
      name : String
@@ -64,6 +59,7 @@ type alias TvApiShowInfo =
 
 fetchShows : Flags -> Cmd Msg
 fetchShows flags =
+    Debug.log "*********** fetching shows ************"
     Http.get
         { url = flags.api
         , expect = Http.expectJson OnFetchShows listOfShowsDecoder
@@ -110,7 +106,7 @@ update msg model =
     let
         ( mData, cmdMsg ) = updateData model.gameId msg model.modelData
     in
-        ({model | modelData = mData}, cmdMsg)
+        ({ model | modelData = mData}, cmdMsg)
 
 
 getSelectedShow: List TvApiShowInfo -> Maybe TvApiShowInfo
@@ -131,8 +127,11 @@ toggleShowsSelected name items =
 updateData : String -> Msg -> ModelData -> ( ModelData, Cmd Msg )
 updateData gameId  msg model =
     case model of
-        StartLoad flags ->
-          (   LoadingData { showInfosLoading = Loading }, fetchShows flags )
+        Done ->
+            (model,Cmd.none)
+        StartLoad _ ->
+            Debug.log "!!!!!!!! StartLoad !!!!!"
+            ( LoadingData { showInfosLoading = Loading }, Cmd.none )
         LoadedData mdl ->
             case msg of
                 SelectShow  name   ->
@@ -146,6 +145,8 @@ updateData gameId  msg model =
                                 (model, createShowCmd gameId aShow)
                             Nothing ->
                                 (model, Cmd.none)
+                DoneMsg ->
+                    (Done, Cmd.none)
                 _ ->
                     Debug.todo "Handle messge"
                      
@@ -159,11 +160,7 @@ updateData gameId  msg model =
                 OnFetchShows (Err err) ->
                     Debug.log "error .."
                         ( LoadingData { showInfosLoading = Failure }, Cmd.none )
-
-                NavigateGame ->
-                    ( model, Cmd.none )
-                    -- ( model, Nav.load Routes.gamePath )
-
+      
                 _ ->
                     Debug.todo "Handle messge"
 
@@ -181,8 +178,8 @@ view model =
             loadingView mdl1
         LoadedData mdl2 ->
             loadedView mdl2
-        StartLoad mdl ->
-            div[][text "Loading shows.."]
+        _ ->
+            div[][text "Begin Loading shows.."]
 
 
 loadingView : LoadingModel -> Html Msg
@@ -238,7 +235,7 @@ loadedView model =
                 )
             ]
          , Button.button [ Button.primary, Button.onClick AddShows ] [ text "Add Shows" ]
-        ,  Button.button [ Button.secondary, Button.onClick NavigateGame ] [ text "Back To Game" ]
+        ,  Button.button [ Button.secondary, Button.onClick DoneMsg ] [ text "Back To Game" ]
       
         ]
 

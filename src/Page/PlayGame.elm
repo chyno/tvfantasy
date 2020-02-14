@@ -20,23 +20,27 @@ import Graphql.OptionalArgument exposing (..)
 import Html exposing (Html, div, label, span, table, td, text, th, tr, ul)
 import Html.Attributes exposing (class, for, id, style)
 import Html.Events exposing (onClick)
-import RemoteData exposing (RemoteData)
-import Routes exposing (showsPath)
-import Shared exposing (GameInfo, UserInfo, faunaAuth, faunaEndpoint, Flags)
-import TvApi exposing (GameQueryResponse, Response, gameSelection, userSelection)
 import Page.ShowsManage as ShowsManage
+import RemoteData exposing (RemoteData)
+import Shared exposing (Flags, GameInfo, UserInfo, faunaAuth, faunaEndpoint)
+import TvApi exposing (GameQueryResponse, Response, gameSelection, userSelection)
+
 
 
 --  Model
-type alias Model = {
-    userName: String
-    , flags: Flags
-    , playGameModel: PlayGameModel
+
+
+type alias Model =
+    { userName : String
+    , flags : Flags
+    , playGameModel : PlayGameModel
     }
 
-type GameEditModes =
-     GameManageMode (Maybe GameInfo)
-     | ShowManageMode ShowsManage.Model
+
+type GameEditModes
+    = GameManageMode (Maybe GameInfo)
+    | ShowManageMode ShowsManage.Model
+
 
 type alias GameModel =
     { userInfo : UserInfo
@@ -57,8 +61,8 @@ type GameEditMsg
     | UpdateDescription String
     | CancelEdit
     | SaveGame
-    | DisplayShow Flags String
-
+    | DisplayShow
+    | ShowMsg ShowsManage.Msg
 
 type Msg
     = AddNewGame
@@ -68,7 +72,8 @@ type Msg
     | GotUserInfoResponse GameQueryResponse
     | GotGameUpdateResponse (RemoteData (Graphql.Http.Error (Maybe GameInfo)) (Maybe GameInfo))
     | GotGameAddResponse (RemoteData (Graphql.Http.Error GameInfo) GameInfo)
-    | ShowMsg ShowsManage.Msg
+    
+
 
 
 --  Graphql.Http.Request #(Maybe GameInfo)
@@ -87,6 +92,8 @@ initNewGame =
 
 
 -- View
+
+
 view : Model -> Html Msg
 view model =
     case model.playGameModel of
@@ -99,11 +106,16 @@ view model =
                     case maybeGameInfo of
                         Nothing ->
                             chooseGameView mdl
+
                         Just selGame ->
                             Html.map GameEdit (playGameView selGame)
-                ShowManageMode showModel ->
-                    Html.map ShowMsg (ShowsManage.view showModel)
 
+                ShowManageMode showModel ->
+                    let
+                        page =  Html.map  ShowMsg (ShowsManage.view showModel)
+                    in
+                        Html.map GameEdit page
+                   
 
 loadingView : String -> Html Msg
 loadingView msg =
@@ -111,6 +123,7 @@ loadingView msg =
         [ div [] [ text msg ]
         , Html.button [] [ text "Reload" ]
         ]
+
 
 chooseGameView : GameModel -> Html Msg
 chooseGameView model =
@@ -124,10 +137,10 @@ chooseGameView model =
             , Select.select [ Select.id "mygmes", Select.onChange GameChange ]
                 (List.map (\x -> Select.item [] [ text x.gameName ]) model.userInfo.games)
             ]
-        , div [ class "button-group" ] [
-            Button.button [ Button.primary, Button.onClick EditExistingGame ] [ text "Select" ]
+        , div [ class "button-group" ]
+            [ Button.button [ Button.primary, Button.onClick EditExistingGame ] [ text "Select" ]
             , Button.button [ Button.success, Button.onClick AddNewGame ] [ text "Add New" ]
-            ] 
+            ]
         ]
 
 
@@ -154,9 +167,9 @@ playGameView model =
             , Input.text [ Input.id "mydescription", Input.onInput UpdateDescription, Input.value model.networkDescription ]
             , Form.help [] [ text "Enter Description" ]
             ]
-        ,  div [ class "button-group" ] 
+        , div [ class "button-group" ]
             [ Button.button [ Button.primary, Button.onClick SaveGame ] [ text "Save Changes" ]
-            , Button.button [ Button.primary  ] [ text "Manage Shows" ]
+            , Button.button [ Button.primary, Button.onClick DisplayShow ] [ text "Manage Shows" ]
             , Button.button [ Button.secondary, Button.onClick CancelEdit ] [ text "Cancel" ]
             ]
         , showsTable model.shows
@@ -170,6 +183,7 @@ showRow show =
         , td [] [ text (String.fromInt show.rating) ]
         , td [] [ text show.description ]
         ]
+
 
 showsTable : List Shared.ShowInfo -> Html GameEditMsg
 showsTable shows =
@@ -187,18 +201,24 @@ showsTable shows =
 
 
 -- Update
-updateGame : String -> GameEditMsg -> GameEditModes -> ( GameEditModes, Cmd Msg )
-updateGame userId msg model =
+
+
+updateGame : Flags -> String -> GameEditMsg -> GameEditModes -> ( GameEditModes, Cmd Msg )
+updateGame flags userId msg model =
     case model of
         GameManageMode maybeModel ->
             case maybeModel of
                 Nothing ->
-                    (model, Cmd.none )
+                    ( model, Cmd.none )
 
                 Just gmModel ->
                     case msg of
-                        DisplayShow flags gameId ->
-                            ( ShowManageMode {  gameId = gameId, modelData =  ShowsManage.StartLoad flags }, Cmd.none)
+                        DisplayShow ->
+                            let
+                               command = Cmd.map ShowMsg (ShowsManage.fetchShows flags) 
+                            in
+                                ( ShowManageMode { gameId = Maybe.withDefault "" gmModel.id, modelData = ShowsManage.StartLoad flags }, Cmd.map GameEdit command  )
+
                         UpdateGameName newName ->
                             ( GameManageMode (Just { gmModel | gameName = newName }), Cmd.none )
 
@@ -216,25 +236,35 @@ updateGame userId msg model =
 
                         SaveGame ->
                             ( GameManageMode (Just gmModel), saveGameCmd userId gmModel )
-
+                        ShowMsg yamsg ->
+                            Debug.todo "should not get here"
+                            
         ShowManageMode showModel ->
-            (model, Cmd.none) 
-    
-    
-    
-    
+            case msg of
+                ShowMsg yamsg ->
+                    let
+                        ( updatedmodel, smessage ) = ShowsManage.update yamsg showModel
+                        command = Cmd.map ShowMsg smessage
+                    in
+                        Debug.log "------- ShowManageMode shwModel -----"
+                        ( ShowManageMode updatedmodel, Cmd.map GameEdit command )
+                _ ->
+                  Debug.todo "ShowManageMode shwModel"  
+            
 
 updateNewGame : List GameInfo -> GameInfo -> List GameInfo
 updateNewGame games game =
     game :: List.filter (\x -> not (x.gameName == game.gameName)) games
 
-updateGameHelper: Model -> GameModel  -> Model
-updateGameHelper model gameMode =
-    { model |  playGameModel = UserInformation  gameMode } 
 
-loadingGameHelper: Model -> String  -> Model
+updateGameHelper : Model -> GameModel -> Model
+updateGameHelper model gameMode =
+    { model | playGameModel = UserInformation gameMode }
+
+
+loadingGameHelper : Model -> String -> Model
 loadingGameHelper model message =
-    { model |  playGameModel = LoadingUserResults  message } 
+    { model | playGameModel = LoadingUserResults message }
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -252,9 +282,10 @@ update msg model =
         ( GameEdit gmsg, UserInformation mdl ) ->
             let
                 ( newSelectedGameModel, cmd ) =
-                    updateGame mdl.userInfo.id gmsg mdl.editGame
+                    updateGame model.flags mdl.userInfo.id gmsg mdl.editGame
             in
-            (updateGameHelper model  { mdl | editGame = newSelectedGameModel }, cmd )
+                Debug.log "$$$$$$$$$$$$ GameEdit gmsg -----"
+                ( updateGameHelper model { mdl | editGame = newSelectedGameModel }, cmd )
 
         ( GameChange newGame, UserInformation gcmdl ) ->
             ( updateGameHelper model { gcmdl | selectedGame = newGame }, Cmd.none )
@@ -329,22 +360,8 @@ update msg model =
 
                 RemoteData.NotAsked ->
                     ( loadingGameHelper model "Not Asked", Cmd.none )
-
-        ( GotUserInfoResponse response, UserInformation mdl ) ->
-            ( loadingGameHelper model "Loaded Game with Unandled message. This state should not happen", Cmd.none )
-
-        ( _, LoadingUserResults loadingResults ) ->
-            ( loadingGameHelper model ("Loaded Game with Unandled message. This state should not happen. Loading Results: " ++ loadingResults), Cmd.none )
-        ( ShowMsg yamsg, UserInformation gmModel ) ->
-            case gmModel.editGame of
-                GameManageMode mdl ->
-                    Debug.todo "Should not happen"
-                ShowManageMode shwModel ->
-                    let
-                        (smodel, smessage) = ShowsManage.update yamsg shwModel
-                    in
-                        (updateGameHelper model {gmModel | editGame = ShowManageMode smodel }, Cmd.none)
-                        
+        ( _, _ ) ->
+            Debug.todo "Should not get here"
 
 
 
@@ -358,8 +375,10 @@ setDefaultEditGame model =
 
 getGame : String -> List GameInfo -> GameEditModes
 getGame gameName games =
-   GameManageMode  (List.filter (\x -> x.gameName == gameName) games
-        |> List.head)
+    GameManageMode
+        (List.filter (\x -> x.gameName == gameName) games
+            |> List.head
+        )
 
 
 getFirstGameName : List GameInfo -> String
@@ -367,6 +386,7 @@ getFirstGameName games =
     case List.head games of
         Nothing ->
             ""
+
         Just gm ->
             gm.gameName
 
@@ -378,12 +398,12 @@ errorToString err =
 
 init : Flags -> String -> ( Model, Cmd Msg )
 init flags username =
-    (  {
-        userName = username
-        , flags = flags
-        , playGameModel = LoadingUserResults "Making Remote Call"
-        }
-    , makeUserInfoRequest username )
+    ( { userName = username
+      , flags = flags
+      , playGameModel = LoadingUserResults "Making Remote Call"
+      }
+    , makeUserInfoRequest username
+    )
 
 
 subscriptions : Model -> Sub Msg
