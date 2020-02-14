@@ -1,7 +1,6 @@
-module Page.ShowsManage exposing (Model, Msg(..), TvApiShowInfo, init, subscriptions, update, view)
+module Page.ShowsManage exposing (ModelData(..), Model, Msg(..), TvApiShowInfo, subscriptions, update, view)
 
-import Bootstrap.Form.Checkbox exposing (checkbox, checked, onCheck)
-import Browser.Navigation as Nav
+import Bootstrap.Form.Checkbox exposing (checkbox, checked)
 import Bootstrap.Button as Button
 import Bootstrap.Form.Checkbox as Checkbox
 import Html exposing (..)
@@ -26,9 +25,9 @@ type Msg
     | GotShowAddResponse (RemoteData (Graphql.Http.Error  ShowInfo)   ShowInfo)
 
 
-init : Flags -> String -> ( Model, Cmd Msg )
-init flags gameId =
-    ( { modelData =  LoadingData { showInfosLoading = Loading }, gameId = gameId }, fetchShows flags )
+-- init : Flags -> String -> ( Model, Cmd Msg )
+-- init flags gameId =
+--     ( { modelData =  LoadingData { showInfosLoading = Loading }, gameId = gameId }, fetchShows flags )
 
 
 -- Model
@@ -47,9 +46,10 @@ type alias Model =
         gameId : String
         , modelData : ModelData
     }
+ 
 
 type ModelData
-    = StartLoad
+    = StartLoad Flags
     | LoadingData LoadingModel
     | LoadedData LoadedModel
 
@@ -131,8 +131,8 @@ toggleShowsSelected name items =
 updateData : String -> Msg -> ModelData -> ( ModelData, Cmd Msg )
 updateData gameId  msg model =
     case model of
-        StartLoad ->
-          (model, )
+        StartLoad flags ->
+          (   LoadingData { showInfosLoading = Loading }, fetchShows flags )
         LoadedData mdl ->
             case msg of
                 SelectShow  name   ->
@@ -181,6 +181,8 @@ view model =
             loadingView mdl1
         LoadedData mdl2 ->
             loadedView mdl2
+        StartLoad mdl ->
+            div[][text "Loading shows.."]
 
 
 loadingView : LoadingModel -> Html Msg

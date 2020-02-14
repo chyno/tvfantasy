@@ -60,13 +60,7 @@ init flags url navKey =
 loadCurrentPage : ( Model, Cmd Msg ) -> ( Model, Cmd Msg )
 loadCurrentPage ( model, cmd ) =
     case model.route of
-        Routes.ShowsRoute gameId ->
-            let
-                ( pageModel, pageCmd ) =
-                    ShowsManage.init model.flags gameId
-            in
-            ( { model | page = PageShow pageModel }, Cmd.batch [ cmd, Cmd.map ShowMsg pageCmd ] )
-
+        
         Routes.LoginRoute ->
             let
                 ( pageModel, pageCmd ) =
@@ -77,7 +71,7 @@ loadCurrentPage ( model, cmd ) =
         Routes.PlayGameRoute userName ->
             let
                 ( pageModel, pageCmd ) =
-                    PlayGame.init userName
+                    PlayGame.init model.flags userName
             in
             ( { model | page = PagePlayGame pageModel }, Cmd.batch [ cmd, Cmd.map PlayGameMsg pageCmd ] )
 
