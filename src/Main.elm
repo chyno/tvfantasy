@@ -27,7 +27,6 @@ type alias Model =
 type Page
     = PageNone
     | PageLogin Login.Model
-    | PageShow ShowsManage.Model
     | PagePlayGame PlayGame.Model
 
 
@@ -35,7 +34,6 @@ type Msg
     = OnUrlChange Url
     | LinkClicked UrlRequest
     | LoginMsg Login.Msg
-    | ShowMsg ShowsManage.Msg
     | PlayGameMsg PlayGame.Msg
     | Logout
 
@@ -97,9 +95,6 @@ subscriptions model =
                 PageLogin pageModel ->
                     Sub.map LoginMsg (Login.subscriptions pageModel)
 
-                PageShow pageModel ->
-                    Sub.map ShowMsg (ShowsManage.subscriptions pageModel)
-
                 -- PageGame pageModel ->
                 --     Sub.map GameMsg (Game.subscriptions pageModel)
                 PageNone ->
@@ -134,15 +129,6 @@ update msg model =
             in
             ( { model | page = PageLogin newPageModel }
             , Cmd.map LoginMsg newCmd
-            )
-
-        ( ShowMsg subMsg, PageShow pageModel ) ->
-            let
-                ( newPageModel, newCmd ) =
-                    ShowsManage.update subMsg pageModel
-            in
-            ( { model | page = PageShow newPageModel }
-            , Cmd.map ShowMsg newCmd
             )
 
         ( PlayGameMsg subMsg, PagePlayGame pageModel ) ->
@@ -208,10 +194,6 @@ currentPage model =
         PageLogin pageModel ->
             Login.view pageModel
                 |> Html.map LoginMsg
-
-        PageShow pageModel ->
-            ShowsManage.view pageModel
-                |> Html.map ShowMsg
 
         PageNone ->
             notFoundView

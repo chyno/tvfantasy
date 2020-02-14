@@ -72,8 +72,7 @@ type Msg
     | GotUserInfoResponse GameQueryResponse
     | GotGameUpdateResponse (RemoteData (Graphql.Http.Error (Maybe GameInfo)) (Maybe GameInfo))
     | GotGameAddResponse (RemoteData (Graphql.Http.Error GameInfo) GameInfo)
-    
-
+     
 
 
 --  Graphql.Http.Request #(Maybe GameInfo)
@@ -201,8 +200,6 @@ showsTable shows =
 
 
 -- Update
-
-
 updateGame : Flags -> String -> GameEditMsg -> GameEditModes -> ( GameEditModes, Cmd Msg )
 updateGame flags userId msg model =
     case model of
@@ -242,12 +239,15 @@ updateGame flags userId msg model =
         ShowManageMode showModel ->
             case msg of
                 ShowMsg yamsg ->
-                    let
-                        ( updatedmodel, smessage ) = ShowsManage.update yamsg showModel
-                        command = Cmd.map ShowMsg smessage
-                    in
-                        Debug.log "------- ShowManageMode shwModel -----"
-                        ( ShowManageMode updatedmodel, Cmd.map GameEdit command )
+                    if yamsg == ShowsManage.DoneMsg then
+                        (model, makeGameInfoRequest showModel.gameId)
+                    else
+                        let
+                            ( updatedmodel, smessage ) = ShowsManage.update flags yamsg showModel
+                            command = Cmd.map ShowMsg smessage
+                        in
+                            Debug.log "------- ShowManageMode shwModel -----"
+                            ( ShowManageMode updatedmodel, Cmd.map GameEdit command )
                 _ ->
                   Debug.todo "ShowManageMode shwModel"  
             
@@ -386,7 +386,6 @@ getFirstGameName games =
     case List.head games of
         Nothing ->
             ""
-
         Just gm ->
             gm.gameName
 
@@ -411,10 +410,7 @@ subscriptions model =
     Sub.none
 
 
-
 --API Request - Query and Mytatutions
-
-
 unWrap : Api.InputObject.GameUserRelationRaw -> Api.InputObject.GameUserRelation
 unWrap x =
     Api.InputObject.GameUserRelation x
@@ -441,6 +437,13 @@ makeUserInfoRequest userName =
         |> Graphql.Http.queryRequest faunaEndpoint
         |> Graphql.Http.withHeader "Authorization" faunaAuth
         |> Graphql.Http.send (RemoteData.fromResult >> GotUserInfoResponse)
+
+makeGameInfoRequest : String -> Cmd Msg
+makeGameInfoRequest gameId =
+    Query.findGameByID { id = Id gameId } gameSelection
+        |> Graphql.Http.queryRequest faunaEndpoint
+        |> Graphql.Http.withHeader "Authorization" faunaAuth
+        |> Graphql.Http.send (RemoteData.fromResult >> GotGameUpdateResponse)
 
 
 gameIntputData : String -> GameInfo -> GameInput

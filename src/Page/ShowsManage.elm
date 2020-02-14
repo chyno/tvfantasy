@@ -101,10 +101,10 @@ createShowCmd gameId showData =
         |> Graphql.Http.withHeader "Authorization" faunaAuth
         |> Graphql.Http.send (RemoteData.fromResult >> GotShowAddResponse)
 
-update : Msg -> Model -> ( Model, Cmd Msg )
-update msg model =
+update : Flags -> Msg -> Model -> ( Model, Cmd Msg )
+update flags msg model =
     let
-        ( mData, cmdMsg ) = updateData model.gameId msg model.modelData
+        ( mData, cmdMsg ) = updateData flags model.gameId msg model.modelData
     in
         ({ model | modelData = mData}, cmdMsg)
 
@@ -124,14 +124,14 @@ toggleShowsSelected name items =
         else
             newlist
 
-updateData : String -> Msg -> ModelData -> ( ModelData, Cmd Msg )
-updateData gameId  msg model =
+updateData : Flags -> String -> Msg -> ModelData -> ( ModelData, Cmd Msg )
+updateData flags gameId  msg model =
     case model of
         Done ->
             (model,Cmd.none)
         StartLoad _ ->
             Debug.log "!!!!!!!! StartLoad !!!!!"
-            ( LoadingData { showInfosLoading = Loading }, Cmd.none )
+            ( LoadingData { showInfosLoading = Loading }, fetchShows flags )
         LoadedData mdl ->
             case msg of
                 SelectShow  name   ->
