@@ -1,4 +1,4 @@
-module Shared exposing (Flags, GameInfo, NetworkInfo, RemoteDataMsg(..), ShowInfo, UserInfo, faunaAuth, faunaEndpoint, mapRemoteData, toString)
+module Shared exposing (ShowInfoUpdedMsg(..), Flags, GameInfo, NetworkInfo, RemoteDataMsg(..), ShowInfo, UserInfo, faunaAuth, faunaEndpoint, mapRemoteData, toString)
 
 import Date exposing (Date)
 import Graphql.Http exposing (..)
@@ -13,6 +13,7 @@ type alias Flags =
     { api : String
     }
 
+type ShowInfoUpdedMsg  = ShowInfoUpded ShowInfo
 
 type RemoteDataMsg a
     = NotAsked

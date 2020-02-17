@@ -91,14 +91,11 @@ initNewGame =
 
 
 -- View
-
-
 view : Model -> Html Msg
 view model =
     case model.playGameModel of
         LoadingUserResults mdl ->
             loadingView mdl
-
         UserInformation mdl ->
             case mdl.editGame of
                 GameManageMode maybeGameInfo ->
@@ -214,7 +211,7 @@ updateGame flags userId msg model =
                             let
                                command = Cmd.map ShowMsg (ShowsManage.fetchShows flags) 
                             in
-                                ( ShowManageMode { gameId = Maybe.withDefault "" gmModel.id, modelData = ShowsManage.StartLoad flags }, Cmd.map GameEdit command  )
+                                ( ShowManageMode { errorMessage = "", gameId = Maybe.withDefault "" gmModel.id, modelData = ShowsManage.StartLoad flags }, Cmd.map GameEdit command  )
 
                         UpdateGameName newName ->
                             ( GameManageMode (Just { gmModel | gameName = newName }), Cmd.none )
@@ -284,7 +281,6 @@ update msg model =
                 ( newSelectedGameModel, cmd ) =
                     updateGame model.flags mdl.userInfo.id gmsg mdl.editGame
             in
-                Debug.log "$$$$$$$$$$$$ GameEdit gmsg -----"
                 ( updateGameHelper model { mdl | editGame = newSelectedGameModel }, cmd )
 
         ( GameChange newGame, UserInformation gcmdl ) ->
@@ -299,7 +295,6 @@ update msg model =
                     let
                         userInf =
                             gmmdl.userInfo
-
                         addeddUser =
                             { gmmdl | editGame = GameManageMode Nothing, userInfo = { userInf | games = data :: gmmdl.userInfo.games } }
                     in
