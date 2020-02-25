@@ -1,4 +1,4 @@
-module Page.ShowsManage exposing (Model, ModelData(..), Msg(..), TvApiShowInfo, fetchShows, subscriptions, update, view)
+module Page.Game.ShowsManage exposing (Model, ModelData(..), Msg(..), TvApiShowInfo, fetchShows, subscriptions, update, view)
 
 import Api.InputObject exposing (ShowInput, ShowInputOptionalFields, buildShowInput)
 import Api.Mutation as Mutation
@@ -44,7 +44,7 @@ type alias Model =
 
 
 type ModelData
-    = StartLoad Flags
+    = StartLoad 
     | LoadingData LoadingModel
     | LoadedData LoadedModel
     | Done
@@ -58,11 +58,11 @@ type alias TvApiShowInfo =
     }
 
 
-fetchShows : Flags -> Cmd Msg
-fetchShows flags =
+fetchShows :  Cmd Msg
+fetchShows  =
     Debug.log "*********** fetching shows ************"
         Http.get
-        { url = flags.api
+        { url = "https://api.themoviedb.org/3/discover/tv?api_key=6aec6123c85be51886e8f69cd9a3a226&first_air_date.gte=2019-01-01&page=1"
         , expect = Http.expectJson OnFetchShows listOfShowsDecoder
         }
 
@@ -104,8 +104,8 @@ createShowCmd gameId showData =
         |> Graphql.Http.send (RemoteData.fromResult >> GotShowAddResponse)
 
 
-update : Flags -> Msg -> Model -> ( Model, Cmd Msg )
-update flags msg model =
+update :  Msg -> Model -> ( Model, Cmd Msg )
+update  msg model =
     case msg of
         GotShowAddResponse response ->
             case response of
@@ -129,7 +129,7 @@ update flags msg model =
         _ ->
             let
                 ( mData, cmdMsg ) =
-                    updateData flags model.gameId msg model.modelData
+                    updateData  model.gameId msg model.modelData
             in
                 Debug.log "Other message"
                 ( { model | modelData = mData }, cmdMsg )
@@ -156,14 +156,14 @@ toggleShowsSelected name items =
         newlist
 
 
-updateData : Flags -> String -> Msg -> ModelData -> ( ModelData, Cmd Msg )
-updateData flags gameId msg model =
+updateData :  String -> Msg -> ModelData -> ( ModelData, Cmd Msg )
+updateData  gameId msg model =
     case model of
         Done ->
             Debug.todo "Done should not get here"
 
-        StartLoad _ ->
-            ( LoadingData { showInfosLoading = Loading }, fetchShows flags )
+        StartLoad  ->
+            ( LoadingData { showInfosLoading = Loading }, fetchShows )
 
         LoadedData mdl ->
             case msg of

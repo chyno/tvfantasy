@@ -7,8 +7,7 @@ import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (onClick, onInput)
 import Page.Login as Login
-import Page.PlayGame as PlayGame
-import Page.ShowsManage as ShowsManage
+import Page.Game.Game as Game
 import Routes exposing (Route)
 import Shared exposing (..)
 import Spinner
@@ -27,14 +26,14 @@ type alias Model =
 type Page
     = PageNone
     | PageLogin Login.Model
-    | PagePlayGame PlayGame.Model
+    | PageGame Game.Model
 
 
 type Msg
     = OnUrlChange Url
     | LinkClicked UrlRequest
     | LoginMsg Login.Msg
-    | PlayGameMsg PlayGame.Msg
+    | GameMsg Game.Msg
     | Logout
 
 
@@ -66,12 +65,12 @@ loadCurrentPage ( model, cmd ) =
             in
             ( { model | page = PageLogin pageModel }, Cmd.batch [ cmd, Cmd.map LoginMsg pageCmd ] )
 
-        Routes.PlayGameRoute userName ->
+        Routes.GameRoute userName ->
             let
                 ( pageModel, pageCmd ) =
-                    PlayGame.init model.flags userName
+                    Game.init model.flags userName
             in
-            ( { model | page = PagePlayGame pageModel }, Cmd.batch [ cmd, Cmd.map PlayGameMsg pageCmd ] )
+            ( { model | page = PageGame pageModel }, Cmd.batch [ cmd, Cmd.map GameMsg pageCmd ] )
 
     
         Routes.NotFoundRoute ->
@@ -89,8 +88,8 @@ subscriptions model =
     let
         pageSubs =
             case model.page of
-                PagePlayGame pageModel ->
-                    Sub.map PlayGameMsg (PlayGame.subscriptions pageModel)
+                PageGame pageModel ->
+                    Sub.map GameMsg (Game.subscriptions pageModel)
 
                 PageLogin pageModel ->
                     Sub.map LoginMsg (Login.subscriptions pageModel)
@@ -131,13 +130,13 @@ update msg model =
             , Cmd.map LoginMsg newCmd
             )
 
-        ( PlayGameMsg subMsg, PagePlayGame pageModel ) ->
+        ( GameMsg subMsg, PageGame pageModel ) ->
             let
                 ( newPageModel, newCmd ) =
-                    PlayGame.update subMsg pageModel
+                    Game.update subMsg pageModel
             in
-            ( { model | page = PagePlayGame newPageModel }
-            , Cmd.map PlayGameMsg newCmd
+            ( { model | page = PageGame newPageModel }
+            , Cmd.map GameMsg newCmd
             )
 
         ( Logout, _ ) ->
@@ -187,9 +186,9 @@ view model =
 currentPage : Model -> Html Msg
 currentPage model =
     case model.page of
-        PagePlayGame pageModel ->
-            PlayGame.view pageModel
-                |> Html.map PlayGameMsg
+        PageGame pageModel ->
+            Game.view pageModel
+                |> Html.map GameMsg
 
         PageLogin pageModel ->
             Login.view pageModel

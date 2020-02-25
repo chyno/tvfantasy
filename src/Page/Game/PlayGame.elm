@@ -1,4 +1,4 @@
-module Page.PlayGame exposing (Model, Msg(..), init, subscriptions, update, view)
+module Page.Game.PlayGame exposing (Model(..), Msg(..), subscriptions, update, view, makeUserInfoRequest)
 
 import Api.InputObject exposing (GameInput, GameInputOptionalFields, buildGameInput)
 import Api.Mutation as Mutation
@@ -20,7 +20,7 @@ import Graphql.OptionalArgument exposing (..)
 import Html exposing (Html, div, label, span, table, td, text, th, tr, ul)
 import Html.Attributes exposing (class, for, id, style)
 import Html.Events exposing (onClick)
-import Page.ShowsManage as ShowsManage
+import Page.Game.ShowsManage as ShowsManage
 import RemoteData exposing (RemoteData)
 import Shared exposing (Flags, GameInfo, UserInfo, faunaAuth, faunaEndpoint)
 import TvApi exposing (GameQueryResponse, Response, gameSelection, userSelection)
@@ -28,14 +28,6 @@ import TvApi exposing (GameQueryResponse, Response, gameSelection, userSelection
 
 
 --  Model
-
-
-type alias Model =
-    { userName : String
-    , flags : Flags
-    , playGameModel : PlayGameModel
-    }
-
 
 type GameEditModes
     = GameManageMode (Maybe GameInfo)
@@ -49,7 +41,7 @@ type alias GameModel =
     }
 
 
-type PlayGameModel
+type Model
     = LoadingUserResults String
     | UserInformation GameModel
 
@@ -93,7 +85,7 @@ initNewGame =
 -- View
 view : Model -> Html Msg
 view model =
-    case model.playGameModel of
+    case model of
         LoadingUserResults mdl ->
             loadingView mdl
         UserInformation mdl ->
@@ -197,8 +189,8 @@ showsTable shows =
 
 
 -- Update
-updateGame : Flags -> String -> GameEditMsg -> GameEditModes -> ( GameEditModes, Cmd Msg )
-updateGame flags userId msg model =
+updateGame :  String -> GameEditMsg -> GameEditModes -> ( GameEditModes, Cmd Msg )
+updateGame userId msg model =
     case model of
         GameManageMode maybeModel ->
             case maybeModel of
@@ -209,9 +201,9 @@ updateGame flags userId msg model =
                     case msg of
                         DisplayShow ->
                             let
-                               command = Cmd.map ShowMsg (ShowsManage.fetchShows flags) 
+                               command = Cmd.map ShowMsg (ShowsManage.fetchShows) 
                             in
-                                ( ShowManageMode { errorMessage = "", gameId = Maybe.withDefault "" gmModel.id, modelData = ShowsManage.StartLoad flags }, Cmd.map GameEdit command  )
+                                ( ShowManageMode { errorMessage = "", gameId = Maybe.withDefault "" gmModel.id, modelData = ShowsManage.StartLoad  }, Cmd.map GameEdit command  )
 
                         UpdateGameName newName ->
                             ( GameManageMode (Just { gmModel | gameName = newName }), Cmd.none )
@@ -240,7 +232,7 @@ updateGame flags userId msg model =
                         (model, makeGameInfoRequest showModel.gameId)
                     else
                         let
-                            ( updatedmodel, smessage ) = ShowsManage.update flags yamsg showModel
+                            ( updatedmodel, smessage ) = ShowsManage.update  yamsg showModel
                             command = Cmd.map ShowMsg smessage
                         in
                             Debug.log "------- ShowManageMode shwModel -----"
@@ -254,37 +246,37 @@ updateNewGame games game =
     game :: List.filter (\x -> not (x.gameName == game.gameName)) games
 
 
-updateGameHelper : Model -> GameModel -> Model
-updateGameHelper model gameMode =
-    { model | playGameModel = UserInformation gameMode }
+-- updateGameHelper : Model -> GameModel -> Model
+-- updateGameHelper model gameMode =
+--     { model | playGameModel = UserInformation gameMode }
 
 
-loadingGameHelper : Model -> String -> Model
-loadingGameHelper model message =
-    { model | playGameModel = LoadingUserResults message }
+-- loadingGameHelper : Model -> String -> Model
+-- loadingGameHelper model message =
+--     { model | playGameModel = LoadingUserResults message }
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
-    case ( msg, model.playGameModel ) of
+    case ( msg, model ) of
         ( EditExistingGame, UserInformation gcmdl ) ->
-            ( updateGameHelper model { gcmdl | editGame = getGame gcmdl.selectedGame gcmdl.userInfo.games }, Cmd.none )
+            (  UserInformation { gcmdl | editGame = getGame gcmdl.selectedGame gcmdl.userInfo.games }, Cmd.none )
 
         ( AddNewGame, UserInformation mdl ) ->
-            ( updateGameHelper model (setDefaultEditGame mdl), Cmd.none )
+            (UserInformation (setDefaultEditGame mdl), Cmd.none )
 
         ( AddNewGame, LoadingUserResults loadMessage ) ->
-            ( loadingGameHelper model loadMessage, Cmd.none )
+            ( LoadingUserResults loadMessage , Cmd.none )
 
         ( GameEdit gmsg, UserInformation mdl ) ->
             let
                 ( newSelectedGameModel, cmd ) =
-                    updateGame model.flags mdl.userInfo.id gmsg mdl.editGame
+                    updateGame  mdl.userInfo.id gmsg mdl.editGame
             in
-                ( updateGameHelper model { mdl | editGame = newSelectedGameModel }, cmd )
+                ( UserInformation { mdl | editGame = newSelectedGameModel }, cmd )
 
         ( GameChange newGame, UserInformation gcmdl ) ->
-            ( updateGameHelper model { gcmdl | selectedGame = newGame }, Cmd.none )
+            ( UserInformation { gcmdl | selectedGame = newGame }, Cmd.none )
 
         ( GotGameAddResponse response, UserInformation gmmdl ) ->
             case response of
@@ -298,14 +290,14 @@ update msg model =
                         addeddUser =
                             { gmmdl | editGame = GameManageMode Nothing, userInfo = { userInf | games = data :: gmmdl.userInfo.games } }
                     in
-                    ( updateGameHelper model addeddUser, Cmd.none )
+                    ( UserInformation addeddUser, Cmd.none )
 
                 RemoteData.Failure err ->
-                    ( loadingGameHelper model "error", Cmd.none )
+                    ( LoadingUserResults "error", Cmd.none )
 
                 --(errorToString err), Cmd.none )
                 RemoteData.NotAsked ->
-                    ( loadingGameHelper model "Not Asked", Cmd.none )
+                    ( LoadingUserResults "Not Asked", Cmd.none )
 
         ( GotGameUpdateResponse response, UserInformation gmmdl ) ->
             case response of
@@ -325,36 +317,36 @@ update msg model =
                                 updatedUser =
                                     { gmmdl | userInfo = { userInf | games = updatedGames } }
                             in
-                            ( updateGameHelper model updatedUser, Cmd.none )
+                            ( UserInformation  updatedUser, Cmd.none )
 
                         Nothing ->
-                            ( loadingGameHelper model "Can not get data", Cmd.none )
+                            ( LoadingUserResults "Can not get data", Cmd.none )
 
                 RemoteData.Failure err ->
-                    ( loadingGameHelper model "error", Cmd.none )
+                    ( LoadingUserResults "error", Cmd.none )
 
                 --(errorToString err), Cmd.none )
                 RemoteData.NotAsked ->
-                    ( loadingGameHelper model "Not Asked", Cmd.none )
+                    ( LoadingUserResults "Not Asked", Cmd.none )
 
         ( GotUserInfoResponse response, LoadingUserResults message ) ->
             case response of
                 RemoteData.Loading ->
-                    ( loadingGameHelper model message, Cmd.none )
+                    ( LoadingUserResults message, Cmd.none )
 
                 RemoteData.Success maybeData ->
                     case maybeData of
                         Just data ->
-                            ( updateGameHelper model { userInfo = data, editGame = GameManageMode Nothing, selectedGame = getFirstGameName data.games }, Cmd.none )
+                            ( UserInformation  { userInfo = data, editGame = GameManageMode Nothing, selectedGame = getFirstGameName data.games }, Cmd.none )
 
                         Nothing ->
-                            ( loadingGameHelper model "User has no games", Cmd.none )
+                            ( LoadingUserResults "User has no games", Cmd.none )
 
                 RemoteData.Failure err ->
-                    ( loadingGameHelper model (errorToString err), Cmd.none )
+                    ( LoadingUserResults (errorToString err), Cmd.none )
 
                 RemoteData.NotAsked ->
-                    ( loadingGameHelper model "Not Asked", Cmd.none )
+                    ( LoadingUserResults "Not Asked", Cmd.none )
         ( _, _ ) ->
             Debug.todo "Should not get here"
 
@@ -390,14 +382,13 @@ errorToString err =
     "Error Response. Error: "
 
 
-init : Flags -> String -> ( Model, Cmd Msg )
-init flags username =
-    ( { userName = username
-      , flags = flags
-      , playGameModel = LoadingUserResults "Making Remote Call"
-      }
-    , makeUserInfoRequest username
-    )
+-- init : Flags -> String -> ( Model, Cmd Msg )
+-- init flags username =
+--     ( { userName = username
+--       , playGameModel = LoadingUserResults "Making Remote Call"
+--       }
+--     , makeUserInfoRequest username
+--     )
 
 
 subscriptions : Model -> Sub Msg
