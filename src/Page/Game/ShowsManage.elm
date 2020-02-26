@@ -16,13 +16,20 @@ import RemoteData exposing (RemoteData)
 import Shared exposing (..)
 import TvApi exposing (showSelection)
 
-
-type Msg
-    = OnFetchShows (Result Http.Error (List TvApiShowInfo))
-    | AddShows
+ 
+type ManageShowMsg =
+    AddShows
     | SelectShow String
+
+type PageShowMsg = OnFetchShows (Result Http.Error (List TvApiShowInfo))
     | GotShowAddResponse (RemoteData (Graphql.Http.Error ShowInfo) ShowInfo)
     | DoneMsg
+   
+
+
+type Msg =
+    PageShow PageShowMsg
+    |  ManageShow ManageShowMsg
 
 
 -- Model
@@ -38,7 +45,7 @@ type alias LoadedModel =
 
 type alias Model =
     { errorMessage : String
-    , gameId : String
+    , gameId :  Maybe String
     , modelData : ModelData
     }
 
@@ -47,7 +54,7 @@ type ModelData
     = StartLoad 
     | LoadingData LoadingModel
     | LoadedData LoadedModel
-    | Done
+    
 
 
 type alias TvApiShowInfo =
@@ -58,7 +65,7 @@ type alias TvApiShowInfo =
     }
 
 
-fetchShows :  Cmd Msg
+fetchShows :  Cmd PageShowMsg
 fetchShows  =
     Debug.log "*********** fetching shows ************"
         Http.get
@@ -96,44 +103,78 @@ showAddData gameId gameData =
         (gameOptBuilder gameId)
 
 
-createShowCmd : String -> TvApiShowInfo -> Cmd Msg
+createShowCmd : String -> TvApiShowInfo -> Cmd PageShowMsg
 createShowCmd gameId showData =
     Mutation.createShow { data = showAddData gameId showData } showSelection
         |> Graphql.Http.mutationRequest faunaEndpoint
         |> Graphql.Http.withHeader "Authorization" faunaAuth
         |> Graphql.Http.send (RemoteData.fromResult >> GotShowAddResponse)
 
+loadedModelUpdate: ManageShowMsg -> LoadedModel -> Maybe String -> ( LoadedModel, Cmd Msg )
+loadedModelUpdate msg model maybeGameId =
+    case msg of
+        AddShows ->
+            let
+                maybeShow = getSelectedShow model.showInfos
+            in
+                case maybeShow of
+                    Just aShow ->
+                        case maybeGameId of
+                            Just gameId ->
+                                ( model, Cmd.map PageShow (createShowCmd gameId aShow) )                  
+                            Nothing ->
+                                 ( model, Cmd.none )
+                    Nothing ->
+                        ( model, Cmd.none )       
+        SelectShow name ->
+             ( { model | selectedShows = toggleShowsSelected name model.selectedShows }, Cmd.none )
+       
 
+            
+    
+
+updateFetchResult: Model -> (Result Http.Error (List TvApiShowInfo)) -> Model
+updateFetchResult model results =
+    case results of
+        OnFetchShows (Ok shows) ->
+            Debug.log "ok shows .."
+            { model | modelData =  LoadedData { showInfos = shows, selectedShows = [] }}
+        OnFetchShows (Err err) ->
+            Debug.log "error .."
+            { model | modelData =  LoadingData { showInfosLoading = Failure }}
+        _ ->
+            model
+            
 update :  Msg -> Model -> ( Model, Cmd Msg )
 update  msg model =
     case msg of
-        GotShowAddResponse response ->
-            case response of
-                RemoteData.Loading ->
-                    ( { model | modelData = Done }, Cmd.none )
-
-                RemoteData.Success data ->
-                    ( { model | modelData = Done, errorMessage = "Show added" }, Cmd.none )
-
-                RemoteData.Failure _ ->
-                     ( { model | errorMessage = "err" }, Cmd.none )
-
-                --(errorToString err), Cmd.none )
-                RemoteData.NotAsked ->
-                    ( { model | errorMessage = "not asked" }, Cmd.none )
-
-        DoneMsg ->
-            Debug.log "!!!!!!!! Done with shows update !!!!!"
-                ( { model | modelData = Done }, Cmd.none )
-
-        _ ->
-            let
-                ( mData, cmdMsg ) =
-                    updateData  model.gameId msg model.modelData
-            in
-                Debug.log "Other message"
-                ( { model | modelData = mData }, cmdMsg )
-
+        PageShow pmsg ->
+            case pmsg of
+                OnFetchShows fetchResults ->
+                    (updateFetchResult model fetchResults, Cmd.none)
+                GotShowAddResponse response ->
+                    case response of
+                        RemoteData.Loading ->
+                            (  model , Cmd.none )
+                        RemoteData.Success data ->
+                            ( { model |   errorMessage = "Show added" }, Cmd.none )
+                        RemoteData.Failure _ ->
+                            ( { model | errorMessage = "err" }, Cmd.none )
+                        RemoteData.NotAsked ->
+                            ( { model | errorMessage = "not asked" }, Cmd.none )
+                DoneMsg ->
+                    ( { model | gameId = Nothing}, Cmd.none)
+        ManageShow mmsg ->
+            case model.modelData of
+                LoadedData loadedModel ->
+                    let
+                        (newLoadedModel, newCmd) = loadedModelUpdate mmsg loadedModel model.gameId
+                    in
+                       ( { model | modelData = newLoadedModel  }, newCmd)
+                _ ->
+                    (model, Cmd.none)   
+            
+            
 
 getSelectedShow : List TvApiShowInfo -> Maybe TvApiShowInfo
 getSelectedShow shows =
@@ -156,52 +197,49 @@ toggleShowsSelected name items =
         newlist
 
 
-updateData :  String -> Msg -> ModelData -> ( ModelData, Cmd Msg )
-updateData  gameId msg model =
-    case model of
-        Done ->
-            Debug.todo "Done should not get here"
+-- updateData :  String -> Msg -> ModelData -> ( ModelData, Cmd Msg )
+-- updateData  gameId msg model =
+--     case model of
+--         StartLoad  ->
+--             ( LoadingData { showInfosLoading = Loading }, fetchShows )
 
-        StartLoad  ->
-            ( LoadingData { showInfosLoading = Loading }, fetchShows )
+--         LoadedData mdl ->
+--             case msg of
+--                 SelectShow name ->
+--                     ( LoadedData { mdl | selectedShows = toggleShowsSelected name mdl.selectedShows }, Cmd.none )
 
-        LoadedData mdl ->
-            case msg of
-                SelectShow name ->
-                    ( LoadedData { mdl | selectedShows = toggleShowsSelected name mdl.selectedShows }, Cmd.none )
+--                 AddShows ->
+--                     let
+--                         maybeShow =
+--                             getSelectedShow mdl.showInfos
+--                     in
+--                     case maybeShow of
+--                         Just aShow ->
+--                             ( model, createShowCmd gameId aShow )
 
-                AddShows ->
-                    let
-                        maybeShow =
-                            getSelectedShow mdl.showInfos
-                    in
-                    case maybeShow of
-                        Just aShow ->
-                            ( model, createShowCmd gameId aShow )
+--                         Nothing ->
+--                             ( model, Cmd.none )
 
-                        Nothing ->
-                            ( model, Cmd.none )
+--                 _ ->
+--                     Debug.todo "Loaded Data Handle messge"
 
-                _ ->
-                    Debug.todo "Loaded Data Handle messge"
+--         LoadingData _ ->
+--             case msg of
+--                 OnFetchShows (Ok shows) ->
+--                     Debug.log "ok shows .."
+--                         ( LoadedData { showInfos = shows, selectedShows = [] }, Cmd.none )
 
-        LoadingData _ ->
-            case msg of
-                OnFetchShows (Ok shows) ->
-                    Debug.log "ok shows .."
-                        ( LoadedData { showInfos = shows, selectedShows = [] }, Cmd.none )
+--                 -- (LoadedData { showInfos =  shows, selectedShowInfos = Nothing}, LoadSelectedShows )
+--                 OnFetchShows (Err err) ->
+--                     Debug.log "error .."
+--                         ( LoadingData { showInfosLoading = Failure }, Cmd.none )
 
-                -- (LoadedData { showInfos =  shows, selectedShowInfos = Nothing}, LoadSelectedShows )
-                OnFetchShows (Err err) ->
-                    Debug.log "error .."
-                        ( LoadingData { showInfosLoading = Failure }, Cmd.none )
-
-                _ ->
-                    Debug.todo "Loading data ...Handle messge"
+--                 _ ->
+--                     Debug.todo "Loading data ...Handle messge"
 
 
 
--- Subscriptions
+-- -- Subscriptions
 
 
 subscriptions : Model -> Sub Msg
