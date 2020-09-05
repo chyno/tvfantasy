@@ -28,11 +28,12 @@ import Loading
         , render
         )
 import RemoteData exposing (RemoteData)
-import Routes exposing (gamePath)
+import Routes exposing (playGamePath)
 import Shared exposing (..)
 
 
-type alias Response = { id : Id }
+type alias Response =
+    { id : Id }
 
 
 
@@ -53,7 +54,7 @@ type alias CreateUserResultInfo =
 
 
 type alias Model =
-    { username : String
+    { userName : String
     , password : String
     , walletAddress : String
     , message : String
@@ -67,7 +68,7 @@ type alias Model =
 
 
 type alias UserInfo =
-    { username : String
+    { userName : String
     , password : String
     }
 
@@ -80,9 +81,6 @@ type alias UserIdUpdate =
 
 
 -- End Model *****************************************
-
-
-
 -- getMutArgs : String -> String -> CreateUserRequiredArguments
 -- getMutArgs username walletAddress =
 --     {
@@ -95,7 +93,7 @@ init key =
     ( { navKey = key
       , walletAddress = ""
       , message = ""
-      , username = ""
+      , userName = ""
       , password = ""
       , passwordConfimation = ""
       , activeTab = 0
@@ -135,39 +133,47 @@ subscriptions model =
 
 createAccountView : Model -> Html Msg
 createAccountView model =
-    div []
-        [ Form.form []
-            [ Form.group []
-                [ Form.label [ for "myusername" ] [ text "Username" ]
-                , Input.text [ Input.id "myusername", Input.onInput UpdateUserName, Input.value model.username ]
-                , Form.help [] [ text "Enter User Name" ]
-                ]
-            , Form.group []
-                [ Form.label [ for "mypwd" ] [ text "Password" ]
-                , Input.password [ Input.id "mypwd", Input.onInput UpdateNewPassword, Input.value model.password ]
-                , Form.help [] [ text "Enter Password" ]
-                ]
-            , Form.group []
-                [ Form.label [ for "mypwdconfirm" ] [ text "Confirm Password" ]
-                , Input.password [ Input.id "mypwdconfirm", Input.onInput UpdateNewConfirmPassword, Input.value model.passwordConfimation ]
-                , Form.help [] [ text "Enter Password again" ]
+    div [ class "flex-container-login" ]
+        [ div [ class "flex-item-login" ]
+            [ Form.form []
+                [ Form.group []
+                    [ Form.label [ for "myusername" ] [ text "User Name" ]
+                    , Input.text [ Input.id "myusername", Input.onInput UpdateUserName, Input.value model.userName ]
+                    , Form.help [] [ text "Enter User Name" ]
+                    ]
+                , Form.group []
+                    [ Form.label [ for "mypwd" ] [ text "Password" ]
+                    , Input.password [ Input.id "mypwd", Input.onInput UpdateNewPassword, Input.value model.password ]
+                    , Form.help [] [ text "Enter Password" ]
+                    ]
+                , Form.group []
+                    [ Form.label [ for "mypwdconfirm" ] [ text "Confirm Password" ]
+                    , Input.password [ Input.id "mypwdconfirm", Input.onInput UpdateNewConfirmPassword, Input.value model.passwordConfimation ]
+                    , Form.help [] [ text "Enter Password again" ]
+                    ]
                 ]
             ]
-        , div [ class "button-group" ]
-            [ Button.button [ Button.primary, Button.onClick RegisterUser ] [ text "Create my Account" ]
-            , Button.button [ Button.secondary, Button.onClick (TabNavigate 0) ] [ text "Cancel" ]
+        , div [ class "flex-item-login" ]
+            [ div [ class "button-group" ]
+                [ Button.button [ Button.primary, Button.onClick RegisterUser ] [ text "Create my Account" ]
+                , Button.button [ Button.secondary, Button.onClick (TabNavigate 0) ] [ text "Cancel" ]
+                ]
             ]
         ]
 
+
+
 -- Update
+
+
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
         DoneAddHedgeHogAccount createInfo ->
-            ( { model | message = "User added to Lgin Account" }, Cmd.none )
+            ( { model | message = "User added to Lgin Account",  loadState = Loading.Off }, Cmd.none )
 
         TabMsg state ->
-            ( { model | tabState = state }
+            ( { model | tabState = state, loadState = Loading.Off }
             , Cmd.none
             )
 
@@ -184,24 +190,24 @@ update msg model =
             ( { model | password = pswd }, Cmd.none )
 
         UpdateUserName usrname ->
-            ( { model | username = usrname }, Cmd.none )
+            ( { model | userName = usrname }, Cmd.none )
 
         StartLoginOrCancel ->
             if model.loadState == Loading.Off then
-                ( { model | walletAddress = "-", message = "", loadState = Loading.On }
-                , loginUser { username = model.username, password = model.password }
+                ( { model | walletAddress = "-", message = "logging in ..", loadState = Loading.On }
+                , loginUser { userName = model.userName, password = model.password }
                 )
 
             else
                 ( { model | walletAddress = "-", message = "", loadState = Loading.Off }, Cmd.none )
 
         RegisterUser ->
-            ( { model | message = "Adding User. Please Wait", loadState = Loading.On }, registerUser { username = model.username, password = model.password } )
+            ( { model | message = "Adding User. Please Wait", loadState = Loading.On }, registerUser { userName = model.userName, password = model.password } )
 
         DoneLogin data ->
             if data.isLoggedIn then
                 Debug.log "Success  .."
-                    ( model, Nav.pushUrl model.navKey (Routes.gamePathLogin model.username) )
+                    ( { model| loadState = Loading.Off}, Nav.pushUrl model.navKey (Routes.playGamePath model.userName) )
 
             else
                 Debug.log "Fail  .."
@@ -212,22 +218,25 @@ update msg model =
 
 loginView : Model -> Html Msg
 loginView model =
-    div []
-        [ Form.form [ Html.Events.onSubmit StartLoginOrCancel]
-            [ Form.group []
-                [ Form.label [ for "myusername" ] [ text "Username" ]
-                , Input.text [ Input.id "myusername", Input.onInput UpdateUserName, Input.value model.username ]
-                , Form.help [] [ text "Enter User Name" ]
+    div [ class "flex-container-login" ]
+        [ div [ class "flex-item-login" ]
+            [ Form.form [  ]
+                [ Form.group []
+                    [ Form.label [ for "myusername" ] [ text "User Name" ]
+                    , Input.text [ Input.id "myusername", Input.onInput UpdateUserName, Input.value model.userName ]
+                    , Form.help [] [ text "Enter User Name" ]
+                    ]
+                , Form.group []
+                    [ Form.label [ for "mypwd" ] [ text "Password" ]
+                    , Input.password [ Input.id "mypwd", Input.onInput UpdatePassword, Input.value model.password ]
+                    , Form.help [] [ text "Enter Password" ]
+                    ]
                 ]
-            , Form.group []
-                [ Form.label [ for "mypwd" ] [ text "Password" ]
-                , Input.password [ Input.id "mypwd", Input.onInput UpdatePassword, Input.value model.password ]
-                , Form.help [] [ text "Enter Password" ]
-                ]
-        
-            , div [ class "button-group" ]
-                [ Button.submitButton [ Button.primary ] [ text "Login" ]
-                , Button.button [ Button.secondary ] [ text "Cancel" ]
+            ]
+        , div [ class "flex-item-login" ]
+            [ div [ class "button-group" ]
+                [ Button.button [ Button.primary,  Button.onClick StartLoginOrCancel ] [ text "Login" ]
+                , Button.button [ Button.secondary, Button.onClick StartLoginOrCancel ] [ text "Cancel" ]
                 ]
             ]
         ]
@@ -235,6 +244,8 @@ loginView model =
 
 
 -- View
+
+
 view : Model -> Html Msg
 view model =
     div []
@@ -270,8 +281,13 @@ view model =
         ]
 
 
-
 port registerUser : UserInfo -> Cmd msg
+
+
 port loginUser : UserInfo -> Cmd msg
+
+
 port hedgeHogloginResult : (LoginResultInfo -> msg) -> Sub msg
+
+
 port hedgeHogCreateUserResult : (CreateUserResultInfo -> msg) -> Sub msg

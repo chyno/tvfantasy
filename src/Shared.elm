@@ -1,6 +1,11 @@
-module Shared exposing (Flags, RemoteDataMsg(..), mapRemoteData, toString, ShowInfo, NetworkInfo, UserInfo)
-import Graphql.Http.GraphqlError as GraphqlError exposing(..)
+module Shared exposing (Flags, GameInfo, NetworkInfo, RemoteDataMsg(..), ShowInfo, UserInfo, faunaAuth, faunaEndpoint, mapRemoteData, toString)
+
+import Date exposing (Date)
 import Graphql.Http exposing (..)
+import Graphql.Http.GraphqlError as GraphqlError exposing (..)
+import Graphql.Operation exposing (RootQuery)
+import Graphql.OptionalArgument exposing (..)
+import Graphql.SelectionSet exposing (SelectionSet)
 import RemoteData exposing (RemoteData)
 
 
@@ -32,56 +37,97 @@ mapRemoteData fn remoteData =
             Failure
 
 
+
 --  https://package.elm-lang.org/packages/dillonkearns/elm-graphql/latest/Graphql-Http#Error
+
+
 toString : Graphql.Http.Error a -> String
-toString err  =
+toString err =
     case err of
         Graphql.Http.HttpError httpError ->
             case httpError of
                 BadUrl url ->
                     "Bad Url"
+
                 Timeout ->
                     "Timeout"
+
                 NetworkError ->
                     "Netwqork Error"
+
                 BadStatus dt val ->
                     "Bad Status"
+
                 BadPayload err2 ->
-                    "Bad Payload "                   
+                    "Bad Payload "
+
         Graphql.Http.GraphqlError parsedData errors ->
             let
-                errorMessages =   List.map (\a  -> a.message) errors |>
-                    List.foldl (\ x acc -> (acc   ++ ", [ " ++ x ++ " ]")) "" 
+                errorMessages =
+                    List.map (\a -> a.message) errors
+                        |> List.foldl (\x acc -> acc ++ ", [ " ++ x ++ " ]") ""
             in
             case parsedData of
                 ParsedData prs ->
                     errorMessages ++ ". Has Parsed data."
+
                 UnparsedData value ->
                     errorMessages ++ ". Has Unparsed data."
-                    
-                
-          
+
+
+
 -- Shared data
-type alias ShowInfo =
-    {
-        name: String
-        , rating: Int
-        , description: String
+-- { #description# : String
+--                 , #name# : String
+--                 , #rating# : Int
+--                 , #shows# : List ShowInfo
+--                 }
+
+
+type alias GameInfo =
+    { gameName : String
+    , walletAmount : Maybe Int
+    , networkName : String
+    , networkDescription : String
+    , id :  Maybe String
+    , shows : List ShowInfo
     }
 
-type alias NetworkInfo = 
-    {
-        name: String
-        , rating: Int
-        , description: String 
-        , shows: List ShowInfo
+
+type alias ShowInfo =
+    { name : String
+    , rating : Int
+    , description : String
+    , id : String
     }
+
+
+type alias NetworkInfo =
+    { name : String
+    , rating : Int
+    , description : String
+    , shows : List ShowInfo
+    }
+
 
 type alias UserInfo =
     { 
-        walletAddress :  String
-        , amount : Maybe Int
-        , networks:  List (Maybe NetworkInfo)
-       
+    id :  String
+    , userName : String
+    , walletAddress : String
+    , games : List GameInfo
     }
 
+
+faunaEndpoint : String
+faunaEndpoint =
+    "https://graphql.fauna.com/graphql"
+
+
+faunaAuth : String
+faunaAuth =
+    "Basic Zm5BRGtRVnpDZkFDRXNFYWp1b2E1YzlSYnNGSU5BWkF5akpxSWVuOTo="
+
+
+
+-- fnADjxgmCnACEtcVYQpT4hYzOwJB7iJBhV86zdb9

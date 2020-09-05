@@ -2,7 +2,7 @@
 -- https://github.com/dillonkearns/elm-graphql
 
 
-module Api.Object.NetworkPage exposing (..)
+module Api.Object.GamePage exposing (..)
 
 import Api.InputObject
 import Api.Interface
@@ -19,22 +19,22 @@ import Graphql.SelectionSet exposing (SelectionSet)
 import Json.Decode as Decode
 
 
-{-| The elements of type 'Network' in this page.
+{-| The elements of type 'Game' in this page.
 -}
-data : SelectionSet decodesTo Api.Object.Network -> SelectionSet (List (Maybe decodesTo)) Api.Object.NetworkPage
+data : SelectionSet decodesTo Api.Object.Game -> SelectionSet (List (Maybe decodesTo)) Api.Object.GamePage
 data object_ =
     Object.selectionForCompositeField "data" [] object_ (identity >> Decode.nullable >> Decode.list)
 
 
 {-| A cursor for elements coming after the current page.
 -}
-after : SelectionSet (Maybe String) Api.Object.NetworkPage
+after : SelectionSet (Maybe String) Api.Object.GamePage
 after =
     Object.selectionForField "(Maybe String)" "after" [] (Decode.string |> Decode.nullable)
 
 
 {-| A cursor for elements coming before the current page.
 -}
-before : SelectionSet (Maybe String) Api.Object.NetworkPage
+before : SelectionSet (Maybe String) Api.Object.GamePage
 before =
     Object.selectionForField "(Maybe String)" "before" [] (Decode.string |> Decode.nullable)

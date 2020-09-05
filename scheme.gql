@@ -1,34 +1,34 @@
 type User   {
-  username: ID!
+  userName: String! 
   walletAddress: String!
-  networks: [Network!] @relation
-  amount: Int
+  games: [Game!] @relation
+}
+
+type Game {
+  gameName: String!
+  walletAmount: Int
+  networkName: String!
+  networkDescription: String!
   start: Date
   end: Date
- 
-}
-
-type Show  {  
-  name: String!
-  rating: Int!
-  description: String!
-  network: Network!
-}
-
-type Network {
-  name: String!
-  rating: Int!
-  description: String!
-  user: User!
+  user: User @relation
   shows: [Show!] @relation
 }
 
+type Show  {  
+  showName: String!
+  rating: Int!
+  showDescription: String!
+  game: Game! @relation
+}
+
+
 
 type Query {
-  # allGames: [Game]
   allUsers: [User]
-  allNetworks: [Network]
-  allShows: [Show]
-  userByUserName(username: ID!): User
- 
+  userByUserName(userName: String!): User
+}
+
+type Mutation {
+  addShowsToGame()
 }

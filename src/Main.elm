@@ -1,17 +1,19 @@
 port module Main exposing (init, main, subscriptions)
 
+import Bootstrap.Button as Button
 import Browser exposing (UrlRequest)
 import Browser.Navigation as Nav exposing (Key)
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (onClick, onInput)
 import Page.Login as Login
-import Page.Show as Show
-import Page.Game as Game
+import Page.PlayGame as PlayGame
+import Page.ShowsManage as ShowsManage
 import Routes exposing (Route)
 import Shared exposing (..)
+import Spinner
 import Url exposing (Url)
-import Bootstrap.Button as Button
+
 
 type alias Model =
     { flags : Flags
@@ -25,97 +27,86 @@ type alias Model =
 type Page
     = PageNone
     | PageLogin Login.Model
-    | PageShow Show.Model
-    | PageGame Game.Model
+    | PageShow ShowsManage.Model
+    | PagePlayGame PlayGame.Model
 
 
 type Msg
     = OnUrlChange Url
     | LinkClicked UrlRequest
     | LoginMsg Login.Msg
-    | ShowMsg Show.Msg
-    | GameMsg Game.Msg
+    | ShowMsg ShowsManage.Msg
+    | PlayGameMsg PlayGame.Msg
     | Logout
- 
-
 
 
 init : Flags -> Url -> Key -> ( Model, Cmd Msg )
 init flags url navKey =
     let
-        ( lgModel, lgCmd ) =  Login.init navKey
+        ( lgModel, lgCmd ) =
+            Login.init navKey
 
         model =
             { flags = flags
             , navKey = navKey
             , route = Routes.parseUrl url
-            , page =   PageLogin lgModel
+            , page = PageLogin lgModel
             , username = ""
-           
             }
     in
-       loadCurrentPage  ( model, Cmd.none )
+    loadCurrentPage ( model, Cmd.none )
 
 
 loadCurrentPage : ( Model, Cmd Msg ) -> ( Model, Cmd Msg )
 loadCurrentPage ( model, cmd ) =
     case model.route of
-        Routes.ShowsRoute ->
-            let
-            
-                ( pageModel, pageCmd ) = Show.init model.flags
-            in
-             ( { model | page = PageShow pageModel }, Cmd.batch [ cmd, (Cmd.map ShowMsg pageCmd) ] )
-                    -- ( PageShow pageModel, Cmd.map ShowMsg pageCmd )
-
+        
         Routes.LoginRoute ->
             let
-                ( pageModel, pageCmd ) = Login.init model.navKey
+                ( pageModel, pageCmd ) =
+                    Login.init model.navKey
             in
-                ( { model | page = PageLogin pageModel }, Cmd.batch [ cmd,  (Cmd.map LoginMsg pageCmd) ] )
-                    -- ( PageLogin pageModel, Cmd.map LoginMsg pageCmd )
+            ( { model | page = PageLogin pageModel }, Cmd.batch [ cmd, Cmd.map LoginMsg pageCmd ] )
 
-        Routes.GameRoute  maybeVal->
+        Routes.PlayGameRoute userName ->
             let
-                mdl = case maybeVal of
-                        Just val ->
-                            {model | username = val}
-                        Nothing  ->
-                            model 
-
-                (pageModel, pageCmd ) = Game.init mdl.username
+                ( pageModel, pageCmd ) =
+                    PlayGame.init model.flags userName
             in
-                ( { mdl | page = PageGame pageModel }, Cmd.batch [ cmd,  (Cmd.map GameMsg pageCmd) ] )
-                        -- ( PageGame pageModel, Cmd.map GameMsg pageCmd )
-    
-        Routes.ShowRoute showId ->
-            ( { model | page = PageNone }, Cmd.none )
-                    -- ( PageNone, Cmd.none )
+            ( { model | page = PagePlayGame pageModel }, Cmd.batch [ cmd, Cmd.map PlayGameMsg pageCmd ] )
 
+    
         Routes.NotFoundRoute ->
             ( { model | page = PageNone }, Cmd.none )
-                    -- ( PageNone, Cmd.none )
-    -- in
-    -- ( { model | page = page }, Cmd.batch [ cmd, newCmd ] )
+
+
+
+-- ( PageNone, Cmd.none )
+-- in
+-- ( { model | page = page }, Cmd.batch [ cmd, newCmd ] )
 
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
     let
-        pageSubs = 
+        pageSubs =
             case model.page of
+                PagePlayGame pageModel ->
+                    Sub.map PlayGameMsg (PlayGame.subscriptions pageModel)
+
                 PageLogin pageModel ->
                     Sub.map LoginMsg (Login.subscriptions pageModel)
 
                 PageShow pageModel ->
-                    Sub.map ShowMsg (Show.subscriptions pageModel)
-                PageGame pageModel ->
-                    Sub.map GameMsg (Game.subscriptions pageModel)
+                    Sub.map ShowMsg (ShowsManage.subscriptions pageModel)
+
+                -- PageGame pageModel ->
+                --     Sub.map GameMsg (Game.subscriptions pageModel)
                 PageNone ->
                     Sub.none
     in
-        Sub.batch[pageSubs]
-        
+    Sub.batch [ pageSubs ]
+
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
@@ -123,44 +114,52 @@ update msg model =
         ( LinkClicked urlRequest, _ ) ->
             case urlRequest of
                 Browser.Internal url ->
-                    ( model , Nav.pushUrl model.navKey (Url.toString url))
+                    ( model, Nav.pushUrl model.navKey (Url.toString url) )
+
                 Browser.External url ->
                     ( model, Nav.load url )
+
         ( OnUrlChange url, _ ) ->
             let
-                newRoute = Routes.parseUrl url
-                        
+                newRoute =
+                    Routes.parseUrl url
             in
-                ( { model | route = newRoute}, Cmd.none )
-                        |> loadCurrentPage
+            ( { model | route = newRoute }, Cmd.none )
+                |> loadCurrentPage
+
         ( LoginMsg subMsg, PageLogin pageModel ) ->
             let
                 ( newPageModel, newCmd ) =
-                            Login.update  subMsg pageModel
-                in
-                    ( { model | page = PageLogin newPageModel }
-                    , Cmd.map LoginMsg newCmd
-                    )
-        (ShowMsg subMsg, PageShow pageModel ) ->
-            let
-                 ( newPageModel, newCmd ) =
-                            Show.update  subMsg pageModel
+                    Login.update subMsg pageModel
             in
-                ( { model | page = PageShow newPageModel }
-                    , Cmd.map ShowMsg newCmd)
-        (GameMsg subMsg, PageGame pageModel ) ->
+            ( { model | page = PageLogin newPageModel }
+            , Cmd.map LoginMsg newCmd
+            )
+
+        ( ShowMsg subMsg, PageShow pageModel ) ->
             let
                 ( newPageModel, newCmd ) =
-                    Game.update  subMsg pageModel
+                    ShowsManage.update subMsg pageModel
             in
-                ( { model | page = PageGame newPageModel }
-                    , Cmd.map GameMsg newCmd
-                    )
-        (Logout, _) ->
-            (model , Cmd.batch [(logoutUser  "Logout"),  Nav.load  Routes.loginPath ])
-               
-        (_,_ )  ->
+            ( { model | page = PageShow newPageModel }
+            , Cmd.map ShowMsg newCmd
+            )
+
+        ( PlayGameMsg subMsg, PagePlayGame pageModel ) ->
+            let
+                ( newPageModel, newCmd ) =
+                    PlayGame.update subMsg pageModel
+            in
+            ( { model | page = PagePlayGame newPageModel }
+            , Cmd.map PlayGameMsg newCmd
+            )
+
+        ( Logout, _ ) ->
+            ( model, Cmd.batch [ logoutUser "Logout", Nav.load Routes.loginPath ] )
+
+        ( _, _ ) ->
             Debug.todo "loginmsg pageshow"
+
 
 main : Program Flags Model Msg
 main =
@@ -173,44 +172,50 @@ main =
         , onUrlChange = OnUrlChange
         }
 
+
+
 -- VIEWS
+
+
 view : Model -> Browser.Document Msg
 view model =
-    let 
+    let
         page =
             case model.page of
                 PageLogin _ ->
-                    div[ class "login-wrapper" ][
-                       div [class "box content"] [currentPage model]
-                    
-                    ]
+                    div [ class "login-wrapper" ]
+                        [ div [ class "box content" ] [ currentPage model ]
+                        ]
+
                 _ ->
-                    div[ class "noside-wrapper" ][
-                        div[class "box header"] [ (headerView model)]
-                        , div [class "box content"] [currentPage model]
-                        
-                    ]
+                    div [ class "noside-wrapper" ]
+                        [ div [ class "box header" ] [ headerView model ]
+                        , div [ class "box content" ] [ currentPage model ]
+                        ]
     in
-        {   title = "App"
-            , body = [page,  div [class "site-footer"] [footerView]]
-        }
+    { title = "App"
+    , body = [ page, div [ class "site-footer" ] [ footerView ] ]
+    }
 
 
 currentPage : Model -> Html Msg
 currentPage model =
     case model.page of
+        PagePlayGame pageModel ->
+            PlayGame.view pageModel
+                |> Html.map PlayGameMsg
+
         PageLogin pageModel ->
             Login.view pageModel
                 |> Html.map LoginMsg
+
         PageShow pageModel ->
-            Show.view pageModel
+            ShowsManage.view pageModel
                 |> Html.map ShowMsg
-        PageGame pageModel ->
-            Game.view pageModel
-                |> Html.map GameMsg
+
         PageNone ->
             notFoundView
-    
+
 
 notFoundView : Html msg
 notFoundView =
@@ -219,39 +224,38 @@ notFoundView =
         ]
 
 
-
-headerView: Model ->  Html Msg
-headerView model = 
-    div [class "header-wrapper"][
-       i [ style "flex-basis" "10px",  class "brand-lockup__logo brand-lockup__logo--animate"] []
-        , span[style "text-align" "left",  class " brand-lockup__title brand-lockup__title--animate"][text "TV Fantasy"] 
-        ,div [style "text-align" "right"] [
-            span [][text ("Welcome " ++ model.username)]
-            ,  Button.linkButton [  Button.onClick Logout ] [ text "Log Out" ]  
-         ]
-    ]
+headerView : Model -> Html Msg
+headerView model =
+    div [ class "header-wrapper" ]
+        [ i [ style "flex-basis" "10px", class "brand-lockup__logo brand-lockup__logo--animate" ] []
+        , span [ style "text-align" "left", class " brand-lockup__title brand-lockup__title--animate" ] [ text "TV Fantasy" ]
+        , div [ style "text-align" "right" ]
+            [ span [] [ text ("Welcome " ++ model.username) ]
+            , Button.linkButton [ Button.onClick Logout ] [ text "Log Out" ]
+            ]
+        ]
 
 
 footerView : Html msg
 footerView =
     footer [ class "footer" ]
-    [ 
-        div [ class "content has-text-centered" ]
-        [ p []
-            [ strong []
-                [ text "TV Fantasy  " ]
-            , text " by "
-            , a [ href "https://www.chynologic.com" ]
-                [ text "John Chynoweth" ]
-            , text ". The source code is licensed      "
-            , a [ href "http://opensource.org/licenses/mit-license.php" ]
-                [ text "MIT" ]
-            , text ". The website content is licensed "
-            , a [ href "http://creativecommons.org/licenses/by-nc-sa/4.0/" ]
-                [ text "CC BY NC SA 4.0" ]
-            , text ".    "
+        [ div [ class "content has-text-centered" ]
+            [ p []
+                [ strong []
+                    [ text "TV Fantasy  " ]
+                , text " by "
+                , a [ href "https://www.chynologic.com" ]
+                    [ text "John Chynoweth" ]
+                , text ". The source code is licensed      "
+                , a [ href "http://opensource.org/licenses/mit-license.php" ]
+                    [ text "MIT" ]
+                , text ". The website content is licensed "
+                , a [ href "http://creativecommons.org/licenses/by-nc-sa/4.0/" ]
+                    [ text "CC BY NC SA 4.0" ]
+                , text ".    "
+                ]
             ]
         ]
-    ]
 
-port logoutUser :   String -> Cmd msg
+
+port logoutUser : String -> Cmd msg

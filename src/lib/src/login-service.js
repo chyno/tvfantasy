@@ -2,7 +2,7 @@ const faunadb = require('faunadb');
 const { Hedgehog, /*WalletManager, Authentication */ } = require('@audius/hedgehog');
 const AUTH_COL = "authentications";
 const USER_COL = "User";
-const faunaKey = "fnADWu_uwLACCI7LXiCJ7Szqvqjvk8BFndUFRMvy";
+const faunaKey = "fnADkawK1-ACE3vmqmvmF6G4W9r-YSmkqFEekzOx";
 
 const readAuthRecordFromDb = async (client, query, obj) => {
                                 
@@ -56,36 +56,47 @@ client.query(
   )
 )
 */
-const _setId =  (client, query) => {  
-  return async (username, id) => {
-    const userNameIndex = 'users_by_username';
-    try {
-      console.log("******************************************");
-      console.log("Adding " + id);
-      let ret = await client.query(
-        query.Update(
-          query.Match(query.Index(userNameIndex), username),
-          {data: {id: id}}
-          ));
-          console.log("******************************************");
-       console.log(ret);
-       if (ret && ret.data)  {
-         return ret;
-       }
-       return null;
+// const _setId =  (client, query) => {  
+//   return async (username, id) => {
+//     const userNameIndex = 'users_by_username';
+//     try {
+//       console.log("******************************************");
+//       console.log("Adding " + id);
+//       let ret = await client.query(
+//         query.Update(
+//           query.Match(query.Index(userNameIndex), username),
+//           {data: {id: id}}
+//           ));
+//           console.log("******************************************");
+//        console.log(ret);
+//        if (ret && ret.data)  {
+//          return ret;
+//        }
+//        return null;
   
-     } catch (e) {
-       throw(e);
-     }
-  };
-};
+//      } catch (e) {
+//        throw(e);
+//      }
+//   };
+// };
   
 const createIfNotExists = async (client, query,collection, obj) => {
     // Todo: Check is exists
   
+    let insObj = obj;
+    if (obj.username) {
+      insObj = {
+        userName: obj.username,
+        walletAddress: obj.walletAddress
+      };
+    }
+
     try {
+     // Whue is userName all lower case???
+    // obj.userName = objusername;
       let response = await client.query(
-      query.Create(query.Collection(collection), { data: obj }));
+      query.Create(query.Collection(collection), { data: insObj
+      }));
       return response.ref;
     } catch (e) {
         console.log('**** Error :' +e);
@@ -109,6 +120,6 @@ function LoginService() {
 LoginService.prototype.hedgehog = new Hedgehog(getFn, setAuthFn, setUserFn);
 
 LoginService.prototype.getUserIdFromUserName = _getUserIdFromUserName(client, q);
-LoginService.prototype.setId = _setId(client, q);
+// LoginService.prototype.setId = _setId(client, q);
 module.exports = LoginService;
 //export const hedgehog = new Hedgehog(getFn, setAuthFn, setUserFn);

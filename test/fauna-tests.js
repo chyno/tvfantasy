@@ -40,11 +40,11 @@ xdescribe("Raw testing of Fauna Javascript API", function() {
     //.then((ret) => console.log(ret)
   });
 
-  xit("Can Create an index on the users’s username:", async function() {
+  it("Can Create an index on the users’s username:", async function() {
     let item = q.CreateIndex({
       name: userIndex,
       source: q.Collection("users"),
-      terms: [{ field: ["data", "username"] }]
+      terms: [{ field: ["data", "userName"] }]
     });
     try {
       let ret = await client.query(item);
@@ -91,7 +91,7 @@ xdescribe("Raw testing of Fauna Javascript API", function() {
       assert(data);
 
       // get data
-      let username = data.username;
+      let username = data.userName;
       console.log(username);
       assert(username);
     } catch (e) {
@@ -162,12 +162,12 @@ describe("Test Fauna Service", function() {
   assert.equal(userID, id, "expected id does not match from the db");
   });
 
-  it("get id from isername", async function() {
-    const username = "f";
-    const idval = "myid";
-    const logInService = new lib.LoginService();
-    assert.ok(logInService);
-    let res = await logInService.setId(username,idval);
-  assert.equal(idval, res.id, "expected id does not match from the db");
-  });
+  // it("get id from isername", async function() {
+  //   const username = "f";
+  //   const idval = "myid";
+  //   const logInService = new lib.LoginService();
+  //   assert.ok(logInService);
+  //   let res = await logInService.setId(username,idval);
+  // assert.equal(idval, res.id, "expected id does not match from the db");
+  // });
 });

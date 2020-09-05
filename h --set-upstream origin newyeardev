@@ -1,0 +1,94 @@
+[33m0e32b92[m[33m ([m[1;36mHEAD -> [m[1;32mfix[m[33m, [m[1;32mgrid[m[33m)[m HEAD@{0}: checkout: moving from master to fix
+[33mca95f92[m[33m ([m[1;31morigin/gamedev[m[33m, [m[1;32mmaster[m[33m, [m[1;32mgamedev[m[33m)[m HEAD@{1}: checkout: moving from newmodel to master
+[33m8357e69[m[33m ([m[1;31morigin/newmodel[m[33m, [m[1;32mnewmodel[m[33m)[m HEAD@{2}: reset: moving to HEAD
+[33m8357e69[m[33m ([m[1;31morigin/newmodel[m[33m, [m[1;32mnewmodel[m[33m)[m HEAD@{3}: commit: broken
+[33md77a61c[m HEAD@{4}: commit: 'd'
+[33mb50abae[m HEAD@{5}: commit: shows model update
+[33md3763b7[m HEAD@{6}: commit: add basic game views
+[33md5da5bc[m HEAD@{7}: commit: add laoding
+[33m0fe2a62[m HEAD@{8}: commit: add graph
+[33m6e32719[m HEAD@{9}: commit: new game compiles
+[33mca95f92[m[33m ([m[1;31morigin/gamedev[m[33m, [m[1;32mmaster[m[33m, [m[1;32mgamedev[m[33m)[m HEAD@{10}: checkout: moving from master to newmodel
+[33mca95f92[m[33m ([m[1;31morigin/gamedev[m[33m, [m[1;32mmaster[m[33m, [m[1;32mgamedev[m[33m)[m HEAD@{11}: merge gamedev: Fast-forward
+[33mfff3616[m[33m ([m[1;31morigin/master[m[33m, [m[1;31morigin/graph[m[33m, [m[1;31morigin/HEAD[m[33m, [m[1;32mgraph[m[33m)[m HEAD@{12}: checkout: moving from gamedev to master
+[33mca95f92[m[33m ([m[1;31morigin/gamedev[m[33m, [m[1;32mmaster[m[33m, [m[1;32mgamedev[m[33m)[m HEAD@{13}: commit: newgame model
+[33m5708329[m HEAD@{14}: commit: one update
+[33ma0a7094[m HEAD@{15}: commit: spit ip game commands
+[33m7fc6cc0[m HEAD@{16}: commit: compolies
+[33mbdf2749[m HEAD@{17}: commit: compiles
+[33mcb63f18[m HEAD@{18}: commit: command
+[33mf638463[m HEAD@{19}: commit: compiles with relationship scheme
+[33m52f15c5[m HEAD@{20}: commit: page works
+[33mfff3616[m[33m ([m[1;31morigin/master[m[33m, [m[1;31morigin/graph[m[33m, [m[1;31morigin/HEAD[m[33m, [m[1;32mgraph[m[33m)[m HEAD@{21}: checkout: moving from master to gamedev
+[33mfff3616[m[33m ([m[1;31morigin/master[m[33m, [m[1;31morigin/graph[m[33m, [m[1;31morigin/HEAD[m[33m, [m[1;32mgraph[m[33m)[m HEAD@{22}: merge graph: Fast-forward
+[33m7b5695a[m[33m ([m[1;31morigin/morebootstrap[m[33m, [m[1;32mmorebootstrap[m[33m)[m HEAD@{23}: checkout: moving from graph to master
+[33mfff3616[m[33m ([m[1;31morigin/master[m[33m, [m[1;31morigin/graph[m[33m, [m[1;31morigin/HEAD[m[33m, [m[1;32mgraph[m[33m)[m HEAD@{24}: commit: network selection works
+[33m436dd47[m HEAD@{25}: commit: comment out old game code for start to refactor
+[33m7cc5e88[m HEAD@{26}: commit: game load messages
+[33mbf67ff8[m HEAD@{27}: commit: add message
+[33mbda29b9[m HEAD@{28}: commit: graph works with login
+[33m2624412[m HEAD@{29}: commit: generate new scheme
+[33ma2ecc20[m HEAD@{30}: commit: sample querries
+[33m73525b2[m HEAD@{31}: commit: add game
+[33m6d1364e[m HEAD@{32}: commit: graph error handling v2
+[33m5384bd7[m HEAD@{33}: commit: graph error handling
+[33m7b5695a[m[33m ([m[1;31morigin/morebootstrap[m[33m, [m[1;32mmorebootstrap[m[33m)[m HEAD@{34}: checkout: moving from master to graph
+[33m7b5695a[m[33m ([m[1;31morigin/morebootstrap[m[33m, [m[1;32mmorebootstrap[m[33m)[m HEAD@{35}: merge morebootstrap: Fast-forward
+[33mf4d7d2c[m HEAD@{36}: checkout: moving from morebootstrap to master
+[33m7b5695a[m[33m ([m[1;31morigin/morebootstrap[m[33m, [m[1;32mmorebootstrap[m[33m)[m HEAD@{37}: commit: create user
+[33mff79407[m HEAD@{38}: commit: add user mutation
+[33m807bafd[m HEAD@{39}: commit: mutation compile for empty selection set
+[33m446a11a[m HEAD@{40}: commit: mytation
+[33m6fb89ae[m HEAD@{41}: commit: mutation 1
+[33mc82127b[m HEAD@{42}: commit: remove hard code userid
+[33m40da175[m HEAD@{43}: commit: get wallet address from graph
+[33m8fd5699[m HEAD@{44}: commit: add userid
+[33m0b329a9[m HEAD@{45}: commit: get id
+[33m289c3c3[m HEAD@{46}: commit: add graph querries to readme
+[33m3585aa6[m HEAD@{47}: commit: add tabs
+[33m9aa5d5c[m HEAD@{48}: commit: new scheme
+[33m79cde45[m HEAD@{49}: commit: add key
+[33mf7933f4[m HEAD@{50}: commit: graph ql
+[33mc005863[m HEAD@{51}: commit: update scheme
+[33m2f24b0b[m HEAD@{52}: commit: show list works
+[33m274e4f5[m HEAD@{53}: checkout: moving from master to morebootstrap
+[33mf4d7d2c[m HEAD@{54}: checkout: moving from morebootstrap to master
+[33m274e4f5[m HEAD@{55}: commit: updates
+[33mc6eba35[m HEAD@{56}: commit: logout works
+[33mef24881[m HEAD@{57}: commit: sticky footer
+[33m4710a82[m HEAD@{58}: commit: fix button groups
+[33m827c913[m HEAD@{59}: commit: login header
+[33mf4d7d2c[m HEAD@{60}: checkout: moving from master to morebootstrap
+[33mf4d7d2c[m HEAD@{61}: commit: login css
+[33mf37ed25[m HEAD@{62}: commit: add bootstrap controls
+[33m826df09[m HEAD@{63}: commit: add bootstrap
+[33mdee6b24[m HEAD@{64}: commit: co,pil no mat grid
+[33m11a61d7[m[33m ([m[1;32mmatfix[m[33m)[m HEAD@{65}: checkout: moving from matfix to master
+[33m11a61d7[m[33m ([m[1;32mmatfix[m[33m)[m HEAD@{66}: checkout: moving from master to matfix
+[33m11a61d7[m[33m ([m[1;32mmatfix[m[33m)[m HEAD@{67}: commit: reame
+[33m84b6dad[m[33m ([m[1;32mmenu[m[33m)[m HEAD@{68}: checkout: moving from menu to master
+[33m84b6dad[m[33m ([m[1;32mmenu[m[33m)[m HEAD@{69}: checkout: moving from master to menu
+[33m84b6dad[m[33m ([m[1;32mmenu[m[33m)[m HEAD@{70}: reset: moving to HEAD~1
+[33mc5fa0a6[m HEAD@{71}: commit: WIPE SAVEPOINT
+[33m84b6dad[m[33m ([m[1;32mmenu[m[33m)[m HEAD@{72}: commit: material to game
+[33mc5a1856[m HEAD@{73}: commit: login material
+[33m12a2b7c[m HEAD@{74}: commit: add textbox and buttons
+[33m6d74ff6[m HEAD@{75}: commit: fix header
+[33m4eb1926[m HEAD@{76}: commit: add material
+[33m0e32b92[m[33m ([m[1;36mHEAD -> [m[1;32mfix[m[33m, [m[1;32mgrid[m[33m)[m HEAD@{77}: merge fix: Fast-forward
+[33m878032d[m HEAD@{78}: checkout: moving from fix to master
+[33m0e32b92[m[33m ([m[1;36mHEAD -> [m[1;32mfix[m[33m, [m[1;32mgrid[m[33m)[m HEAD@{79}: commit: add logout
+[33mbdb5021[m HEAD@{80}: commit: baseline for graphql
+[33ma69705c[m[33m ([m[1;31morigin/fix[m[33m)[m HEAD@{81}: commit: show username in header works
+[33m98c3949[m HEAD@{82}: commit: get user name
+[33m60807f1[m HEAD@{83}: commit: add username to header
+[33mfa9531b[m HEAD@{84}: reset: moving to HEAD~1
+[33m7e2f532[m HEAD@{85}: commit: WIPE SAVEPOINT
+[33mfa9531b[m HEAD@{86}: reset: moving to HEAD~1
+[33me197959[m HEAD@{87}: commit: WIPE SAVEPOINT
+[33mfa9531b[m HEAD@{88}: reset: moving to HEAD~1
+[33m4f93d2a[m HEAD@{89}: commit: WIPE SAVEPOINT
+[33mfa9531b[m HEAD@{90}: commit: game display
+[33m878032d[m HEAD@{91}: checkout: moving from master to fix
+[33m878032d[m HEAD@{92}: commit: fix game
+[33m03f273a[m[33m ([m[1;31morigin/mainpage[m[33m)[m HEAD@{93}: clone: from https://github.com/chyno/tvfantasy.git

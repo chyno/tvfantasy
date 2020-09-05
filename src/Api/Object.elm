@@ -5,12 +5,12 @@
 module Api.Object exposing (..)
 
 
-type Network
-    = Network
+type Game
+    = Game
 
 
-type NetworkPage
-    = NetworkPage
+type GamePage
+    = GamePage
 
 
 type Show

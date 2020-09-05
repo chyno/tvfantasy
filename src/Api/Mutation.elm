@@ -64,20 +64,6 @@ createUser requiredArgs object_ =
     Object.selectionForCompositeField "createUser" [ Argument.required "data" requiredArgs.data Api.InputObject.encodeUserInput ] object_ identity
 
 
-type alias DeleteNetworkRequiredArguments =
-    { id : Api.ScalarCodecs.Id }
-
-
-{-| Delete an existing document in the collection of 'Network'
-
-  - id - The 'Network' document's ID
-
--}
-deleteNetwork : DeleteNetworkRequiredArguments -> SelectionSet decodesTo Api.Object.Network -> SelectionSet (Maybe decodesTo) RootMutation
-deleteNetwork requiredArgs object_ =
-    Object.selectionForCompositeField "deleteNetwork" [ Argument.required "id" requiredArgs.id (Api.ScalarCodecs.codecs |> Api.Scalar.unwrapEncoder .codecId) ] object_ (identity >> Decode.nullable)
-
-
 type alias CreateShowRequiredArguments =
     { data : Api.InputObject.ShowInput }
 
@@ -106,6 +92,37 @@ deleteUser requiredArgs object_ =
     Object.selectionForCompositeField "deleteUser" [ Argument.required "id" requiredArgs.id (Api.ScalarCodecs.codecs |> Api.Scalar.unwrapEncoder .codecId) ] object_ (identity >> Decode.nullable)
 
 
+type alias DeleteGameRequiredArguments =
+    { id : Api.ScalarCodecs.Id }
+
+
+{-| Delete an existing document in the collection of 'Game'
+
+  - id - The 'Game' document's ID
+
+-}
+deleteGame : DeleteGameRequiredArguments -> SelectionSet decodesTo Api.Object.Game -> SelectionSet (Maybe decodesTo) RootMutation
+deleteGame requiredArgs object_ =
+    Object.selectionForCompositeField "deleteGame" [ Argument.required "id" requiredArgs.id (Api.ScalarCodecs.codecs |> Api.Scalar.unwrapEncoder .codecId) ] object_ (identity >> Decode.nullable)
+
+
+type alias UpdateGameRequiredArguments =
+    { id : Api.ScalarCodecs.Id
+    , data : Api.InputObject.GameInput
+    }
+
+
+{-| Update an existing document in the collection of 'Game'
+
+  - id - The 'Game' document's ID
+  - data - 'Game' input values
+
+-}
+updateGame : UpdateGameRequiredArguments -> SelectionSet decodesTo Api.Object.Game -> SelectionSet (Maybe decodesTo) RootMutation
+updateGame requiredArgs object_ =
+    Object.selectionForCompositeField "updateGame" [ Argument.required "id" requiredArgs.id (Api.ScalarCodecs.codecs |> Api.Scalar.unwrapEncoder .codecId), Argument.required "data" requiredArgs.data Api.InputObject.encodeGameInput ] object_ (identity >> Decode.nullable)
+
+
 type alias UpdateShowRequiredArguments =
     { id : Api.ScalarCodecs.Id
     , data : Api.InputObject.ShowInput
@@ -123,32 +140,15 @@ updateShow requiredArgs object_ =
     Object.selectionForCompositeField "updateShow" [ Argument.required "id" requiredArgs.id (Api.ScalarCodecs.codecs |> Api.Scalar.unwrapEncoder .codecId), Argument.required "data" requiredArgs.data Api.InputObject.encodeShowInput ] object_ (identity >> Decode.nullable)
 
 
-type alias UpdateNetworkRequiredArguments =
-    { id : Api.ScalarCodecs.Id
-    , data : Api.InputObject.NetworkInput
-    }
+type alias CreateGameRequiredArguments =
+    { data : Api.InputObject.GameInput }
 
 
-{-| Update an existing document in the collection of 'Network'
+{-| Create a new document in the collection of 'Game'
 
-  - id - The 'Network' document's ID
-  - data - 'Network' input values
+  - data - 'Game' input values
 
 -}
-updateNetwork : UpdateNetworkRequiredArguments -> SelectionSet decodesTo Api.Object.Network -> SelectionSet (Maybe decodesTo) RootMutation
-updateNetwork requiredArgs object_ =
-    Object.selectionForCompositeField "updateNetwork" [ Argument.required "id" requiredArgs.id (Api.ScalarCodecs.codecs |> Api.Scalar.unwrapEncoder .codecId), Argument.required "data" requiredArgs.data Api.InputObject.encodeNetworkInput ] object_ (identity >> Decode.nullable)
-
-
-type alias CreateNetworkRequiredArguments =
-    { data : Api.InputObject.NetworkInput }
-
-
-{-| Create a new document in the collection of 'Network'
-
-  - data - 'Network' input values
-
--}
-createNetwork : CreateNetworkRequiredArguments -> SelectionSet decodesTo Api.Object.Network -> SelectionSet decodesTo RootMutation
-createNetwork requiredArgs object_ =
-    Object.selectionForCompositeField "createNetwork" [ Argument.required "data" requiredArgs.data Api.InputObject.encodeNetworkInput ] object_ identity
+createGame : CreateGameRequiredArguments -> SelectionSet decodesTo Api.Object.Game -> SelectionSet decodesTo RootMutation
+createGame requiredArgs object_ =
+    Object.selectionForCompositeField "createGame" [ Argument.required "data" requiredArgs.data Api.InputObject.encodeGameInput ] object_ identity

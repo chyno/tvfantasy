@@ -2,7 +2,7 @@
 -- https://github.com/dillonkearns/elm-graphql
 
 
-module Api.Object.Network exposing (..)
+module Api.Object.Game exposing (..)
 
 import Api.InputObject
 import Api.Interface
@@ -19,26 +19,36 @@ import Graphql.SelectionSet exposing (SelectionSet)
 import Json.Decode as Decode
 
 
-name : SelectionSet String Api.Object.Network
-name =
-    Object.selectionForField "String" "name" [] Decode.string
+networkDescription : SelectionSet String Api.Object.Game
+networkDescription =
+    Object.selectionForField "String" "networkDescription" [] Decode.string
 
 
-description : SelectionSet String Api.Object.Network
-description =
-    Object.selectionForField "String" "description" [] Decode.string
+gameName : SelectionSet String Api.Object.Game
+gameName =
+    Object.selectionForField "String" "gameName" [] Decode.string
 
 
 {-| The document's ID.
 -}
-id_ : SelectionSet Api.ScalarCodecs.Id Api.Object.Network
+id_ : SelectionSet Api.ScalarCodecs.Id Api.Object.Game
 id_ =
     Object.selectionForField "ScalarCodecs.Id" "_id" [] (Api.ScalarCodecs.codecs |> Api.Scalar.unwrapCodecs |> .codecId |> .decoder)
 
 
-rating : SelectionSet Int Api.Object.Network
-rating =
-    Object.selectionForField "Int" "rating" [] Decode.int
+walletAmount : SelectionSet (Maybe Int) Api.Object.Game
+walletAmount =
+    Object.selectionForField "(Maybe Int)" "walletAmount" [] (Decode.int |> Decode.nullable)
+
+
+end : SelectionSet (Maybe Api.ScalarCodecs.Date) Api.Object.Game
+end =
+    Object.selectionForField "(Maybe ScalarCodecs.Date)" "end" [] (Api.ScalarCodecs.codecs |> Api.Scalar.unwrapCodecs |> .codecDate |> .decoder |> Decode.nullable)
+
+
+networkName : SelectionSet String Api.Object.Game
+networkName =
+    Object.selectionForField "String" "networkName" [] Decode.string
 
 
 type alias ShowsOptionalArguments =
@@ -53,7 +63,7 @@ type alias ShowsOptionalArguments =
   - cursor\_ - The pagination cursor.
 
 -}
-shows : (ShowsOptionalArguments -> ShowsOptionalArguments) -> SelectionSet decodesTo Api.Object.ShowPage -> SelectionSet decodesTo Api.Object.Network
+shows : (ShowsOptionalArguments -> ShowsOptionalArguments) -> SelectionSet decodesTo Api.Object.ShowPage -> SelectionSet decodesTo Api.Object.Game
 shows fillInOptionals object_ =
     let
         filledInOptionals =
@@ -66,13 +76,18 @@ shows fillInOptionals object_ =
     Object.selectionForCompositeField "shows" optionalArgs object_ identity
 
 
-user : SelectionSet decodesTo Api.Object.User -> SelectionSet decodesTo Api.Object.Network
+start : SelectionSet (Maybe Api.ScalarCodecs.Date) Api.Object.Game
+start =
+    Object.selectionForField "(Maybe ScalarCodecs.Date)" "start" [] (Api.ScalarCodecs.codecs |> Api.Scalar.unwrapCodecs |> .codecDate |> .decoder |> Decode.nullable)
+
+
+user : SelectionSet decodesTo Api.Object.User -> SelectionSet (Maybe decodesTo) Api.Object.Game
 user object_ =
-    Object.selectionForCompositeField "user" [] object_ identity
+    Object.selectionForCompositeField "user" [] object_ (identity >> Decode.nullable)
 
 
 {-| The document's timestamp.
 -}
-ts_ : SelectionSet Api.ScalarCodecs.Long Api.Object.Network
+ts_ : SelectionSet Api.ScalarCodecs.Long Api.Object.Game
 ts_ =
     Object.selectionForField "ScalarCodecs.Long" "_ts" [] (Api.ScalarCodecs.codecs |> Api.Scalar.unwrapCodecs |> .codecLong |> .decoder)

@@ -29,7 +29,7 @@ app.ports.loginUser.subscribe(function(data) {
  
 
   hedgehog
-  .login(data.username, data.password)
+  .login(data.userName, data.password)
   .then(appLoginSendResults)
   .catch((e) => {
     app.ports.hedgeHogloginResult.send({
@@ -57,9 +57,9 @@ app.ports.logoutUser.subscribe(function() {
 app.ports.registerUser.subscribe(function(data) {
   hedgehog.logout();
  
-  
+ 
   hedgehog
-    .signUp(data.username, data.password)
+    .signUp(data.userName, data.password)
     .then(function() {
       app.ports.hedgeHogCreateUserResult.send({
         isCreated: true,

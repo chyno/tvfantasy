@@ -1,5 +1,5 @@
 # https://github.com/sporto/elm-example-app/tree/master/src
-
+## some changes
 ## You Create a Tv Network. ...
 ## You prepare your Network by scouting shows. ...
 ## You build your Network team by buying shows. ...
@@ -24,60 +24,75 @@
 
 ## Add User
 ### "_id": "247852697206653458",
-mutation {
-  createUser( data : {
-     amount: 1
-     username: "chyno2"
-     walletAddress: "111"
-     networks: {connect: "249585712236593682" }
-     
-  })
-  {
+ mutation createUser {
+   createUser(data: {
+    walletAddress : "aaa"
+    userName : "user123"
+  }) {
+    userName
     _id
   }
-}
-
-## ad network
-mutation {
-  createNetwork(data: {
-    name: "abc"
-    rating:3
-    description: "main network"
   
-  }
-  )
-  {
-    _id
-    name
-  }
 }
+# "_id": "256087277788201490"
 
-{
-  "data": {
-    "createNetwork": {
-      "_id": "249584647410811410",
-      "name": "abc"
+mutation createGame {
+  createGame(data: {
+     gameName: "game 2"
+  walletAmount: 1
+  networkName: "network 2"
+  networkDescription: "network descr 2"
+    user: {
+      connect : 256087277788201490
     }
+  }) {
+    _id
   }
 }
+## 256085588225032724
 
 
-## read user
+
+
 query {
-  allUsers {data 
-  {
-    amount
-    username
-    walletAddress
-    networks 
-    {
-      data  {
-        name
-        rating
-        description
+  allUsers {
+    data {
+      userName
+      walletAddress
+      games {
+        data {
+          _id
+          gameName
+          networkName
+          networkDescription
+           shows {
+            data {
+              showName
+              showDescription
+              rating
+            }
+          }
+         
+        }
       }
     }
-  }}
+  }
 }
 some chnges
 
+mutation createShow {
+  createShow( data : {
+    showName: "new show 2"
+    showDescription : "sown description 2"
+    rating : 1
+    game: {
+      connect : 256087327657427476
+    }
+  })
+  {
+    _id 
+  }
+  
+}
+## Create scheme.gql
+### https://fauna.com/blog/abac-graphql
